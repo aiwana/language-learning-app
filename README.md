@@ -1,6 +1,3 @@
-# language-learning-app
-Web application for assistance with language learning
-
 # Web App Luyện Nói Tiếng Anh Theo Phương Pháp Shadowing Tích Hợp Trí Tuệ Nhân Tạo
 
 Chào mừng bạn đến với kho lưu trữ mã nguồn của dự án **Web App Luyện Nói Tiếng Anh theo phương pháp Shadowing**. Đây là một nền tảng hiện đại ứng dụng Trí tuệ nhân tạo (AI) giúp người học cải thiện kỹ năng phát âm, ngữ điệu và phản xạ tiếng Anh thông qua kỹ thuật nói đuổi (Shadowing).
