@@ -35,3 +35,4 @@ Cốt lõi của phương pháp Shadowing là người dùng sẽ nghe một đo
 * **Chức năng:** Lưu trữ thông tin tài khoản người dùng, danh sách các bài học/chủ đề tiếng Anh, lịch sử luyện tập chi tiết và bảng điểm số/xếp hạng.
 
 ### 5. Thiết kế UI/UX
+* **Figma**
