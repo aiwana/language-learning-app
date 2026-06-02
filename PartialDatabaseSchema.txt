@@ -1,0 +1,32 @@
+Users
+- user_id [PK]
+- username
+- email
+- password_hash
+- full_name
+- created_at
+- updated_at
+Users_Courses
+- user_id [PK] [FK [Users]]
+- course_id [PK] [FK [Courses]]
+- enrolled_at
+- progress
+Courses
+- course_id [PK]
+- title
+- description
+- level [Beginner, Intermediate, Advanced]
+- created_at
+- updated_at
+Lessons
+- lesson_id [PK]
+- course_id [FK [Courses]]
+- title
+- description
+- lesson_order
+- duration
+Lesson_Material
+- material_id [PK]
+- lesson_id [FK [Lessons]]
+- material_type
+- content_url
