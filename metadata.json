@@ -1,0 +1,6 @@
+{
+  "name": "Web App Shadowing Tiếng Anh AI",
+  "description": "Hệ thống luyện nói tiếng Anh theo phương pháp Shadowing tích hợp trí tuệ nhân tạo Gemini đánh dấu phản hồi, chấm điểm trực quan kết cấu chi tiết.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
