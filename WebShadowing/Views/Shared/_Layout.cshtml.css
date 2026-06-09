@@ -50,7 +50,7 @@ button.accept-policy {
 /* --- Custom CSS cho Cụm Menu ở giữa --- */
 .custom-nav-center {
     display: flex;
-    gap: 8px; /* Khoảng cách giữa các tab */
+    gap: 8px;
 }
 
 .custom-nav-center .custom-tab {
@@ -58,7 +58,7 @@ button.accept-policy {
     font-weight: 600;
     font-size: 15px;
     padding: 8px 20px;
-    border-radius: 12px; /* Bo góc mềm mại cho background giống Figma */
+    border-radius: 12px; 
     transition: all 0.2s ease-in-out;
 }
 
@@ -104,17 +104,17 @@ button.accept-policy {
 
 }
 .stat-icon.svg-heart {
-    width: 96px;  /* Cho phép SVG mở rộng đúng tỷ lệ ngang */
+    width: 96px;  
     height: 48px;
-    margin-left: -10px; /* Kéo lùi icon sang trái để che lấp khoảng trắng ảo */
-    margin-right: -60px; /* Thu hẹp khoảng cách thừa bên phải với chữ số */
+    margin-left: -10px; 
+    margin-right: -60px; 
 }
 /* Sửa lỗi hiển thị lệch cho icon EXP */
 .stat-icon.svg-exp {
     width: 108px;
     height: 48px;
-    margin-left: -10px; /* Kéo lùi ngôi sao sang trái */
-    margin-right: -70px; /* Ép chữ số sát lại gần ngôi sao */
+    margin-left: -10px; 
+    margin-right: -70px; 
 }
 
 .stat-box .stat-value {
