@@ -29,3 +29,130 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* --- Cụm Menu ở giữa --- */
+.custom-nav-center {
+    display: flex;
+    gap: 8px;
+}
+
+.custom-nav-center .custom-tab {
+    color: #555555 !important;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 8px 20px;
+    border-radius: 12px; 
+    background-color: transparent !important; 
+    transition: all 0.2s ease-in-out;
+}
+
+.custom-nav-center .custom-tab:hover {
+    background-color: #FAF5FF !important; 
+}
+
+.custom-nav-center .custom-tab.active {
+    color: #8200DB !important; 
+    background-color: #FAF5FF !important; 
+}
+
+.custom-badge-pro {
+    background-color: #9810FA;
+    color: #ffffff;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+}
+
+/* --- Cụm chỉ số bên phải (Giữ nguyên từ file cũ của bạn) --- */
+.stat-box {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    padding: 0 12px 0 8px;
+    border-radius: 10px;  
+    font-weight: 700;     
+    font-size: 13.5px;
+    gap: 4px;            
+    border: 1.09px solid transparent; 
+}
+
+.stat-box .stat-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+    overflow: visible;
+}
+
+.stat-icon.svg-heart {
+    width: 96px;  
+    height: 48px;
+    margin-left: -10px; 
+    margin-right: -60px; 
+}
+
+.stat-icon.svg-exp {
+    width: 108px;
+    height: 48px;
+    margin-left: -10px; 
+    margin-right: -70px; 
+}
+
+.stat-box .stat-value {
+    letter-spacing: -0.2px;
+}
+
+.stat-box .stat-unit {
+    font-weight: 600;
+    font-size: 12.5px;
+    opacity: 0.9;
+}
+
+.streak-box {
+    background-color: #FFF7ED;
+    border-color: #FFEDD4;
+    color: #CA3500;
+}
+
+.heart-box {
+    background-color: #FDF2F8;
+    border-color: #FCE7F3;
+    color: #C6005C;
+}
+
+.exp-box {
+    background-color: #FFFBEB;
+    border-color: #FEF3C6;
+    color: #BB4D00;
+}
+
+.provip-box {
+    background-color: #ECFDF5;
+    border-color: #D0FAE5;
+    color: #007A55;
+    padding: 0 12px; 
+}
+
+.custom-nav-right .btn-link {
+    text-decoration: none;
+    font-size: 18px;
+    transition: transform 0.2s ease;
+}
+
+.btn-logout {
+    transition: transform 0.2s ease;
+}
+
+.btn-logout:hover svg path {
+    stroke: #EF4444; 
+}
+
+.btn-logout:active {
+    transform: scale(0.92);
+}
+
+.btn-theme-toggle:hover svg path {
+    stroke: #9810FA;
+}
+.btn-theme-toggle:active {
+    transform: scale(0.92);
+}
