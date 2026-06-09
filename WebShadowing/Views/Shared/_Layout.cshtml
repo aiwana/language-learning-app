@@ -11,26 +11,133 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">WebShadowing</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3 py-2">
+            <div class="container-fluid px-4">
+                
+                <a class="navbar-brand d-flex align-items-center me-4" asp-area="" asp-controller="Home" asp-action="Index">
+                    <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-2">
+                        <g filter="url(#filter0_dd_18_2769)">
+                        <path d="M3 12C3 6.47715 7.47715 2 13 2H24.9894C30.5123 2 34.9894 6.47715 34.9894 12V23.9894C34.9894 29.5123 30.5123 33.9894 24.9894 33.9894H13C7.47715 33.9894 3 29.5123 3 23.9894V12Z" fill="#9810FA" shape-rendering="crispEdges"/>
+                        <g clip-path="url(#clip0_18_2769)">
+                        <path d="M10.668 16.3296V18.8277" stroke="white" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M13.9985 12.9985V22.1583" stroke="white" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17.3296 10.5005V25.4892" stroke="white" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M20.6602 14.6641V20.493" stroke="white" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M23.9912 12.166V22.9912" stroke="white" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M27.3218 16.3296V18.8277" stroke="white" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                        </g>
+                        </g>
+                        <defs>
+                        <filter id="filter0_dd_18_2769" x="0" y="0" width="37.9893" height="37.9893" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                        <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                        <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                        <feMorphology radius="1" operator="erode" in="SourceAlpha" result="effect1_dropShadow_18_2769"/>
+                        <feOffset dy="1"/>
+                        <feGaussianBlur stdDeviation="1"/>
+                        <feComposite in2="hardAlpha" operator="out"/>
+                        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/>
+                        <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_18_2769"/>
+                        <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                        <feOffset dy="1"/>
+                        <feGaussianBlur stdDeviation="1.5"/>
+                        <feComposite in2="hardAlpha" operator="out"/>
+                        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/>
+                        <feBlend mode="normal" in2="effect1_dropShadow_18_2769" result="effect2_dropShadow_18_2769"/>
+                        <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_18_2769" result="shape"/>
+                        </filter>
+                        <clipPath id="clip0_18_2769">
+                        <rect width="19.9849" height="19.9849" fill="white" transform="translate(9.00244 8.00244)"/>
+                        </clipPath>
+                        </defs>
+                    </svg>
+                    <span class="fw-bold fs-5" style="color: #4A148C; letter-spacing: -0.5px;">WebShadowing</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    
+                    <ul class="navbar-nav mx-auto custom-nav-center mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link custom-tab active" asp-area="" asp-controller="Home" asp-action="Index">Khóa học</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link custom-tab" asp-area="" asp-controller="Home" asp-action="Privacy">Tiến trình & Thẻ nhớ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link custom-tab" asp-area="" asp-controller="Home" asp-action="Privacy">Tài khoản</a>
                         </li>
                     </ul>
-                </div>
-            </div>
-        </nav>
+
+                    <div class="d-flex align-items-center custom-nav-right gap-2">
+                        
+                        <div class="stat-box streak-box" title="Streak hiện tại">
+                            <svg width="20" height="20" viewBox="10 10 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="stat-icon">
+                                <path d="M16.7564 18.503C17.1983 18.503 17.6221 18.3275 17.9345 18.015C18.247 17.7025 18.4225 17.2788 18.4225 16.8369C18.4225 15.9172 18.0893 15.504 17.7561 14.8375C17.0416 13.4093 17.6068 12.1358 19.0889 10.8389C19.4222 12.505 20.4218 14.1045 21.7547 15.1708C23.0876 16.2371 23.7541 17.5033 23.7541 18.8362C23.7541 19.4488 23.6334 20.0555 23.399 20.6215C23.1645 21.1875 22.8209 21.7018 22.3877 22.135C21.9545 22.5682 21.4402 22.9118 20.8742 23.1462C20.3082 23.3807 19.7016 23.5013 19.0889 23.5013C18.4763 23.5013 17.8697 23.3807 17.3037 23.1462C16.7377 22.9118 16.2234 22.5682 15.7902 22.135C15.357 21.7018 15.0134 21.1875 14.7789 20.6215C14.5445 20.0555 14.4238 19.4488 14.4238 18.8362C14.4238 18.0678 14.7124 17.3074 15.0903 16.8369C15.0903 17.2788 15.2658 17.7025 15.5783 18.015C15.8907 18.3275 16.3145 18.503 16.7564 18.503Z" fill="#FF6900" stroke="#FF6900" stroke-width="1.33289" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="stat-value">5</span>
+                            <span class="stat-unit">ngày</span>
+                        </div>
+
+                        <div class="stat-box heart-box" title="Số tim còn lại">
+                            <svg width="24" height="24" viewBox="0 0 82 34" fill="none" xmlns="http://www.w3.org/2000/svg" class="stat-icon svg-heart">
+                                <g clip-path="url(#clip0_18_2793)">
+                                <path d="M23.7544 18.1698C24.7474 17.1968 25.7537 16.0305 25.7537 14.5043C25.7537 13.5322 25.3675 12.5999 24.6801 11.9125C23.9927 11.225 23.0604 10.8389 22.0883 10.8389C20.9153 10.8389 20.0889 11.1721 19.0893 12.1718C18.0896 11.1721 17.2632 10.8389 16.0903 10.8389C15.1181 10.8389 14.1858 11.225 13.4984 11.9125C12.811 12.5999 12.4248 13.5322 12.4248 14.5043C12.4248 16.0371 13.4245 17.2034 14.4241 18.1698L19.0893 22.8349L23.7544 18.1698Z" fill="#F6339A" stroke="#F6339A" stroke-width="1.33289" stroke-linecap="round" stroke-linejoin="round"/>
+                                </g>
+                                <defs>
+                                <clipPath id="clip0_18_2793">
+                                <rect width="15.9947" height="15.9947" fill="white" transform="translate(11.0918 8.83936)"/>
+                                </clipPath>
+                                </defs>
+                            </svg>
+                            <span class="stat-value">12</span>
+                            <span class="stat-unit">tim</span>
+                        </div>
+
+                        <div class="stat-box exp-box" title="Điểm kinh nghiệm (EXP)">
+                            <svg width="24" height="24" viewBox="0 0 94 34" fill="none" xmlns="http://www.w3.org/2000/svg" class="stat-icon svg-exp">
+                                <g clip-path="url(#clip0_18_2798)">
+                                <path d="M18.7729 10.3689C18.8021 10.3099 18.8472 10.2602 18.9032 10.2255C18.9591 10.1908 19.0236 10.1724 19.0895 10.1724C19.1553 10.1724 19.2199 10.1908 19.2758 10.2255C19.3317 10.2602 19.3768 10.3099 19.406 10.3689L20.9455 13.4872C21.047 13.6924 21.1967 13.87 21.3818 14.0047C21.567 14.1393 21.782 14.227 22.0085 14.2603L25.4514 14.7641C25.5166 14.7736 25.5779 14.8011 25.6283 14.8435C25.6787 14.886 25.7162 14.9417 25.7366 15.0044C25.757 15.0671 25.7595 15.1343 25.7437 15.1983C25.7279 15.2622 25.6945 15.3206 25.6473 15.3666L23.1575 17.7911C22.9933 17.9511 22.8704 18.1486 22.7995 18.3667C22.7285 18.5847 22.7117 18.8167 22.7503 19.0427L23.3381 22.4682C23.3496 22.5334 23.3426 22.6006 23.3178 22.6619C23.293 22.7233 23.2514 22.7765 23.1978 22.8154C23.1442 22.8543 23.0808 22.8774 23.0148 22.882C22.9487 22.8866 22.8827 22.8725 22.8242 22.8414L19.7466 21.2233C19.5438 21.1168 19.3182 21.0612 19.0892 21.0612C18.8601 21.0612 18.6345 21.1168 18.4317 21.2233L15.3547 22.8414C15.2963 22.8724 15.2304 22.8863 15.1644 22.8816C15.0985 22.8769 15.0352 22.8538 14.9817 22.8149C14.9282 22.776 14.8868 22.7229 14.862 22.6616C14.8372 22.6003 14.8301 22.5333 14.8416 22.4682L15.4287 19.0434C15.4675 18.8172 15.4507 18.5851 15.3797 18.3669C15.3088 18.1488 15.1859 17.9512 15.0215 17.7911L12.5317 15.3672C12.4841 15.3213 12.4503 15.2629 12.4343 15.1987C12.4183 15.1345 12.4207 15.0671 12.4411 15.0042C12.4615 14.9412 12.4992 14.8853 12.5498 14.8427C12.6005 14.8002 12.6621 14.7727 12.7276 14.7634L16.1698 14.2603C16.3965 14.2273 16.6119 14.1397 16.7973 14.005C16.9827 13.8703 17.1326 13.6926 17.2341 13.4872L18.7729 10.3689Z" fill="#FE9A00" stroke="#FE9A00" stroke-width="1.33289" stroke-linecap="round" stroke-linejoin="round"/>
+                                </g>
+                                <defs>
+                                <clipPath id="clip0_18_2798">
+                                <rect width="15.9947" height="15.9947" fill="white" transform="translate(11.0918 8.83936)"/>
+                                </clipPath>
+                                </defs>
+                            </svg>
+                            <span class="stat-value">940</span>
+                            <span class="stat-unit">XP</span>
+                        </div>
+
+                        <div class="stat-box provip-box" title="Gói tài khoản">
+                            <svg width="20" height="20" viewBox="11 9 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="stat-icon">
+                                <path d="M18.7976 11.0158C18.8264 10.9635 18.8687 10.92 18.92 10.8896C18.9714 10.8593 19.0299 10.8433 19.0895 10.8433C19.1492 10.8433 19.2077 10.8593 19.2591 10.8896C19.3104 10.92 19.3527 10.9635 19.3814 11.0158L21.3488 14.7505C21.3957 14.837 21.4612 14.912 21.5405 14.9702C21.6199 15.0284 21.7111 15.0683 21.8077 15.087C21.9043 15.1057 22.0038 15.1028 22.0992 15.0785C22.1945 15.0542 22.2833 15.0091 22.3591 14.9465L25.2095 12.5046C25.2642 12.4601 25.3317 12.4341 25.4021 12.4304C25.4725 12.4266 25.5423 12.4453 25.6015 12.4838C25.6606 12.5222 25.706 12.5785 25.7311 12.6444C25.7563 12.7103 25.7598 12.7824 25.7413 12.8505L23.8526 19.6789C23.8141 19.8186 23.731 19.942 23.6161 20.0303C23.5011 20.1185 23.3605 20.1669 23.2155 20.1681H14.9642C14.8192 20.1671 14.6784 20.1187 14.5633 20.0305C14.4482 19.9422 14.365 19.8187 14.3265 19.6789L12.4384 12.8512C12.4199 12.7831 12.4235 12.7109 12.4486 12.645C12.4738 12.5791 12.5192 12.5229 12.5783 12.4844C12.6374 12.446 12.7072 12.4273 12.7777 12.431C12.8481 12.4348 12.9155 12.4608 12.9702 12.5053L15.82 14.9471C15.8958 15.0098 15.9846 15.0549 16.0799 15.0792C16.1753 15.1035 16.2748 15.1064 16.3714 15.0877C16.468 15.0689 16.5592 15.029 16.6386 14.9709C16.7179 14.9127 16.7834 14.8377 16.8303 14.7512L18.7976 11.0158Z" fill="#009966" stroke="#009966" stroke-width="1.33289" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14.4238 22.835H23.7541H14.4238Z" fill="#009966"/>
+                                <path d="M14.4238 22.835H23.7541" stroke="#009966" stroke-width="1.33289" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="stat-value">PROVIP</span>
+                        </div>
+
+                        <div class="vr mx-1 text-secondary opacity-25" style="height: 24px;"></div>
+
+                        <button class="btn btn-link p-1 shadow-none btn-theme-toggle" type="button" title="Chế độ tối/sáng">
+                            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17.9924 10.498C16.9986 11.4919 16.4403 12.8398 16.4403 14.2452C16.4403 15.6507 16.9986 16.9986 17.9924 17.9924C18.9862 18.9862 20.3341 19.5445 21.7396 19.5445C23.145 19.5445 24.4929 18.9862 25.4867 17.9924C25.4867 19.4746 25.0472 20.9236 24.2237 22.156C23.4002 23.3885 22.2298 24.349 20.8603 24.9163C19.4909 25.4835 17.9841 25.6319 16.5303 25.3427C15.0766 25.0536 13.7412 24.3398 12.6931 23.2917C11.645 22.2436 10.9312 20.9082 10.6421 19.4545C10.3529 18.0007 10.5013 16.4938 11.0685 15.1244C11.6358 13.755 12.5963 12.5846 13.8288 11.7611C15.0612 10.9376 16.5101 10.498 17.9924 10.498Z" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+
+                        <button class="btn btn-link p-1 shadow-none btn-logout" type="button" title="Đăng xuất">
+                            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.4943 25.4867H12.1635C11.7218 25.4867 11.2982 25.3113 10.9858 24.9989C10.6735 24.6866 10.498 24.263 10.498 23.8213V12.1635C10.498 11.7218 10.6735 11.2982 10.9858 10.9858C11.2982 10.6735 11.7218 10.498 12.1635 10.498H15.4943" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21.3232 22.1561L25.4868 17.9926L21.3232 13.8291" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M25.4866 17.9927H15.4941" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div> </div> </div> </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()

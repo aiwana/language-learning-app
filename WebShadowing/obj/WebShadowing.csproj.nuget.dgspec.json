@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\School\\2025_2026_3\\language-learning-app\\WebShadowing\\WebShadowing.csproj": {}
+    "D:\\webapp tiếng anh\\language-learning-app\\WebShadowing\\WebShadowing.csproj": {}
   },
   "projects": {
-    "D:\\School\\2025_2026_3\\language-learning-app\\WebShadowing\\WebShadowing.csproj": {
+    "D:\\webapp tiếng anh\\language-learning-app\\WebShadowing\\WebShadowing.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\School\\2025_2026_3\\language-learning-app\\WebShadowing\\WebShadowing.csproj",
+        "projectUniqueName": "D:\\webapp tiếng anh\\language-learning-app\\WebShadowing\\WebShadowing.csproj",
         "projectName": "WebShadowing",
-        "projectPath": "D:\\School\\2025_2026_3\\language-learning-app\\WebShadowing\\WebShadowing.csproj",
-        "packagesPath": "C:\\Users\\lucifer\\.nuget\\packages\\",
-        "outputPath": "D:\\School\\2025_2026_3\\language-learning-app\\WebShadowing\\obj\\",
+        "projectPath": "D:\\webapp tiếng anh\\language-learning-app\\WebShadowing\\WebShadowing.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "D:\\webapp tiếng anh\\language-learning-app\\WebShadowing\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "D:\\VSShared\\NuGetPackages"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\lucifer\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
