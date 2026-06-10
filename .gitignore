@@ -1,0 +1,49 @@
+## Before shared user-ledger-context triggers
+# =========================================================================
+# File .gitignore chuẩn cho dự án ASP.NET Core & Web Frontend
+# =========================================================================
+
+# 1. Các file sinh ra khi Biên dịch / Build dự án C#
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleasePublic/
+x64/
+x86/
+build/
+bin/
+obj/
+
+# 2. File cấu hình cá nhân của Visual Studio & VS Code (Tránh xung đột cấu hình máy)
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Loại trừ file cấu hình user cụ thể trong ảnh của bạn
+WebShadowing.csproj.user
+
+# 3. Thư viện Frontend (Nếu sau này bạn có dùng npm / nodejs)
+node_modules/
+.npm/
+live-server/
+
+# 4. File nhật ký (Logs) và file rác của hệ điều hành
+*.log
+.DS_Store
+Thumbs.db
+
+# 5. Cấu hình bảo mật và Database cục bộ (Tránh lộ thông tin nhạy cảm)
+appsettings.Development.json
+*.db
+*.db-journal
+*.sqlite
+PartialDatabaseSchema.txt
+
+# 6. Các file tạm thời sinh ra khi chạy ứng dụng .NET
+.net/
+*.pubxml
+*.pfx
+*.publishproparas
