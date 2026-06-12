@@ -40,7 +40,6 @@ appsettings.Development.json
 *.db
 *.db-journal
 *.sqlite
-PartialDatabaseSchema.txt
 
 # 6. Các file tạm thời sinh ra khi chạy ứng dụng .NET
 .net/
