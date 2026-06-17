@@ -1,0 +1,236 @@
+@using WebShadowing.Models
+@{
+    ViewData["Title"] = "Tiến trình & Thẻ nhớ";
+    var profile = ViewBag.UserProfile as UserProfile ?? StaticData.DefaultProfile;
+    var stats = ViewBag.UserStats as UserStats ?? StaticData.DefaultStats;
+    var flashcards = ViewBag.Flashcards as List<Flashcard> ?? new List<Flashcard>();
+    var favorites = ViewBag.Favorites as List<FavoriteSentence> ?? new List<FavoriteSentence>();
+}
+
+<div id="stats-dashboard-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-slide-up">
+    
+    <!-- Grid: Stats Summary Numbers widgets -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8 text-center font-sans">
+        
+        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm transition-all">
+            <div class="mx-auto w-10 h-10 rounded-xl bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400 flex items-center justify-center mb-3">
+                <i data-lucide="flame" class="w-5 h-5 fill-orange-500 text-orange-500"></i>
+            </div>
+            <span class="text-xs text-slate-400 block font-bold tracking-wider uppercase font-mono">Streak liên tiếp</span>
+            <span class="text-2xl font-black text-slate-800 dark:text-white mt-1 block font-sans">@stats.Streak Ngày</span>
+            <p class="text-[10px] text-slate-400 mt-1">Duy trì đều đặn để giữ nhiệt!</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm transition-all">
+            <div class="mx-auto w-10 h-10 rounded-xl bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10 dark:text-indigo-400 flex items-center justify-center mb-3">
+                <i data-lucide="award" class="w-5 h-5 text-indigo-500"></i>
+            </div>
+            <span class="text-xs text-slate-400 block font-bold tracking-wider uppercase font-mono">Số câu hoàn thành</span>
+            <span class="text-2xl font-black text-slate-800 dark:text-white mt-1 block font-sans">@stats.TotalSentences Câu</span>
+            <p class="text-[10px] text-slate-400 mt-1">Nỗ lực qua từng bối cảnh</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm transition-all">
+            <div class="mx-auto w-10 h-10 rounded-xl bg-rose-50 text-rose-500 dark:bg-rose-500/10 dark:text-rose-400 flex items-center justify-center mb-3">
+                <i data-lucide="heart" class="w-5 h-5 fill-rose-500 text-rose-500"></i>
+            </div>
+            <span class="text-xs text-slate-400 block font-bold tracking-wider uppercase font-mono">Sức Khỏe (Hearts)</span>
+            <span class="text-2xl font-black text-slate-800 dark:text-white mt-1 block font-sans">
+                @(profile.IsPremium ? "∞ Tim" : $"{stats.Hearts} / 5 Tim")
+            </span>
+            <p class="text-[10px] text-slate-400 mt-1">
+                @(profile.IsPremium ? "VIP không giới hạn tim khi luyện IPA." : "Đổi 100 EXP để nhận 1 tim tối đa 5.")
+            </p>
+            @if (!profile.IsPremium)
+            {
+                <button type="button" onclick="alert('Đã đổi 100 EXP thành 1 Tim thành công!')"
+                        class="mt-3 w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold py-2 transition-colors">
+                    Đổi 100 EXP → 1 Tim
+                </button>
+            }
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm transition-all">
+            <div class="mx-auto w-10 h-10 rounded-xl bg-amber-50 text-amber-500 dark:bg-amber-500/10 dark:text-amber-400 flex items-center justify-center mb-3">
+                <i data-lucide="star" class="w-5 h-5 fill-amber-500 text-amber-500"></i>
+            </div>
+            <span class="text-xs text-slate-400 block font-bold tracking-wider uppercase font-mono">Kinh nghiệm EXP</span>
+            <span class="text-2xl font-black text-slate-800 dark:text-white mt-1 block font-sans">@stats.Exp EXP</span>
+            <p class="text-[10px] text-slate-400 mt-1">Thi đua bảng xếp hạng trường</p>
+        </div>
+
+    </div>
+
+    <div class="grid lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Side: Dynamic Anki Flashcards Spaced Repetition Box - 5 cols -->
+        <div class="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            
+            <div class="flex items-center gap-2 mb-4">
+                <i data-lucide="brain" class="w-5 h-5 text-indigo-500"></i>
+                <h3 class="font-sans font-extrabold text-base tracking-tight text-slate-900 dark:text-slate-50">Sổ tay từ vựng thông minh (Anki)</h3>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 text-xs leading-normal">
+                Hệ thống lặp lại ngắt quãng (Spaced Repetition) tự động ôn tập các từ vựng bạn phát âm sai hoặc còn yếu trong lúc shadowing.
+            </p>
+
+            <div id="anki-canvas" class="mt-6 pt-2">
+                @if (flashcards.Count > 0)
+                {
+                    var firstCard = flashcards[0];
+                    <div class="space-y-6">
+                        
+                        <!-- Physical Flip Card Layout -->
+                        <div id="flashcard-box" onclick="toggleFlashcardFlip()"
+                             class="w-full min-h-[180px] p-6 rounded-2xl border flex flex-col justify-between items-center text-center cursor-pointer transition-all duration-300 shadow-sm relative overflow-hidden border-slate-100 hover:border-slate-200 dark:border-slate-800 dark:hover:border-slate-700">
+                            
+                            <span class="text-[8px] font-mono font-bold tracking-wider text-slate-400 uppercase bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded absolute top-3 right-3 select-none">
+                                Nhấp để Lật Thẻ
+                            </span>
+
+                            <div></div> <!-- Spacer -->
+
+                            <!-- FRONT -->
+                            <div id="card-front" class="space-y-2">
+                                <h4 class="text-2xl font-black text-indigo-700 dark:text-sky-400 capitalize tracking-tight font-sans">
+                                    @firstCard.Word
+                                </h4>
+                                <p class="text-[10px] text-slate-400 font-sans font-medium uppercase tracking-wider">
+                                    Phát âm yếu • Box @firstCard.Box
+                                </p>
+                            </div>
+
+                            <!-- BACK (Hidden by default) -->
+                            <div id="card-back" class="space-y-2.5 hidden">
+                                <h4 class="text-sm font-mono font-bold text-slate-400 dark:text-slate-500">
+                                    @firstCard.Ipa
+                                </h4>
+                                <div class="text-xs text-slate-700 dark:text-slate-300 leading-normal max-w-xs font-sans">
+                                    @firstCard.Meaning
+                                </div>
+                                <p class="text-[10px] text-indigo-500 italic leading-snug">
+                                    @firstCard.SentenceContext
+                                </p>
+                            </div>
+
+                            <!-- TTS Button -->
+                            <button type="button" onclick="event.stopPropagation(); playTTS('@firstCard.Word')"
+                                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                                    title="Nghe phát âm chuẩn">
+                                <i data-lucide="volume-2" class="w-4 h-4"></i>
+                            </button>
+
+                        </div>
+
+                        <!-- Leitner Box Actions buttons -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" onclick="alert('Đã lưu để ôn tập lại sau!')"
+                                    class="py-2 px-4 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-500/10 dark:hover:bg-rose-500/5 transition-all text-xs font-bold cursor-pointer">
+                                Học Lại (Quên)
+                            </button>
+                            <button type="button" onclick="alert('Chúc mừng! Nhận được +5 EXP')"
+                                    class="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm cursor-pointer transition-colors">
+                                Đã Nhớ (+5 EXP)
+                            </button>
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-12 border border-dashed border-slate-100 dark:border-slate-800 rounded-2xl mt-5">
+                        <i data-lucide="book-open" class="w-8 h-8 text-slate-300 mx-auto"></i>
+                        <h4 class="font-bold text-xs text-slate-500 dark:text-slate-400 mt-2">Thật Tuyệt Vời!</h4>
+                        <p class="text-[10px] text-slate-400 mt-1 max-w-[220px] mx-auto leading-normal">
+                            Bạn không có từ vựng nào bị sai cần ôn tập lúc này. Hãy tiếp tục luyện bài mới!
+                        </p>
+                    </div>
+                }
+            </div>
+
+        </div>
+
+        <!-- Right Side: Favorite Subtitle & History checklist - 7 cols -->
+        <div class="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            
+            <div class="flex items-center gap-2 mb-4">
+                <i data-lucide="bookmark" class="w-5 h-5 text-indigo-500"></i>
+                <h3 class="font-sans font-extrabold text-base tracking-tight text-slate-900 dark:text-slate-50">Sổ tay câu thoại yêu thích (@favorites.Count)</h3>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 text-xs leading-normal">
+                Danh sách những câu thoại tiếng Anh được bạn đánh dấu để ôn luyện Shadowing nhanh bất cứ lúc nào.
+            </p>
+
+            <div id="favorites-list" class="mt-6 space-y-3">
+                @if (favorites.Count > 0)
+                {
+                    @foreach (var fav in favorites)
+                    {
+                        <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-950/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs font-sans">
+                            <div class="space-y-1 md:max-w-md">
+                                <span class="text-[8px] bg-slate-100 dark:bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider block w-max select-none">
+                                    @fav.LessonTitle
+                                </span>
+                                <p class="font-bold text-slate-950 dark:text-slate-50 text-sm leading-snug">@fav.Sentence.Text</p>
+                                <p class="text-[10px] font-mono text-slate-400">@fav.Sentence.Ipa</p>
+                                <p class="text-slate-500 text-[11px] italic">"@fav.Sentence.Translation"</p>
+                            </div>
+
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button onclick="playTTS('@fav.Sentence.Text')"
+                                        class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-500/10 dark:text-sky-400 dark:hover:bg-indigo-500/20 flex items-center justify-center transition-all cursor-pointer"
+                                        title="Phát âm câu thoại này">
+                                    <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="alert('Đã bỏ lưu câu thoại')"
+                                        class="px-2 py-1.5 rounded-lg text-slate-400 hover:text-rose-500 text-[10px] font-bold cursor-pointer">
+                                    Bỏ lưu
+                                </button>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-16 border border-dashed border-slate-100 dark:border-slate-800 rounded-2xl">
+                        <i data-lucide="bookmark" class="w-8 h-8 text-slate-300 mx-auto"></i>
+                        <p class="text-slate-400 text-xs mt-2 select-none">Bạn chưa lưu bất cứ câu thoại yêu thích nào.</p>
+                    </div>
+                }
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function toggleFlashcardFlip() {
+            var box = document.getElementById("flashcard-box");
+            var front = document.getElementById("card-front");
+            var back = document.getElementById("card-back");
+            
+            if (front.classList.contains("hidden")) {
+                front.classList.remove("hidden");
+                back.classList.add("hidden");
+                box.classList.remove("border-indigo-500", "bg-indigo-50/15", "dark:bg-indigo-950/10", "ring-1", "ring-indigo-500");
+            } else {
+                front.classList.add("hidden");
+                back.classList.remove("hidden");
+                box.classList.add("border-indigo-500", "bg-indigo-50/15", "dark:bg-indigo-950/10", "ring-1", "ring-indigo-500");
+            }
+        }
+
+        function playTTS(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+}

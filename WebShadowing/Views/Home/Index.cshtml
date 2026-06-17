@@ -1,8 +1,445 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model IEnumerable<WebShadowing.Models.Lesson>
+@using WebShadowing.Models
+@{
+    ViewData["Title"] = "Thư viện bài học ShadowSpeak AI";
+    var profile = ViewBag.UserProfile as UserProfile ?? StaticData.DefaultProfile;
+    var textbooks = ViewBag.Textbooks as List<Textbook> ?? new List<Textbook>();
+    var videoLessons = ViewBag.VideoLessons as List<VideoLessonMock> ?? new List<VideoLessonMock>();
+    var savedAILessons = ViewBag.SavedAILessons as List<Lesson> ?? new List<Lesson>();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@functions {
+    string GetDifficultyBadgeColor(string level)
+    {
+        switch (level)
+        {
+            case "Cơ bản":
+                return "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200/50";
+            case "Trung cấp":
+                return "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200/50";
+            case "Nâng cao":
+                return "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border-rose-200/50";
+            default:
+                return "bg-slate-50 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400 border-slate-200/50";
+        }
+    }
+
+    string GetTopicLabel(string topic)
+    {
+        switch (topic)
+        {
+            case "Casual": return "Đời Sống (Casual)";
+            case "Academic": return "Học Thuật (Academic)";
+            case "Professional": return "Công Sở (Professional)";
+            default: return topic;
+        }
+    }
+}
+
+<div id="lesson-library-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-slide-up">
+      
+    <!-- Top Welcome Title Banner -->
+    <div id="library-banner" class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm mb-8 transition-all">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-sans font-black tracking-tight flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-sky-500 bg-clip-text text-transparent dark:from-sky-400 dark:to-indigo-300">
+                <span>Thư viện bài học ShadowSpeak AI</span>
+            </h1>
+            <p class="text-slate-500 dark:text-slate-400 mt-1.5 text-sm max-w-xl font-sans">
+                Luyện nói tiếng Anh theo cấu trúc giáo trình lớp 6-12 hoặc tự do phát kiến bài giảng AI theo mong muốn riêng của bạn.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+            <!-- Custom Search Bar -->
+            <div class="relative w-full md:w-64">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="search" class="h-4 w-4 text-slate-400"></i>
+                </span>
+                <input
+                    type="text"
+                    id="search-input"
+                    oninput="filterLessons()"
+                    placeholder="Tìm bài học..."
+                    class="pl-9 pr-4 py-2 w-full text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-700 dark:text-slate-350"
+                />
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Side: Course Rows (Netflix style) -->
+        <div class="lg:col-span-8 space-y-8">
+          
+            <!-- ==================== LINE 1: SAVED AI LESSONS ==================== -->
+            <div class="space-y-3 pb-6 border-b border-slate-100 dark:border-slate-800" id="row-saved-ai">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="bookmark" class="w-5 h-5 text-pink-500 fill-pink-100 dark:fill-none"></i>
+                        <h3 class="text-md font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 font-sans">
+                            Các bài giảng AI của bạn
+                        </h3>
+                    </div>
+                    <span class="text-[10px] font-mono text-pink-500 uppercase tracking-wider font-extrabold">
+                        @savedAILessons.Count bài học
+                    </span>
+                </div>
+
+                @if (savedAILessons.Count > 0)
+                {
+                    <div class="scroll-row py-2">
+                        @foreach (var lesson in savedAILessons)
+                        {
+                            <div 
+                                data-lesson-title="@lesson.Title.ToLower()"
+                                data-lesson-level="@lesson.Level.ToLower()"
+                                data-lesson-topic="@lesson.Topic.ToLower()"
+                                class="scroll-card lesson-card bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800/80 rounded-2xl p-4 hover:border-pink-500 dark:hover:border-pink-400 hover:shadow-md transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                                onclick="window.location.href='@Url.Action("LessonDetail", "Home", new { id = lesson.Id })'"
+                            >
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                        <span class="text-[9px] uppercase tracking-widest font-extrabold px-2 py-0.5 rounded @GetDifficultyBadgeColor(lesson.Level)">
+                                            @lesson.Level
+                                        </span>
+                                        <span class="bg-pink-50 text-pink-600 dark:bg-pink-500/10 dark:text-pink-400 text-[8px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                                            <i data-lucide="sparkles" class="w-2.5 h-2.5 fill-pink-500 text-pink-500"></i>
+                                            Đã lưu
+                                        </span>
+                                    </div>
+                                    <h4 class="font-sans font-bold text-sm text-slate-800 dark:text-slate-100 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors leading-snug line-clamp-2 min-h-[40px]">
+                                        @lesson.Title
+                                    </h4>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-50 dark:border-slate-800/60 flex justify-between items-center text-[10px]">
+                                    <span class="text-slate-400 font-semibold flex items-center gap-1">
+                                        @if (lesson.Topic == "Casual") { <i data-lucide="compass" class="w-3.5 h-3.5 text-orange-500"></i> }
+                                        else if (lesson.Topic == "Academic") { <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-emerald-500"></i> }
+                                        else if (lesson.Topic == "Professional") { <i data-lucide="briefcase" class="w-3.5 h-3.5 text-indigo-500"></i> }
+                                        else { <i data-lucide="book-open" class="w-3.5 h-3.5 text-slate-500"></i> }
+                                        @GetTopicLabel(lesson.Topic)
+                                    </span>
+                                    <span class="text-slate-400 font-mono">
+                                        @lesson.Duration
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center text-slate-400 text-xs font-sans">
+                        Chưa có bài giảng AI nào được lưu. Hãy nhập chủ đề ở khung bên phải để tạo bài giảng.
+                    </div>
+                }
+            </div>
+
+            <!-- ==================== LINES 2..N: TEXTBOOK COURSES (GRADES 6-12) ==================== -->
+            @foreach (var tb in textbooks)
+            {
+                <div class="space-y-3 pb-6 border-b border-slate-100 dark:border-slate-800 textbook-row">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-md font-black tracking-tight text-slate-800 dark:text-slate-200 font-sans">
+                                @tb.Name
+                            </h3>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-sans">
+                                @tb.Description
+                            </p>
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                            @tb.Units.Count bài học
+                        </span>
+                    </div>
+
+                    <div class="scroll-row py-2">
+                        @foreach (var unit in tb.Units)
+                        {
+                            <div 
+                                data-lesson-title="@unit.Title.ToLower()"
+                                data-lesson-level="@unit.Level.ToLower()"
+                                data-lesson-topic="@unit.Topic.ToLower()"
+                                class="scroll-card lesson-card bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-4 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-md transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                                onclick="window.location.href='@Url.Action("LessonDetail", "Home", new { id = unit.Id })'"
+                            >
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                        <span class="text-[9px] uppercase tracking-widest font-extrabold px-2 py-0.5 rounded @GetDifficultyBadgeColor(unit.Level)">
+                                            @unit.Level
+                                        </span>
+                                        <span class="bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400 text-[8px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded">
+                                            Hội thoại
+                                        </span>
+                                    </div>
+                                    <h4 class="font-sans font-bold text-sm text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug line-clamp-2 min-h-[40px]">
+                                        @unit.Title
+                                    </h4>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-50 dark:border-slate-800/60 flex justify-between items-center text-[10px]">
+                                    <span class="text-slate-400 font-semibold flex items-center gap-1">
+                                        @if (unit.Topic == "Casual") { <i data-lucide="compass" class="w-3.5 h-3.5 text-orange-500"></i> }
+                                        else if (unit.Topic == "Academic") { <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-emerald-500"></i> }
+                                        else if (unit.Topic == "Professional") { <i data-lucide="briefcase" class="w-3.5 h-3.5 text-indigo-500"></i> }
+                                        else { <i data-lucide="book-open" class="w-3.5 h-3.5 text-slate-500"></i> }
+                                        @GetTopicLabel(unit.Topic)
+                                    </span>
+                                    @if (unit.Speakers != null && unit.Speakers.Count > 0)
+                                    {
+                                        <span class="text-slate-400 font-mono text-[9px] max-w-[90px] truncate bg-slate-50 dark:bg-slate-950 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-850">
+                                            @string.Join(" & ", unit.Speakers)
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- ==================== STATIC SAMPLE LESSONS ==================== -->
+            <div class="space-y-3 pb-6 border-b border-slate-100 dark:border-slate-800" id="row-sample-lessons">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-md font-black tracking-tight text-slate-800 dark:text-slate-200 font-sans">
+                        Các bài giảng mẫu mở rộng
+                    </h3>
+                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                        @Model.Count() bài học
+                    </span>
+                </div>
+
+                <div class="scroll-row py-2">
+                    @foreach (var lesson in Model)
+                    {
+                        <div 
+                            data-lesson-title="@lesson.Title.ToLower()"
+                            data-lesson-level="@lesson.Level.ToLower()"
+                            data-lesson-topic="@lesson.Topic.ToLower()"
+                            class="scroll-card lesson-card bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-4 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-md transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                            onclick="window.location.href='@Url.Action("LessonDetail", "Home", new { id = lesson.Id })'"
+                        >
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-2">
+                                    <span class="text-[9px] uppercase tracking-widest font-extrabold px-2 py-0.5 rounded @GetDifficultyBadgeColor(lesson.Level)">
+                                        @lesson.Level
+                                    </span>
+                                    @if (!string.IsNullOrEmpty(lesson.YoutubeId))
+                                    {
+                                        <span class="bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 text-[8px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded">
+                                            Video
+                                        </span>
+                                    }
+                                </div>
+                                <h4 class="font-sans font-bold text-sm text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug line-clamp-2 min-h-[40px]">
+                                    @lesson.Title
+                                </h4>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-50 dark:border-slate-800/60 flex justify-between items-center text-[10px]">
+                                <span class="text-slate-400 font-semibold flex items-center gap-1 font-sans">
+                                    @if (lesson.Topic == "Casual") { <i data-lucide="compass" class="w-3.5 h-3.5 text-orange-500"></i> }
+                                    else if (lesson.Topic == "Academic") { <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-emerald-500"></i> }
+                                    else if (lesson.Topic == "Professional") { <i data-lucide="briefcase" class="w-3.5 h-3.5 text-indigo-500"></i> }
+                                    else { <i data-lucide="book-open" class="w-3.5 h-3.5 text-slate-500"></i> }
+                                    @GetTopicLabel(lesson.Topic)
+                                </span>
+                                <span class="text-slate-400 font-mono">
+                                    @lesson.Duration
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ==================== VIDEO BANK CAROUSEL ==================== -->
+            <div class="space-y-3 pb-6" id="row-video-bank">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="video" class="w-5 h-5 text-rose-500"></i>
+                        <h3 class="text-md font-black tracking-tight text-slate-800 dark:text-slate-200 font-sans">
+                            Ngân hàng Video Shadowing thực tế
+                        </h3>
+                    </div>
+                    <span class="text-[10px] font-mono text-rose-500 uppercase tracking-wider font-bold">
+                        @videoLessons.Count video
+                    </span>
+                </div>
+
+                <div class="scroll-row py-2">
+                    @foreach (var video in videoLessons)
+                    {
+                        <div 
+                            data-lesson-title="@video.Title.ToLower()"
+                            data-lesson-level="@video.Level.ToLower()"
+                            data-lesson-topic="@video.Topic.ToLower()"
+                            class="scroll-card lesson-card bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl overflow-hidden hover:border-rose-500 hover:shadow-md transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                            onclick="window.location.href='@Url.Action("LessonDetail", "Home", new { id = video.Id })'"
+                        >
+                            <div class="relative aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-950">
+                                <img 
+                                  src="@video.ImageUrl" 
+                                  alt="@video.Title" 
+                                  class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                                  referrerpolicy="no-referrer"
+                                />
+                                <div class="absolute bottom-2 left-2 text-[8px] font-mono text-white bg-slate-950/80 px-1.5 py-0.5 rounded font-bold">
+                                    @video.Duration
+                                </div>
+                                <div class="absolute top-2 right-2">
+                                    <span class="text-[8px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-rose-500 text-white shadow">
+                                        Video
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-3.5 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1.5 font-sans">
+                                        <span class="font-semibold text-slate-600 dark:text-slate-400">@video.Speaker</span>
+                                    </div>
+                                    <h4 class="font-sans font-bold text-xs text-slate-800 dark:text-slate-100 group-hover:text-rose-500 transition-colors leading-snug line-clamp-2 min-h-[32px]">
+                                        @video.Title
+                                    </h4>
+                                </div>
+                                <div class="mt-3 pt-2 border-t border-slate-50 dark:border-slate-800/60 flex items-center justify-between text-[9px] font-sans">
+                                    <span class="text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded @GetDifficultyBadgeColor(video.Level)">
+                                        @video.Level
+                                    </span>
+                                    <span class="text-rose-600 font-bold flex items-center gap-0.5">
+                                        Luyện ngay <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Note banner on database integration -->
+                <div class="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-start gap-3">
+                    <i data-lucide="info" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+                    <div class="text-[11px] leading-relaxed text-slate-400 font-sans">
+                        <strong>Kết nối ngân hàng Video:</strong> Shadows theo nhân vật thực tế của người bản xứ giúp bạn rèn luyện ngữ điệu tự nhiên nhất.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Side: AI Generative Lesson Terminal - 4 cols -->
+        <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm transition-all sticky top-20">
+            <div class="flex items-center gap-2 text-pink-600 dark:text-pink-400 mb-2">
+                <i data-lucide="sparkles" class="w-5 h-5 fill-pink-500 text-pink-500 dark:fill-none"></i>
+                <h3 class="font-sans font-extrabold text-base tracking-tight text-slate-900 dark:text-slate-50">Tạo đề tài AI Generator</h3>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-normal font-sans">
+                Nhập bất kỳ chủ đề, cấp độ, hoặc hoàn cảnh công sở mong muốn để sinh đoạn thoại nhại học tức thì với Gemini AI.
+            </p>
+
+            <form onsubmit="generateLesson(event)" class="mt-6 space-y-4 font-sans">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 block uppercase tracking-wider mb-1.5 font-mono">Prompt nội dung / Cấp độ học</label>
+                    <textarea
+                        id="prompt-text"
+                        rows="3"
+                        class="w-full bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-transparent transition-all leading-relaxed text-slate-800 dark:text-white"
+                        placeholder="Ví dụ: Hội thoại đi gọi trà sữa trân châu, viết đoạn hội thoại cấp độ B2 chủ đề bảo vệ đa dạng sinh học..."
+                    >Đoạn hội thoại phỏng vấn tại công ty công nghệ lớn</textarea>
+                </div>
+
+                <div class="p-3 bg-slate-50 dark:bg-slate-950/40 rounded-xl space-y-2.5 text-[11px] font-sans">
+                    <div class="flex justify-between items-center text-slate-500">
+                        <span>Cấu hình cấp độ:</span>
+                        <span class="font-semibold text-slate-800 dark:text-slate-300">@GetTopicLabel(profile.Level.ToString())</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-500">
+                        <span>Giọng bản xứ ưu tiên:</span>
+                        <span class="font-semibold text-slate-800 dark:text-slate-300">@(profile.TargetAccent == TargetAccent.US ? "Anh - Mỹ (US)" : "Anh - Anh (UK)")</span>
+                    </div>
+                </div>
+
+                <button
+                    id="ai-generate-btn"
+                    type="submit"
+                    class="w-full py-3.5 rounded-xl text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
+                    <i data-lucide="wand-2" class="w-4 h-4 text-amber-200"></i>
+                    <span>XUẤT BẢN BÀI GIẢNG AI</span>
+                </button>
+            </form>
+
+            <div id="ai-generating-indicator" class="mt-4 p-3 bg-sky-50 dark:bg-sky-500/5 rounded-xl text-[10px] text-sky-800 dark:text-sky-300 leading-normal border border-sky-100 dark:border-sky-500/10 animate-pulse hidden font-sans">
+                <strong>Mẹo học tập:</strong> Gemini đang phân tích cú pháp và dịch kịch bản, thêm phần phiên âm IPA cho bài giảng riêng cho bạn. Tiến trình này thường tốn từ 3-5 giây!
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
+@section Scripts {
+    <script>
+        function filterLessons() {
+            var query = document.getElementById("search-input").value.toLowerCase().trim();
+            var cards = document.getElementsByClassName("lesson-card");
+
+            for (var i = 0; i < cards.length; i++) {
+                var card = cards[i];
+                var title = card.getAttribute("data-lesson-title") || "";
+                var level = card.getAttribute("data-lesson-level") || "";
+                var topic = card.getAttribute("data-lesson-topic") || "";
+
+                if (!query || title.includes(query) || level.includes(query) || topic.includes(query)) {
+                    card.style.display = "";
+                } else {
+                    card.style.display = "none";
+                }
+            }
+        }
+
+        function generateLesson(event) {
+            event.preventDefault();
+            var indicator = document.getElementById("ai-generating-indicator");
+            var btn = document.getElementById("ai-generate-btn");
+            var promptText = document.getElementById("prompt-text").value.trim();
+
+            if (!promptText) {
+                alert("Vui lòng nhập chủ đề kịch bản học!");
+                return;
+            }
+
+            indicator.classList.remove("hidden");
+            btn.disabled = true;
+            btn.classList.add("bg-slate-400", "cursor-not-allowed", "animate-pulse");
+            btn.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4 animate-spin shrink-0"></i><span class="font-mono">Gemini AI đang soạn bài học...</span>`;
+            lucide.createIcons();
+
+            fetch('/api/generate-lesson', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    theme: promptText,
+                    level: '@profile.Level.ToString()'
+                })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Yêu cầu biên soạn bài học từ máy chủ thất bại.");
+                return res.json();
+            })
+            .then(data => {
+                alert("Đã khởi tạo kịch bản học bằng AI thành công với Gemini! Chuyển đến bài học mới...");
+                window.location.href = '@Url.Action("LessonDetail", "Home")' + '?id=' + encodeURIComponent(data.id);
+            })
+            .catch(err => {
+                console.error("Generate lesson failed:", err);
+                alert("Gặp sự cố khi kết nối tới máy chủ AI để tạo bài học.");
+            })
+            .finally(() => {
+                indicator.classList.add("hidden");
+                btn.disabled = false;
+                btn.classList.remove("bg-slate-400", "cursor-not-allowed", "animate-pulse");
+                btn.innerHTML = `<i data-lucide="wand-2" class="w-4 h-4 text-amber-200"></i><span>XUẤT BẢN BÀI GIẢNG AI</span>`;
+                lucide.createIcons();
+            });
+        }
+    </script>
+}

@@ -1,0 +1,1947 @@
+@model WebShadowing.Models.Lesson
+@using WebShadowing.Models
+@{
+    ViewData["Title"] = Model.Title;
+    var profile = ViewBag.UserProfile as UserProfile ?? StaticData.DefaultProfile;
+    var stats = ViewBag.UserStats as UserStats ?? StaticData.DefaultStats;
+}
+
+<div id="lesson-view-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-slide-up">
+
+      <!-- Top controls and headers bar -->
+      <div class="flex items-center justify-between mb-5">
+        <a asp-action="Index"
+          class="flex items-center gap-2 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-sky-400 font-sans font-bold text-xs cursor-pointer bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 px-3 py-1.5 rounded-xl shadow-sm no-underline"
+        >
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>Quay lại Thư Viện</span>
+        </a>
+
+        <span class="text-[10px] text-slate-400 font-mono bg-slate-100 dark:bg-slate-800/60 px-2.5 py-1 rounded-md">
+          CHỦ ĐỀ: <span class="font-bold text-indigo-600 dark:text-sky-400">@Model.Topic.ToUpper()</span> • <span class="font-semibold text-slate-500">@Model.Level</span>
+        </span>
+      </div>
+
+      <!-- Primary High Density 2-Column Grid -->
+      <div class="grid lg:grid-cols-12 gap-6 items-start">
+
+        <!-- LEFT COLUMN: Training Dashboard & Content Modules (8 Cols) -->
+        <div class="lg:col-span-8 space-y-6">
+
+          <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-5 md:p-6 shadow-sm relative overflow-hidden">
+
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 dark:bg-sky-500"></div>
+
+            <!-- Lesson Title Banner -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 dark:border-slate-800/60 pb-4 mb-5 gap-4">
+              <div>
+                <span class="text-[9px] bg-indigo-50 text-indigo-700 dark:bg-sky-500/10 dark:text-sky-400 px-2 py-0.5 rounded uppercase font-mono font-bold tracking-wider">
+                  Khóa Học Tiếng Anh Shadowing
+                </span>
+                <h2 class="text-lg md:text-xl font-sans font-extrabold tracking-tight text-slate-900 dark:text-slate-100 mt-1">
+                  @Model.Title
+                </h2>
+              </div>
+
+              <div class="flex items-center gap-2">
+                @if (Model.IsGenerated == true)
+                {
+                  <button
+                    onclick="handleSaveAILesson()"
+                    id="save-ai-btn"
+                    class="px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 transition-all text-[11px] font-bold cursor-pointer shrink-0 border-pink-200 bg-pink-50 text-pink-600 hover:bg-pink-100 dark:border-pink-850 dark:bg-pink-950/10 dark:text-pink-400"
+                  >
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-current"></i>
+                    <span id="save-ai-text">Lưu bài AI</span>
+                  </button>
+                }
+
+                <button
+                  onclick="handleBookmarkSentence()"
+                  class="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-500 hover:text-indigo-600 flex items-center gap-1.5 transition-all text-[11px] font-bold cursor-pointer shrink-0"
+                >
+                  <i data-lucide="bookmark" class="w-3.5 h-3.5 text-indigo-650 dark:text-sky-400"></i>
+                  <span>Bookmark câu này</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Modular Tab Headers -->
+            <div class="flex border-b border-slate-100 dark:border-slate-800/40 mb-5 font-sans text-xs overflow-x-auto">
+              <button
+                id="tab-shadowing"
+                onclick="switchTab('shadowing')"
+                class="px-3 py-2 font-extrabold pb-2 border-b-2 cursor-pointer transition-colors whitespace-nowrap border-indigo-600 text-indigo-600 dark:border-sky-400 dark:text-sky-400"
+              >
+                Studio Shadowing
+              </button>
+              <button
+                id="tab-roleplay"
+                onclick="switchTab('roleplay')"
+                class="px-3 py-2 font-extrabold pb-2 border-b-2 cursor-pointer transition-colors whitespace-nowrap border-transparent text-slate-400 hover:text-slate-600"
+              >
+                Đàm thoại Role Play AI
+              </button>
+              <button
+                id="tab-dictation"
+                onclick="switchTab('dictation')"
+                class="px-3 py-2 font-extrabold pb-2 border-b-2 cursor-pointer transition-colors whitespace-nowrap border-transparent text-slate-400 hover:text-slate-600"
+              >
+                Nghe & Chép Chính Tả
+              </button>
+              <button
+                id="tab-ipagame"
+                onclick="switchTab('ipa-game')"
+                class="px-3 py-2 font-extrabold pb-2 border-b-2 cursor-pointer transition-colors whitespace-nowrap border-transparent text-slate-400 hover:text-slate-600"
+              >
+                Thử thách cặp IPA
+              </button>
+            </div>
+
+            <!-- TAB CONTENT: CORE SHADOWING STUDIO -->
+            <div id="panel-shadowing" class="tab-panel space-y-5">
+
+              <div class="active-sentence p-5 md:p-6 rounded-xl border border-indigo-100/50 dark:border-sky-500/10 shadow-sm text-center space-y-3.5">
+
+                <!-- Video embed for Video Bank lessons -->
+                @if (!string.IsNullOrEmpty(Model.YoutubeId))
+                {
+                  <div id="lesson-video-player" class="mb-5 aspect-video w-full max-w-2xl mx-auto rounded-2xl overflow-hidden bg-black border border-slate-200 dark:border-slate-800/80 shadow-md">
+                    <iframe
+                      class="w-full h-full"
+                      src="https://www.youtube.com/embed/@Model.YoutubeId"
+                      title="Video YouTube player"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                }
+
+                <!-- Target Phrase with Inline IPA and Click-to-Translate -->
+                <div id="words-container" class="ipa-word-grid my-4 select-none justify-center">
+                    <!-- Word cells injected by JS -->
+                </div>
+
+                <!-- Target Vietnamese translation -->
+                <div id="target-translation" class="font-sans text-slate-500 dark:text-slate-400 text-xs md:text-sm font-semibold italic mt-2">
+                    <!-- Translation injected by JS -->
+                </div>
+
+                <!-- Word Correction details panel -->
+                <div id="word-correction-panel" class="mt-3 p-3.5 bg-yellow-400/5 dark:bg-yellow-400/10 border border-yellow-200/50 rounded-xl max-w-md mx-auto text-left flex gap-3 text-[11px] leading-normal animate-slide-up hidden">
+                  <div class="w-5 h-5 rounded-full bg-yellow-400/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center shrink-0 font-bold font-mono text-[10px]">!</div>
+                  <div class="flex-1">
+                    <h4 class="font-bold text-slate-900 dark:text-slate-50 flex items-center gap-1.5">
+                      Phát âm từ: <span id="correcting-word-name" class="text-indigo-650 dark:text-sky-400 font-mono text-xs">""</span>
+                      <span id="correcting-word-badge" class="text-[10px] text-slate-400 font-normal">()</span>
+                    </h4>
+                    <p id="correcting-word-ipa" class="text-[10px] font-mono mt-0.5 text-slate-400"></p>
+                    <p id="correcting-word-tip" class="text-slate-500 mt-1 dark:text-slate-350 font-sans leading-relaxed"></p>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Simulated Audio Stream Control Line with waveform -->
+              <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-950/20 rounded-xl p-3 border border-slate-100 dark:border-slate-800 gap-4">
+                <div class="flex items-center gap-3">
+                  <button
+                    onclick="playTargetAudio()"
+                    class="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm flex items-center justify-center transition-all cursor-pointer"
+                    title="Nghe giọng đọc chuẩn bản xứ"
+                  >
+                    <i data-lucide="volume-2" class="w-4.5 h-4.5"></i>
+                  </button>
+                  <div class="text-left font-sans">
+                    <p class="text-[11px] font-bold text-slate-700 dark:text-slate-200">Listening Mode (Nghe âm chuẩn)</p>
+                    <p class="text-[10px] text-slate-400">Nghe máy học phát âm nhấn ngắt nhịp tự nhiên.</p>
+                  </div>
+                </div>
+
+                <div class="h-6 flex items-center gap-1 shrink-0 px-2 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-900 rounded-md py-1">
+                  <!-- Waveform bars -->
+                  <span class="inline-block w-[2.5px] rounded-full h-1.5 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-3 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-2 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-4 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-1.5 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-3 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-2.5 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-4.5 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-2 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-3.5 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-1 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                  <span class="inline-block w-[2.5px] rounded-full h-3 opacity-30 bg-indigo-500 dark:bg-sky-400 wave-bar-element"></span>
+                </div>
+              </div>
+
+              <!-- Local Client Device Recording Engine Interface -->
+              <div class="bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                <div>
+                  <h4 class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">Thiết bị thu âm</h4>
+
+                  <div id="recording-status-box">
+                    <p class="text-[10px] text-slate-400 mt-0.5">Micro sẵn sàng. Nhấp nút xanh bên dưới để ghi âm nhại tiếng.</p>
+                  </div>
+
+                  <div class="mt-3 p-3 bg-white dark:bg-slate-950/90 border border-slate-200/60 dark:border-slate-800 rounded-lg min-h-[60px] max-h-[100px] overflow-y-auto text-xs font-bold text-slate-800 dark:text-slate-100 font-sans leading-relaxed relative">
+                    <span id="transcription-output-text" class="text-slate-400 italic font-normal text-[11px]">Văn bản STT thực tế tương tác sẽ khớp tại đây...</span>
+                  </div>
+
+                  <div id="recognition-error-box" class="hidden">
+                    <p class="text-[9px] text-rose-500 mt-1.5 flex items-center gap-1 leading-normal">
+                      <i data-lucide="alert-circle" class="w-3 h-3 text-rose-500 shrink-0"></i>
+                      <span id="recognition-error-text"></span>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 mt-4">
+                  <button
+                    id="record-toggle-btn"
+                    onclick="handleToggleRecording()"
+                    class="px-4 py-2.5 rounded-lg font-bold font-sans text-xs flex items-center gap-2 cursor-pointer transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                  >
+                    <i data-lucide="mic" class="w-3.5 h-3.5 text-white" id="mic-icon-stt"></i>
+                    <span id="record-btn-text">BẮT ĐẦU THU ÂM</span>
+                  </button>
+
+                  <button
+                    id="clear-record-btn"
+                    onclick="clearRecording()"
+                    class="px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-[11px] cursor-pointer hidden"
+                  >
+                    Xóa Thu Âm
+                  </button>
+
+                  <button
+                    id="simulate-mic-btn"
+                    onclick="simulateMicrophoneInput()"
+                    class="px-3 py-2.5 rounded-lg border border-dashed border-indigo-200 text-indigo-500 hover:bg-indigo-50 dark:border-slate-850 dark:text-sky-400 dark:hover:bg-slate-800 font-bold text-[11px] cursor-pointer flex items-center gap-1"
+                    title="Dành cho trình duyệt không hỗ trợ micro/chưa cấp quyền"
+                  >
+                    <i data-lucide="sparkles" class="w-3 h-3 text-indigo-500 dark:text-sky-400"></i>
+                    Ghi âm giả lập
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- TAB CONTENT: INTERACTIVE AI ROLE PLAY MODE -->
+            <div id="panel-roleplay" class="tab-panel space-y-6 hidden">
+              <div id="roleplay-loader" class="py-12 flex flex-col justify-center items-center text-center hidden">
+                <i data-lucide="refresh-cw" class="w-8 h-8 text-indigo-600 animate-spin mb-3"></i>
+                <p class="text-slate-400 text-xs font-medium">Đang khởi tạo đàm thoại Role Play với Gemini AI...</p>
+              </div>
+
+              <div id="roleplay-content" class="space-y-5">
+                <!-- Role Selection Grid -->
+                <div id="role-selection-box" class="p-4 bg-slate-50 dark:bg-slate-950/45 rounded-2xl border border-slate-100 dark:border-slate-800/80 font-sans">
+                  <span class="text-[9px] uppercase font-bold tracking-widest text-slate-400 block mb-2">Chọn vai đàm thoại của bạn</span>
+                  <div id="role-selection-container" class="flex flex-wrap gap-2">
+                    <!-- Role buttons injected by JS -->
+                  </div>
+                </div>
+
+                <!-- Chat Log Message bubbles -->
+                <div id="chat-bubbles-container" class="chat-container border border-slate-100 dark:border-slate-800/60 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 max-h-[350px] overflow-y-auto relative">
+                    <!-- Chat bubbles injected by JS -->
+                </div>
+
+                <!-- Chat Input Bar & Controls -->
+                <div id="roleplay-controls-container" class="space-y-3">
+                    <!-- Controls injected by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB CONTENT: DICTATION SPELLING GAME -->
+            <div id="panel-dictation" class="tab-panel space-y-4 hidden">
+              <div class="p-4 bg-indigo-50/20 dark:bg-slate-950/40 rounded-xl border border-indigo-100/10 text-center font-sans">
+                <span class="text-[9px] uppercase font-bold tracking-widest text-indigo-600 dark:text-sky-400 block mb-1">Phương pháp Dictation</span>
+                <h3 class="font-extrabold text-xs text-slate-800 dark:text-slate-200">Gõ lại đúng những gì bạn nghe thấy</h3>
+
+                <button
+                  type="button"
+                  onclick="playTargetAudio()"
+                  class="mt-3 mx-auto w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center cursor-pointer transition-all hover:scale-105 shadow"
+                  title="Nghe câu mẫu"
+                >
+                  <i data-lucide="volume-2" class="w-4.5 h-4.5"></i>
+                </button>
+              </div>
+
+              <div class="space-y-3 font-sans text-xs">
+                <div>
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">NHẬP VĂN BẢN CHÍNH TẢ</label>
+                  <textarea
+                    id="dictation-textarea"
+                    oninput="handleDictationInput(event)"
+                    rows="2"
+                    class="w-full bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-sans tracking-wide leading-relaxed text-xs focus:outline-none focus:border-indigo-500"
+                    placeholder="Nghe, dịch rồi gõ lại chuẩn xác từng từ..."
+                  ></textarea>
+                </div>
+
+                <div id="dictation-result-box" class="hidden">
+                    <!-- Spelling feedback box injected by JS -->
+                </div>
+
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    id="dictation-check-btn"
+                    onclick="checkDictationSpelling()"
+                    class="px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all text-xs cursor-pointer bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800 dark:text-slate-600"
+                    disabled
+                  >
+                    <i data-lucide="keyboard" class="w-3.5 h-3.5"></i>
+                    <span>Kết quả chép</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    id="dictation-retry-btn"
+                    onclick="resetDictationSpelling()"
+                    class="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-xs cursor-pointer hidden"
+                  >
+                    Thử lại
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB CONTENT: IPA MATCHING GAME -->
+            <div id="panel-ipa-game" class="tab-panel space-y-4 hidden">
+              <div class="p-4 bg-amber-50/20 dark:bg-slate-950/40 rounded-xl border border-amber-100/15 text-center font-sans">
+                <span class="text-[9px] uppercase font-bold tracking-widest text-amber-600 dark:text-amber-400 block mb-1">IPA Challenge Game</span>
+                <p class="text-[11px] text-slate-400 max-w-sm mx-auto leading-normal">
+                  Ký tự phiên âm bên dưới thuộc về từ nào trong số các lựa chọn này?
+                </p>
+
+                <div id="ipa-quiz-text" class="mt-3 text-lg font-mono text-indigo-600 dark:text-sky-400 font-extrabold tracking-wider p-2 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80 inline-block rounded-lg shadow-sm">
+                    <!-- IPA tag injected by JS -->
+                </div>
+              </div>
+
+              <div class="space-y-3 font-sans">
+                <div id="ipa-options-grid" class="grid grid-cols-2 gap-3">
+                  <!-- 2x2 grid injected by JS -->
+                </div>
+
+                <div id="ipa-feedback-box" class="hidden">
+                    <!-- Correct/Incorrect warning box injected by JS -->
+                </div>
+
+                <button
+                  id="ipa-next-btn"
+                  onclick="advanceIpaQuizSentence()"
+                  class="py-1.5 px-3.5 bg-indigo-600 text-white rounded-lg text-[11px] font-bold hover:bg-indigo-700 cursor-pointer hidden"
+                >
+                  Sang câu hỏi sau
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- SUBTITLE LIST PANEL -->
+          <div id="panel-subtitles-drawer" class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-4 md:p-5 shadow-sm">
+            <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-3">Tài liệu phụ đề bài giảng (<span id="subtitles-count-label">0</span> Câu)</h4>
+
+            <div id="subtitles-list-container" class="space-y-2">
+              <!-- Rendered list of sentences -->
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800/80 flex justify-between items-center gap-4 text-[11px] font-sans text-slate-400">
+              <p>Mục tiêu: Đọc chính xác &gt; 80 EXP</p>
+              <button
+                onclick="advanceActiveSentence()"
+                class="py-1.5 px-3 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-lg hover:bg-slate-200 transition-colors font-bold cursor-pointer shrink-0"
+              >
+                Câu Kế Tiếp (<span id="subtitle-progress-label">1/1</span>)
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: EVALUATION ANALYTICS CARD & COACH PRO TIPS (4 Cols) -->
+        <div class="lg:col-span-4 space-y-6">
+
+          <!-- Circular overall score chart HUD -->
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm text-center relative overflow-hidden">
+            <h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest text-left mb-4">Điểm Số Đánh Giá AI</h3>
+
+            <div class="relative w-32 h-32 mx-auto mb-4">
+              <svg class="w-32 h-32 transform -rotate-90">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="52"
+                  fill="none"
+                  strokeWidth="11"
+                  class="stroke-slate-100 dark:stroke-slate-800/60"
+                />
+                <circle
+                  id="score-circle-ring"
+                  cx="64"
+                  cy="64"
+                  r="52"
+                  fill="none"
+                  strokeWidth="11"
+                  stroke="#e2e8f0"
+                  strokeDasharray="326.7"
+                  strokeDashoffset="326.7"
+                  class="score-ring"
+                />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center font-sans">
+                <span id="hud-score-value" class="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
+                  85
+                </span>
+                <span id="hud-score-label" class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mt-0.5">
+                  Target Point
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-4 text-left">
+              <div class="bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-100 dark:border-slate-800/60">
+                <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wider font-mono">Nhịp độ đọc</p>
+                <p id="hud-pace-status" class="text-xs font-black text-slate-800 dark:text-slate-200 mt-0.5">
+                  Chuẩn Bản Xứ
+                </p>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-100 dark:border-slate-800/60">
+                <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wider font-mono">Dải tần cao độ</p>
+                <p id="hud-pitch-status" class="text-xs font-black text-slate-800 dark:text-slate-200 mt-0.5">
+                  Cân Bằng
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Pronunciation detailed Breakdown list -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-4 md:p-5 shadow-sm flex flex-col min-h-[280px]">
+            <h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-4">Chi Tiết Lỗi Phát Âm Từng Từ</h3>
+
+            <div id="ai-evaluation-loading" class="flex-1 flex flex-col justify-center items-center py-10 text-center hidden">
+              <div class="w-7 h-7 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin mb-3"></div>
+              <p class="text-[11px] text-slate-400 max-w-xs animate-pulse font-sans">
+                AI đang xử lý cao độ, tách âm vị học, phát hiện các quãng ngắt nhịp thoại...
+              </p>
+            </div>
+
+            <div id="ai-evaluation-list" class="space-y-3.5 flex-1 overflow-y-auto max-h-[220px] pr-1.5 hidden">
+                <!-- Word breakdowns injected by JS -->
+            </div>
+
+            <div id="ai-evaluation-empty" class="flex-1 flex flex-col items-center justify-center text-center py-12">
+              <i data-lucide="sparkles" class="w-7 h-7 text-slate-300 dark:text-slate-700 animate-bounce mb-3"></i>
+              <p class="text-[10px] text-slate-400 max-w-xs font-sans leading-relaxed">
+                Chưa có dữ liệu bài nói. Ghi âm bằng nút xanh góc trái rồi nhấp nút chấm điểm để xem phân tích.
+              </p>
+            </div>
+
+            <div class="mt-4 p-3 bg-indigo-50/70 dark:bg-indigo-950/20 rounded-xl border border-indigo-100/40 dark:border-indigo-800/30 text-[11px] text-indigo-900 dark:text-indigo-300 leading-relaxed font-sans italic relative">
+              <strong>Gemini Coach Pro Tip:</strong>
+              <p id="gemini-coach-tip-text" class="mt-1">
+                "Luyện nói đều đặn hằng ngày giúp rèn vùng cơ môi tự nhiên. Ấn nút Phát âm tiếng bản xứ rồi nói nhại ngay sau để giữ nhịp thở chuẩn."
+              </p>
+            </div>
+
+            <div class="mt-4">
+              <button
+                id="evaluate-pronunciation-btn"
+                onclick="evaluatePronunciation()"
+                class="w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800/80 dark:text-slate-600"
+                disabled
+              >
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300 fill-amber-300"></i>
+                <span>CHẤM CÂU THOẠI VỚI AI</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        // 1. Raw Lesson Model injected from MVC
+        const lesson = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+        
+        // 2. Global State holding page reactivity
+        const state = {
+            activeSentenceIndex: 0,
+            activeTab: 'shadowing',
+            isRecording: false,
+            transcribedText: '',
+            interimTranscript: '',
+            recognitionError: null,
+            isEvaluating: false,
+            evaluation: null,
+            selectedWord: null,
+
+            // Dictation
+            dictationInput: '',
+            dictationChecked: false,
+            dictationPassed: false,
+
+            // IPA Quiz
+            ipaQuizOptions: [],
+            ipaQuizCorrect: '',
+            ipaSelectedAnswer: null,
+            ipaFeedbackMessage: null,
+
+            // Tooltip dictionary lookup
+            lookupKey: null,
+            isLookingUp: false,
+            wordMeaning: null,
+
+            // Stats (Sync with header DOM)
+            expGained: @stats.Exp,
+            heartsRemaining: @(profile.IsPremium ? 999 : stats.Hearts),
+            isPremium: @(profile.IsPremium ? "true" : "false"),
+
+            // Roleplay parameters
+            rolePlayMessages: [],
+            rolePlaySpeakers: [],
+            selectedRole: null,
+            isLoadingRolePlay: false,
+            rolePlayActiveIndex: 0,
+            isEvaluatingRolePlay: false,
+            rolePlaySTTText: '',
+            rolePlayInterimSTT: '',
+            rolePlayStarted: false
+        };
+
+        // Speech recognition reference
+        let recognition = null;
+        let recordingSimTimer = null;
+
+        // Initialize elements
+        document.addEventListener("DOMContentLoaded", () => {
+            initSpeechRecognition();
+            loadActiveSentence();
+            renderSubtitlesList();
+            updateScoreCircleRing(85);
+            
+            // Add click listener outside to close tooltips
+            document.addEventListener("click", () => {
+                if (state.lookupKey) {
+                    state.lookupKey = null;
+                    renderActiveSentence();
+                    renderRolePlayChat();
+                }
+            });
+
+            // Listen for Enter key to submit recording in roleplay
+            document.addEventListener("keydown", (e) => {
+                if (state.activeTab === 'roleplay' && state.isRecording && e.key === 'Enter') {
+                    e.preventDefault();
+                    if (recognition) {
+                        recognition.stop();
+                    }
+                }
+            });
+        });
+
+        // Speech recognition setup
+        function initSpeechRecognition() {
+            const SpeechReg = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechReg) {
+                recognition = new SpeechReg();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    state.isRecording = true;
+                    if (state.activeTab === 'roleplay') {
+                        state.rolePlaySTTText = '';
+                        state.rolePlayInterimSTT = '';
+                    } else {
+                        state.transcribedText = '';
+                        state.interimTranscript = '';
+                    }
+                    state.recognitionError = null;
+                    updateRecordingUI();
+                };
+
+                recognition.onresult = (event) => {
+                    let interim = '';
+                    let final = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            final += event.results[i][0].transcript + ' ';
+                        } else {
+                            interim += event.results[i][0].transcript;
+                        }
+                    }
+
+                    if (final) {
+                        if (state.activeTab === 'roleplay') {
+                            state.rolePlaySTTText += final;
+                        } else {
+                            state.transcribedText += final;
+                        }
+                    }
+
+                    if (state.activeTab === 'roleplay') {
+                        state.rolePlayInterimSTT = interim;
+                    } else {
+                        state.interimTranscript = interim;
+                    }
+                    updateRecordingTranscript();
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech Recognition Error:', event);
+                    if (event.error !== 'no-speech') {
+                        state.recognitionError = `Microphone: ${event.error}. Vui lòng cấp quyền truy cập micro.`;
+                        updateRecordingUI();
+                    }
+                };
+
+                recognition.onend = () => {
+                    state.isRecording = false;
+                    updateRecordingUI();
+
+                    // Auto-submit text when recording ends in Role Play mode
+                    if (state.activeTab === 'roleplay') {
+                        const transcript = (state.rolePlaySTTText + state.rolePlayInterimSTT).trim();
+                        if (transcript) {
+                            sendSpeechMessage(transcript);
+                        }
+                    }
+                };
+            } else {
+                state.recognitionError = 'Trình duyệt không hỗ trợ trực tiếp Google Speech API. Khuyên dùng Google Chrome/Edge.';
+                document.getElementById("recognition-error-box").classList.remove("hidden");
+                document.getElementById("recognition-error-text").textContent = state.recognitionError;
+            }
+        }
+
+        // Toggle record state
+        function handleToggleRecording() {
+            // Cancel simulator if running
+            if (recordingSimTimer) {
+                clearTimeout(recordingSimTimer);
+                recordingSimTimer = null;
+            }
+
+            if (state.isRecording) {
+                if (recognition) {
+                    recognition.stop();
+                } else {
+                    state.isRecording = false;
+                    updateRecordingUI();
+                }
+            } else {
+                state.transcribedText = '';
+                state.interimTranscript = '';
+                state.rolePlaySTTText = '';
+                state.rolePlayInterimSTT = '';
+                state.evaluation = null;
+
+                if (recognition) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error("Failed to start speech recognition: ", e);
+                    }
+                } else {
+                    state.isRecording = true;
+                    updateRecordingUI();
+                }
+            }
+        }
+
+        // Simulating mic inputs for testing
+        function simulateMicrophoneInput() {
+            if (state.isRecording) {
+                handleToggleRecording();
+                return;
+            }
+
+            state.isRecording = true;
+            state.transcribedText = '';
+            state.interimTranscript = 'Đang nhận diện giọng nói giả lập...';
+            state.evaluation = null;
+            updateRecordingUI();
+            updateRecordingTranscript();
+
+            const target = getCurrentSentence().Text;
+            
+            recordingSimTimer = setTimeout(() => {
+                // Return a transcription containing 90% accuracy (replace a word slightly or keep identical)
+                const targetWords = target.split(' ');
+                let resultText = target;
+                if (targetWords.length > 3) {
+                    // Slight spelling mutation for warning/incorrect testing
+                    const lastIdx = targetWords.length - 1;
+                    targetWords[lastIdx] = targetWords[lastIdx].toLowerCase().includes('day') ? 'days' : targetWords[lastIdx];
+                    resultText = targetWords.join(' ');
+                }
+
+                state.transcribedText = resultText;
+                state.interimTranscript = '';
+                state.isRecording = false;
+                
+                updateRecordingUI();
+                updateRecordingTranscript();
+                
+                // Alert simulation notice
+                alert(`[GIẢ LẬP MICRO] Đã ghi âm thử thành công! Chuỗi ghi nhận: "${resultText}". Nhấn Chấm điểm để phân tích.`);
+            }, 3000);
+        }
+
+        // Update mic button styles & visual waveforms
+        function updateRecordingUI() {
+            const btn = document.getElementById("record-toggle-btn");
+            const btnText = document.getElementById("record-btn-text");
+            const statusBox = document.getElementById("recording-status-box");
+            const clearBtn = document.getElementById("clear-record-btn");
+            const micIcon = document.getElementById("mic-icon-stt");
+
+            // Waveform elements
+            const waveBars = document.querySelectorAll(".wave-bar-element");
+
+            if (state.isRecording) {
+                btn.className = "px-4 py-2.5 rounded-lg font-bold font-sans text-xs flex items-center gap-2 cursor-pointer transition-all bg-rose-600 text-white animate-rec shadow-lg";
+                btnText.textContent = "DỪNG THU";
+                if (micIcon) micIcon.setAttribute("data-lucide", "square");
+                
+                statusBox.innerHTML = `
+                    <div class="text-[11px] text-rose-500 flex items-center gap-1.5 font-bold animate-pulse mt-0.5">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                        <span>Micro bận: Nói to và bắt chước nhịp điệu của câu nói mẫu...</span>
+                    </div>
+                `;
+
+                // Wave bounce animation
+                waveBars.forEach(bar => {
+                    bar.classList.remove("opacity-30");
+                    bar.classList.add("wave-bar");
+                    // Custom height values in standard animation
+                    bar.style.height = "";
+                });
+            } else {
+                btn.className = "px-4 py-2.5 rounded-lg font-bold font-sans text-xs flex items-center gap-2 cursor-pointer transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm";
+                btnText.textContent = "BẮT ĐẦU THU ÂM";
+                if (micIcon) micIcon.setAttribute("data-lucide", "mic");
+
+                statusBox.innerHTML = `
+                    <p class="text-[10px] text-slate-400 mt-0.5">Micro sẵn sàng. Nhấp nút xanh bên dưới để ghi âm nhại tiếng.</p>
+                `;
+
+                // Pause wave bounce animation
+                waveBars.forEach((bar, idx) => {
+                    bar.classList.add("opacity-30");
+                    bar.classList.remove("wave-bar");
+                    bar.style.height = `${((idx % 4) + 1) * 3}px`;
+                });
+            }
+
+            if (state.transcribedText || state.interimTranscript) {
+                clearBtn.classList.remove("hidden");
+            } else {
+                clearBtn.classList.add("hidden");
+            }
+
+            // Sync layout icons
+            lucide.createIcons();
+        }
+
+        // Update transcript placeholder box
+        function updateRecordingTranscript() {
+            const outputText = document.getElementById("transcription-output-text");
+            const evalBtn = document.getElementById("evaluate-pronunciation-btn");
+
+            const final = state.transcribedText;
+            const interim = state.interimTranscript;
+
+            if (final || interim) {
+                outputText.className = "text-slate-800 dark:text-slate-100 font-sans";
+                outputText.innerHTML = `
+                    <span>${final}</span>
+                    <span class="text-slate-400 italic font-normal">${interim}</span>
+                `;
+                
+                // Enable evaluate button
+                evalBtn.className = "w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md bg-indigo-600 hover:bg-indigo-700 text-white";
+                evalBtn.disabled = false;
+            } else {
+                outputText.className = "text-slate-400 italic font-normal text-[11px]";
+                outputText.textContent = "Văn bản STT thực tế tương tác sẽ khớp tại đây...";
+
+                // Disable evaluate button
+                evalBtn.className = "w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800/80 dark:text-slate-600";
+                evalBtn.disabled = true;
+            }
+        }
+
+        // Clear recording values
+        function clearRecording() {
+            state.transcribedText = '';
+            state.interimTranscript = '';
+            state.evaluation = null;
+            state.selectedWord = null;
+
+            document.getElementById("word-correction-panel").classList.add("hidden");
+
+            updateRecordingUI();
+            updateRecordingTranscript();
+            renderActiveSentence();
+            resetEvaluationPanel();
+        }
+
+        // Reset Evaluation Panels
+        function resetEvaluationPanel() {
+            document.getElementById("hud-score-value").textContent = "85";
+            document.getElementById("hud-score-label").textContent = "Target Point";
+            document.getElementById("hud-pace-status").textContent = "Chuẩn Bản Xứ";
+            document.getElementById("hud-pitch-status").textContent = "Cân Bằng";
+            updateScoreCircleRing(85);
+
+            document.getElementById("ai-evaluation-empty").classList.remove("hidden");
+            document.getElementById("ai-evaluation-list").classList.add("hidden");
+            document.getElementById("ai-evaluation-list").innerHTML = "";
+            document.getElementById("gemini-coach-tip-text").textContent = `"Luyện nói đều đặn hằng ngày giúp rèn vùng cơ môi tự nhiên. Ấn nút Phát âm tiếng bản xứ rồi nói nhại ngay sau để giữ nhịp thở chuẩn."`;
+        }
+
+        // Get current active sentence
+        function getCurrentSentence() {
+            return lesson.Sentences[state.activeSentenceIndex];
+        }
+
+        function getCurrentTargetText() {
+            return getCurrentSentence().Text;
+        }
+
+        // Change Active Sentence
+        function changeActiveSentence(index) {
+            if (index < 0 || index >= lesson.Sentences.length) return;
+            state.activeSentenceIndex = index;
+            loadActiveSentence();
+        }
+
+        // Advance to next active sentence
+        function advanceActiveSentence() {
+            const nextIdx = (state.activeSentenceIndex + 1) % lesson.Sentences.length;
+            changeActiveSentence(nextIdx);
+        }
+
+        // Core dynamic page reload for active sentence
+        function loadActiveSentence() {
+            state.transcribedText = '';
+            state.interimTranscript = '';
+            state.evaluation = null;
+            state.selectedWord = null;
+
+            // Hide warnings
+            document.getElementById("word-correction-panel").classList.add("hidden");
+
+            // Setup UI states
+            updateRecordingUI();
+            updateRecordingTranscript();
+            renderActiveSentence();
+            renderSubtitlesHighlight();
+            resetEvaluationPanel();
+
+            // Refresh game states
+            resetDictationSpelling();
+            generateIpaQuiz();
+
+            // Dynamic Progress labels
+            document.getElementById("subtitle-progress-label").textContent = `${state.activeSentenceIndex + 1}/${lesson.Sentences.length}`;
+
+            // Create Icons
+            lucide.createIcons();
+        }
+
+        // Render target text with inline IPA & dictionary events
+        function renderActiveSentence() {
+            const sentence = getCurrentSentence();
+            if (!sentence) return;
+
+            const words = sentence.Text.split(/\s+/).filter(Boolean);
+            const ipaClean = sentence.Ipa.replace(/[\[\]]/g, '').trim();
+            const ipaWords = ipaClean.split(/\s+/).filter(Boolean);
+
+            const container = document.getElementById("words-container");
+            container.innerHTML = "";
+
+            words.forEach((word, idx) => {
+                const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, "");
+                const ipa = ipaWords[idx] || "";
+                const wordKey = `shadow-${state.activeSentenceIndex}-${idx}`;
+                const isLookupActive = state.lookupKey === wordKey;
+
+                // Color accuracy mapping
+                let accuracyClass = "text-slate-800 dark:text-slate-200 hover:text-indigo-650 dark:hover:text-sky-400";
+                if (state.evaluation && state.evaluation.words) {
+                    const cleanLookup = cleanWord.toLowerCase();
+                    const found = state.evaluation.words.find(w => w.word.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, "") === cleanLookup);
+                    if (found) {
+                        if (found.accuracyCode === 'correct') {
+                            accuracyClass = "text-emerald-500 hover:bg-emerald-50 hover:dark:bg-emerald-500/10 cursor-help underline decoration-dotted transition-colors font-bold";
+                        } else if (found.accuracyCode === 'warning') {
+                            accuracyClass = "text-amber-500 hover:bg-amber-50 hover:dark:bg-amber-500/10 cursor-help underline decoration-dotted transition-colors font-bold";
+                        } else if (found.accuracyCode === 'incorrect') {
+                            accuracyClass = "text-rose-500 hover:bg-rose-50 hover:dark:bg-rose-500/10 cursor-help underline decoration-dotted transition-colors font-bold";
+                        }
+                    }
+                }
+
+                // Cell wrapper
+                const cell = document.createElement("div");
+                cell.className = "ipa-word-cell word-tooltip-container";
+
+                // Word Text Span
+                const wordSpan = document.createElement("span");
+                wordSpan.className = `word-text ${accuracyClass}`;
+                wordSpan.textContent = word;
+                wordSpan.onclick = (e) => {
+                    e.stopPropagation();
+                    handleWordClick(word, wordKey);
+                };
+
+                cell.appendChild(wordSpan);
+
+                // IPA Subtext
+                if (ipa) {
+                    const ipaSpan = document.createElement("span");
+                    ipaSpan.className = "word-ipa";
+                    ipaSpan.textContent = `/${ipa}/`;
+                    cell.appendChild(ipaSpan);
+                }
+
+                // Definition Tooltip popup
+                if (isLookupActive) {
+                    const tooltip = document.createElement("div");
+                    tooltip.className = "word-tooltip text-left text-xs font-sans";
+                    tooltip.onclick = (e) => e.stopPropagation();
+
+                    const tooltipHeader = document.createElement("div");
+                    tooltipHeader.className = "flex justify-between items-start mb-1.5 border-b border-slate-100 dark:border-slate-850 pb-1";
+                    
+                    const wordTitle = document.createElement("span");
+                    wordTitle.className = "font-extrabold text-slate-800 dark:text-slate-200 capitalize";
+                    wordTitle.textContent = cleanWord;
+
+                    const closeBtn = document.createElement("button");
+                    closeBtn.className = "text-slate-400 hover:text-slate-600 text-[10px] font-bold cursor-pointer";
+                    closeBtn.textContent = "Đóng";
+                    closeBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        state.lookupKey = null;
+                        renderActiveSentence();
+                    };
+
+                    tooltipHeader.appendChild(wordTitle);
+                    tooltipHeader.appendChild(closeBtn);
+                    tooltip.appendChild(tooltipHeader);
+
+                    if (state.isLookingUp) {
+                        const loader = document.createElement("div");
+                        loader.className = "flex items-center gap-1.5 py-1 text-slate-400";
+                        loader.innerHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5 animate-spin"></i><span>Đang tra từ...</span>`;
+                        tooltip.appendChild(loader);
+                    } else if (state.wordMeaning) {
+                        const meaningBody = document.createElement("div");
+                        meaningBody.className = "space-y-1";
+                        
+                        if (state.wordMeaning.ipa) {
+                            meaningBody.innerHTML += `<p class="font-mono text-indigo-500 dark:text-sky-400 font-semibold">${state.wordMeaning.ipa}</p>`;
+                        }
+                        meaningBody.innerHTML += `<p class="text-slate-650 dark:text-slate-350 leading-relaxed font-medium">${state.wordMeaning.meaning}</p>`;
+                        tooltip.appendChild(meaningBody);
+                    } else {
+                        const emptyTip = document.createElement("p");
+                        emptyTip.className = "text-slate-400";
+                        emptyTip.textContent = "Không có dữ liệu.";
+                        tooltip.appendChild(emptyTip);
+                    }
+
+                    cell.appendChild(tooltip);
+                }
+
+                container.appendChild(cell);
+            });
+
+            // Target Vietnamese translation
+            document.getElementById("target-translation").textContent = `"${sentence.Translation}"`;
+        }
+
+        // Subtitle drawer rendering
+        function renderSubtitlesList() {
+            const container = document.getElementById("subtitles-list-container");
+            document.getElementById("subtitles-count-label").textContent = lesson.Sentences.length;
+            container.innerHTML = "";
+
+            lesson.Sentences.forEach((sent, idx) => {
+                const row = document.createElement("button");
+                row.id = `sub-row-${idx}`;
+                row.onclick = () => changeActiveSentence(idx);
+
+                const dur = Math.round(sent.EndTime - sent.StartTime);
+                
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-5.5 h-5.5 rounded-md font-mono font-bold text-[10px] flex items-center justify-center border sub-row-num" id="sub-row-num-${idx}">
+                            ${idx + 1}
+                        </span>
+                        <div>
+                            <p class="font-sans tracking-tight leading-normal select-none text-slate-800 dark:text-slate-300 sub-row-text" id="sub-row-text-${idx}">${sent.Text}</p>
+                            <p class="font-sans text-[10px] text-slate-400 select-none mt-0.5">${sent.Translation}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-[8px] font-mono font-bold text-slate-400 uppercase bg-slate-100 dark:bg-slate-800/80 px-1 rounded-sm">
+                            ${dur}s
+                        </span>
+                    </div>
+                `;
+
+                container.appendChild(row);
+            });
+
+            renderSubtitlesHighlight();
+        }
+
+        // Highlight selected row in subtitle drawer
+        function renderSubtitlesHighlight() {
+            lesson.Sentences.forEach((_, idx) => {
+                const row = document.getElementById(`sub-row-${idx}`);
+                const num = document.getElementById(`sub-row-num-${idx}`);
+                const text = document.getElementById(`sub-row-text-${idx}`);
+
+                if (!row) return;
+
+                if (state.activeSentenceIndex === idx) {
+                    row.className = "w-full text-left p-3 rounded-xl border text-xs flex justify-between items-center transition-all cursor-pointer active-sentence border-l-4 border-indigo-600 bg-indigo-50/15 dark:bg-sky-500/5 font-bold text-slate-900 dark:text-white";
+                    
+                    if (num) num.className = "w-5.5 h-5.5 rounded-md font-mono font-bold text-[10px] flex items-center justify-center border border-indigo-600 bg-indigo-600 text-white dark:border-sky-500 dark:bg-sky-500 dark:text-slate-900";
+                    if (text) text.className = "font-sans tracking-tight leading-normal select-none text-slate-900 dark:text-slate-50 font-bold";
+                } else {
+                    row.className = "w-full text-left p-3 rounded-xl border text-xs flex justify-between items-center transition-all cursor-pointer border-slate-50 dark:border-slate-800/60 hover:bg-slate-50/45 dark:hover:bg-slate-800/30 text-slate-500";
+                    
+                    if (num) num.className = "w-5.5 h-5.5 rounded-md font-mono font-bold text-[10px] flex items-center justify-center border border-slate-200 bg-slate-50 dark:border-slate-850 dark:text-slate-400";
+                    if (text) text.className = "font-sans tracking-tight leading-normal select-none text-slate-800 dark:text-slate-300";
+                }
+            });
+        }
+
+        // Switch panel tabs
+        function switchTab(tab) {
+            state.activeTab = tab;
+
+            const tabs = ['shadowing', 'roleplay', 'dictation', 'ipa-game'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t.replace('-', '')}`);
+                const panel = document.getElementById(`panel-${t}`);
+
+                if (t === tab) {
+                    btn.className = "px-3 py-2 font-extrabold pb-2 border-b-2 cursor-pointer transition-colors whitespace-nowrap border-indigo-600 text-indigo-600 dark:border-sky-400 dark:text-sky-400";
+                    panel.classList.remove("hidden");
+                } else {
+                    btn.className = "px-3 py-2 font-extrabold pb-2 border-b-2 cursor-pointer transition-colors whitespace-nowrap border-transparent text-slate-400 hover:text-slate-600";
+                    panel.classList.add("hidden");
+                }
+            });
+
+            // If switching to roleplay, load initial messages
+            if (tab === 'roleplay' && state.rolePlayMessages.length === 0) {
+                loadRolePlay();
+            }
+
+            // Subtitle drawer visibility toggles based on tabs
+            const subPanel = document.getElementById("panel-subtitles-drawer");
+            if (tab === 'roleplay' || tab === 'ipa-game') {
+                subPanel.classList.add("hidden");
+            } else {
+                subPanel.classList.remove("hidden");
+            }
+
+            // Sync layout icons
+            lucide.createIcons();
+        }
+
+        // Speak active target sentence with WebTTS
+        function playTargetAudio() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const text = getCurrentSentence().Text;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Hệ thống không hỗ trợ offline Speech Synthesis trên trình duyệt này.');
+            }
+        }
+
+        // Speak custom text with WebTTS
+        function playAudioText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Word click lookup and speech playback
+        function handleWordClick(word, key) {
+            const cleanWord = word.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, "");
+            if (!cleanWord) return;
+
+            // Pronounce word immediately
+            playAudioText(cleanWord);
+
+            // Check if user clicked an evaluated word with warning/incorrect status
+            if (state.evaluation && state.evaluation.words) {
+                const found = state.evaluation.words.find(w => w.word.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, "") === cleanWord);
+                if (found && (found.accuracyCode === 'warning' || found.accuracyCode === 'incorrect')) {
+                    state.selectedWord = found;
+                    showWordCorrectionNotice(found);
+                } else {
+                    document.getElementById("word-correction-panel").classList.add("hidden");
+                }
+            }
+
+            // Query meaning from API
+            state.lookupKey = key;
+            state.isLookingUp = true;
+            state.wordMeaning = null;
+            renderActiveSentence();
+
+            fetch('/api/word-meaning', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ word: cleanWord, context: getCurrentSentence().Text })
+            })
+            .then(res => res.json())
+            .then(data => {
+                state.wordMeaning = {
+                    word: cleanWord,
+                    meaning: data.meaning || 'Không tìm thấy nghĩa.',
+                    ipa: data.ipa || ''
+                };
+            })
+            .catch(() => {
+                state.wordMeaning = {
+                    word: cleanWord,
+                    meaning: 'Lỗi tra cứu từ điển.',
+                    ipa: ''
+                };
+            })
+            .finally(() => {
+                state.isLookingUp = false;
+                renderActiveSentence();
+            });
+        }
+
+        // Show correction notice box
+        function showWordCorrectionNotice(found) {
+            const panel = document.getElementById("word-correction-panel");
+            const wName = document.getElementById("correcting-word-name");
+            const wBadge = document.getElementById("correcting-word-badge");
+            const wIpa = document.getElementById("correcting-word-ipa");
+            const wTip = document.getElementById("correcting-word-tip");
+
+            panel.classList.remove("hidden");
+            wName.textContent = `"${found.word}"`;
+            wBadge.textContent = found.accuracyCode === 'incorrect' ? '(Phát âm chưa chính xác)' : '(Cần cải thiện)';
+            wIpa.textContent = found.ipa ? `IPA chuẩn: ${found.ipa}` : '';
+            wTip.textContent = found.correction || 'Chú ý nhấn đúng âm tiết trọng âm và phát âm rõ phụ âm gió đuôi.';
+        }
+
+        // Bookmark sentence simulation
+        function handleBookmarkSentence() {
+            alert("Đã thêm câu thoại này vào mục Bookmark cá nhân!");
+        }
+
+        // Save AI custom lesson simulation
+        function handleSaveAILesson() {
+            const btn = document.getElementById("save-ai-btn");
+            const text = document.getElementById("save-ai-text");
+
+            btn.className = "px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 transition-all text-[11px] font-bold cursor-not-allowed shrink-0 border-emerald-250 bg-emerald-50 text-emerald-600 dark:border-emerald-800/60 dark:bg-emerald-950/20";
+            btn.disabled = true;
+            text.textContent = "Đã lưu AI";
+            alert("Đã lưu bài học do AI sinh ra vào danh mục khóa học của bạn!");
+        }
+
+        // Update radial score wheel circle offset
+        function updateScoreCircleRing(score) {
+            const circle = document.getElementById("score-circle-ring");
+            const circumference = 326.7;
+            const offset = circumference - (score / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+
+            // Change color class based on score
+            if (score >= 80) {
+                circle.setAttribute("stroke", "#10b981");
+            } else if (score >= 60) {
+                circle.setAttribute("stroke", "#f59e0b");
+            } else {
+                circle.setAttribute("stroke", "#ef4444");
+            }
+        }
+
+        // Call evaluate pronunciation API
+        function evaluatePronunciation() {
+            const transcript = state.transcribedText.trim();
+            if (!transcript) {
+                alert('Vui lòng thu âm hoặc chọn "Ghi âm giả lập" trước khi tiến hành chấm điểm.');
+                return;
+            }
+
+            state.isEvaluating = true;
+            state.selectedWord = null;
+            document.getElementById("word-correction-panel").classList.add("hidden");
+
+            // Toggle loading panels
+            document.getElementById("ai-evaluation-loading").classList.remove("hidden");
+            document.getElementById("ai-evaluation-empty").classList.add("hidden");
+            document.getElementById("ai-evaluation-list").classList.add("hidden");
+
+            fetch('/api/evaluate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    targetText: getCurrentSentence().Text,
+                    transcript: transcript,
+                    level: lesson.Topic,
+                    userGoal: 'comprehension70'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                state.evaluation = data;
+                
+                // Update stats locally
+                state.expGained += data.score >= 80 ? 15 : (data.score >= 60 ? 10 : 5);
+                updateStatsInHeader();
+
+                // Display score details
+                document.getElementById("hud-score-value").textContent = data.score;
+                document.getElementById("hud-score-label").textContent = "Pronunciation Score";
+                document.getElementById("hud-pace-status").textContent = data.score >= 80 ? 'Perfect / Good' : 'Moderate';
+                document.getElementById("hud-pitch-status").textContent = 'Tự nhiên';
+                updateScoreCircleRing(data.score);
+
+                // Render word breakdown detail
+                const listContainer = document.getElementById("ai-evaluation-list");
+                listContainer.innerHTML = "";
+
+                data.words.forEach(w => {
+                    let barBg = 'bg-emerald-500';
+                    let descriptionText = 'Phát âm chuẩn xác cấu trúc âm vị học.';
+                    if (w.accuracyCode === 'warning') {
+                        barBg = 'bg-amber-500';
+                        descriptionText = w.correction || 'Trọng âm chưa chính xác, hãy tăng độ ngân.';
+                    } else if (w.accuracyCode === 'incorrect') {
+                        barBg = 'bg-rose-500';
+                        descriptionText = w.correction || 'Âm vị sai hoặc thiếu hoàn toàn, cần luyện lại.';
+                    }
+
+                    const row = document.createElement("div");
+                    row.className = "flex items-start gap-2.5 text-xs text-left";
+                    row.innerHTML = `
+                        <span class="w-[3px] h-9 shrink-0 rounded-full mt-0.5 ${barBg}"></span>
+                        <div>
+                            <p class="font-bold text-slate-800 dark:text-slate-100 capitalize">${w.word}</p>
+                            <p class="text-[10px] text-slate-400 font-mono mt-0.5">${descriptionText}</p>
+                        </div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+
+                document.getElementById("gemini-coach-tip-text").textContent = data.feedback;
+
+                // Toggle visibility
+                document.getElementById("ai-evaluation-list").classList.remove("hidden");
+                
+                // Re-render sentence to update colors of text words
+                renderActiveSentence();
+            })
+            .catch(err => {
+                console.error("Evaluation error: ", err);
+                alert("Gặp sự cố kết nối tới máy chủ AI.");
+                document.getElementById("ai-evaluation-empty").classList.remove("hidden");
+            })
+            .finally(() => {
+                state.isEvaluating = false;
+                document.getElementById("ai-evaluation-loading").classList.add("hidden");
+            });
+        }
+
+        // Sync local stats to top layout header values
+        function updateStatsInHeader() {
+            // Find Star/EXP
+            const starIcon = document.querySelector('[data-lucide="star"]');
+            if (starIcon) {
+                const expSpan = starIcon.nextElementSibling;
+                if (expSpan) expSpan.textContent = `${state.expGained} EXP`;
+            }
+
+            // Find Hearts
+            const heartIcon = document.querySelector('[data-lucide="heart"]');
+            if (heartIcon) {
+                const heartSpan = heartIcon.nextElementSibling;
+                if (heartSpan) heartSpan.textContent = state.isPremium ? "∞ Tim" : `${state.heartsRemaining} Tim`;
+            }
+        }
+
+        // ==================== DICTATION MODE FUNCTIONS ====================
+        function handleDictationInput(event) {
+            state.dictationInput = event.target.value;
+            const checkBtn = document.getElementById("dictation-check-btn");
+            if (state.dictationInput.trim()) {
+                checkBtn.disabled = false;
+                checkBtn.className = "px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all text-xs cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700";
+            } else {
+                checkBtn.disabled = true;
+                checkBtn.className = "px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all text-xs cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600";
+            }
+        }
+
+        function checkDictationSpelling() {
+            const input = state.dictationInput.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+            const target = getCurrentSentence().Text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+
+            state.dictationChecked = true;
+            state.dictationPassed = (input === target);
+
+            const resultBox = document.getElementById("dictation-result-box");
+            resultBox.classList.remove("hidden");
+            
+            if (state.dictationPassed) {
+                state.expGained += 12;
+                updateStatsInHeader();
+
+                resultBox.className = "p-3 rounded-xl flex gap-2.5 leading-normal border bg-emerald-50 text-emerald-800 border-emerald-200/50 dark:bg-emerald-500/5 dark:text-emerald-400 dark:border-emerald-500/10";
+                resultBox.innerHTML = `
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-bold text-xs">Hoàn toàn chuẩn xác! +12 EXP</h4>
+                        <p class="text-[10px] opacity-90">Từ vựng, ký tự, dấu câu của bạn trùng khớp 100%.</p>
+                    </div>
+                `;
+            } else {
+                resultBox.className = "p-3 rounded-xl flex gap-2.5 leading-normal border bg-rose-50 text-rose-800 border-rose-200/50 dark:bg-rose-500/5 dark:text-rose-400 dark:border-rose-500/10";
+                resultBox.innerHTML = `
+                    <i data-lucide="x-circle" class="w-4 h-4 text-rose-500 shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-bold text-xs">Chưa trùng khớp rồi!</h4>
+                        <p class="text-[10px] opacity-90">Đáp án chuẩn: <strong class="font-mono text-indigo-600 dark:text-sky-400 select-all font-bold">"${getCurrentSentence().Text}"</strong></p>
+                    </div>
+                `;
+            }
+
+            document.getElementById("dictation-retry-btn").classList.remove("hidden");
+            document.getElementById("dictation-textarea").disabled = true;
+
+            // Update icons
+            lucide.createIcons();
+        }
+
+        function resetDictationSpelling() {
+            state.dictationInput = '';
+            state.dictationChecked = false;
+            state.dictationPassed = false;
+
+            const textarea = document.getElementById("dictation-textarea");
+            textarea.value = '';
+            textarea.disabled = false;
+
+            document.getElementById("dictation-result-box").classList.add("hidden");
+            document.getElementById("dictation-retry-btn").classList.add("hidden");
+
+            const checkBtn = document.getElementById("dictation-check-btn");
+            checkBtn.disabled = true;
+            checkBtn.className = "px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all text-xs cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600";
+        }
+
+        // ==================== IPA GAME MODULE ====================
+        function generateIpaQuiz() {
+            const sentence = getCurrentSentence();
+            if (!sentence) return;
+
+            const cleanWords = sentence.Text
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
+                .split(/\s+/)
+                .filter(Boolean);
+
+            if (cleanWords.length === 0) return;
+
+            const correctWord = cleanWords[Math.floor(cleanWords.length / 2)].toLowerCase();
+            const pool = ['about', 'around', 'activity', 'routine', 'people', 'coffee', 'business', 'environment', 'important', 'strategy', 'science', 'technology'];
+            const distractors = pool
+                .filter(w => w !== correctWord)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 3);
+
+            const options = [correctWord, ...distractors].sort(() => 0.5 - Math.random());
+
+            state.ipaQuizCorrect = correctWord;
+            state.ipaQuizOptions = options;
+            state.ipaSelectedAnswer = null;
+            state.ipaFeedbackMessage = null;
+
+            // Extract matching IPA segment
+            let ipaSegment = "";
+            const textWords = sentence.Text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "").split(/\s+/).filter(Boolean);
+            const ipaWords = sentence.Ipa.replace(/[\[\]]/g, '').toLowerCase().split(/\s+/).filter(Boolean);
+            const wordIdx = textWords.indexOf(correctWord);
+            if (wordIdx !== -1 && ipaWords[wordIdx]) {
+                ipaSegment = `[${ipaWords[wordIdx]}]`;
+            } else {
+                ipaSegment = `[${correctWord}]`;
+            }
+
+            document.getElementById("ipa-quiz-text").textContent = ipaSegment;
+            document.getElementById("ipa-feedback-box").classList.add("hidden");
+            document.getElementById("ipa-next-btn").classList.add("hidden");
+
+            renderIpaQuizOptions();
+        }
+
+        function renderIpaQuizOptions() {
+            const container = document.getElementById("ipa-options-grid");
+            container.innerHTML = "";
+
+            state.ipaQuizOptions.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "p-2.5 rounded-lg border text-xs font-bold capitalize transition-all cursor-pointer border-slate-200 hover:border-indigo-600 dark:border-slate-800 dark:hover:border-sky-500 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200";
+                btn.textContent = opt;
+                btn.onclick = () => selectIpaAnswer(opt, btn);
+
+                container.appendChild(btn);
+            });
+        }
+
+        function selectIpaAnswer(option, clickedBtn) {
+            if (state.ipaSelectedAnswer) return; // Answer locked
+
+            state.ipaSelectedAnswer = option;
+            const isCorrect = (option === state.ipaQuizCorrect);
+            const feedbackBox = document.getElementById("ipa-feedback-box");
+            feedbackBox.classList.remove("hidden");
+
+            // Disable all option buttons and color the correct/incorrect answers
+            const buttons = document.getElementById("ipa-options-grid").querySelectorAll("button");
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                const text = btn.textContent.toLowerCase();
+                if (text === state.ipaQuizCorrect) {
+                    btn.className = "p-2.5 rounded-lg border text-xs font-bold capitalize transition-all bg-emerald-50/15 border-emerald-500 text-emerald-600";
+                } else if (text === option) {
+                    btn.className = "p-2.5 rounded-lg border text-xs font-bold capitalize transition-all bg-rose-50/15 border-rose-500 text-rose-500";
+                } else {
+                    btn.className = "p-2.5 rounded-lg border text-xs font-bold capitalize transition-all opacity-40 border-slate-100 dark:border-slate-850 bg-transparent text-slate-400";
+                }
+            });
+
+            if (isCorrect) {
+                state.expGained += 15;
+                state.ipaFeedbackMessage = "Chúc mừng! Đáp án hoàn toàn chuẩn xác. IPA này khớp với từ: " + option;
+                feedbackBox.className = "p-3 rounded-lg text-xs leading-normal flex gap-2 border bg-emerald-50/50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/5 dark:text-emerald-400 dark:border-emerald-500/10";
+            } else {
+                state.ipaFeedbackMessage = `Rất tiếc! Chưa chính xác rồi. Phiên âm này thuộc về từ "${state.ipaQuizCorrect}".`;
+                feedbackBox.className = "p-3 rounded-lg text-xs leading-normal flex gap-2 border bg-rose-50/50 text-rose-800 border-rose-200 dark:bg-rose-500/5 dark:text-rose-400 dark:border-rose-500/10";
+            }
+
+            feedbackBox.innerHTML = `<span>${state.ipaFeedbackMessage}</span>`;
+            document.getElementById("ipa-next-btn").classList.remove("hidden");
+            updateStatsInHeader();
+        }
+                       // ==================== ROLE PLAY MODE FUNCTIONS ====================
+        function loadRolePlay() {
+            state.isLoadingRolePlay = true;
+            state.selectedRole = null;
+            state.rolePlayActiveIndex = 0;
+            state.rolePlayMessages = [];
+            state.rolePlaySTTText = '';
+            state.rolePlayInterimSTT = '';
+            state.rolePlayStarted = false;
+
+            document.getElementById("roleplay-loader").classList.remove("hidden");
+            document.getElementById("roleplay-content").classList.add("hidden");
+
+            // Call backend API
+            fetch('/api/generate-roleplay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    topic: lesson.Title,
+                    level: lesson.Level
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                state.rolePlayMessages = [];
+                state.rolePlaySpeakers = data.speakers || [];
+                if (data.speakers && data.speakers.length > 0) {
+                    state.selectedRole = data.speakers[0];
+                }
+
+                setupRoleSelection();
+                renderRolePlayChat();
+                renderRolePlayControls();
+
+                document.getElementById("roleplay-content").classList.remove("hidden");
+            })
+            .catch(err => {
+                console.error("Roleplay load failed:", err);
+                alert("Lỗi tải đàm thoại Roleplay.");
+            })
+            .finally(() => {
+                state.isLoadingRolePlay = false;
+                document.getElementById("roleplay-loader").classList.add("hidden");
+            });
+        }
+
+        function setupRoleSelection() {
+            const roleSelectionBox = document.getElementById("role-selection-box");
+            if (state.rolePlayStarted) {
+                roleSelectionBox.classList.add("hidden");
+                return;
+            }
+            roleSelectionBox.classList.remove("hidden");
+
+            const container = document.getElementById("role-selection-container");
+            container.innerHTML = "";
+
+            state.rolePlaySpeakers.forEach(spk => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = `px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    state.selectedRole === spk
+                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300'
+                }`;
+                btn.innerHTML = `<i data-lucide="user" class="w-3.5 h-3.5 inline mr-1"></i><span>Đóng vai ${spk}</span>`;
+                btn.onclick = () => {
+                    handleSelectRole(spk);
+                };
+                container.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        function handleSelectRole(role) {
+            state.selectedRole = role;
+            state.rolePlayMessages = [];
+            state.rolePlayStarted = false;
+
+            setupRoleSelection();
+            renderRolePlayChat();
+            renderRolePlayControls();
+        }
+
+        function renderRolePlayChat() {
+            const container = document.getElementById("chat-bubbles-container");
+            container.innerHTML = "";
+
+            if (state.rolePlayMessages.length === 0) {
+                const emptyMsg = document.createElement("div");
+                emptyMsg.className = "text-center text-slate-400 dark:text-slate-600 text-xs py-8 font-sans w-full";
+                emptyMsg.innerHTML = `<i data-lucide="message-square" class="w-8 h-8 mx-auto mb-2 opacity-50"></i><p>Chọn vai của bạn ở trên và bấm "Bắt đầu" để trò chuyện với AI.</p>`;
+                container.appendChild(emptyMsg);
+                lucide.createIcons();
+                return;
+            }
+
+            state.rolePlayMessages.forEach((msg, idx) => {
+                const isUser = msg.isUser;
+
+                // Regular chat bubbles
+                const bubble = document.createElement("div");
+                bubble.className = `chat-bubble max-w-[80%] ${
+                    isUser ? 'chat-bubble-user align-self-end font-semibold' : 'chat-bubble-ai align-self-start'
+                }`;
+
+                // Word span mapping with dictionary tooltips
+                let textHtml = "";
+                msg.text.split(/\s+/).forEach((word, wIdx) => {
+                    const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, "");
+                    const wordKey = `rp-${msg.id}-${wIdx}`;
+                    const isLookupActive = state.lookupKey === wordKey;
+
+                    let tooltipHtml = "";
+                    if (isLookupActive) {
+                        tooltipHtml = `<div class="word-tooltip text-left text-xs font-sans text-slate-800 dark:text-slate-200" onclick="event.stopPropagation()">
+                            <div class="flex justify-between items-start mb-1.5 border-b border-slate-100 dark:border-slate-850 pb-1">
+                                <span class="font-extrabold capitalize text-slate-800 dark:text-slate-200">${cleanWord}</span>
+                                <button class="text-slate-400 hover:text-slate-655 text-[10px] font-bold cursor-pointer" onclick="event.stopPropagation(); state.lookupKey = null; renderRolePlayChat();">Đóng</button>
+                            </div>`;
+                        if (state.isLookingUp) {
+                            tooltipHtml += `<div class="flex items-center gap-1.5 py-1 text-slate-400">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 animate-spin"></i><span>Đang tra từ...</span>
+                            </div>`;
+                        } else if (state.wordMeaning) {
+                            tooltipHtml += `<div class="space-y-1">`;
+                            if (state.wordMeaning.ipa) {
+                                tooltipHtml += `<p class="font-mono text-indigo-500 dark:text-sky-400 font-semibold">${state.wordMeaning.ipa}</p>`;
+                            }
+                            tooltipHtml += `<p class="text-slate-650 dark:text-slate-350 leading-relaxed font-medium">${state.wordMeaning.meaning}</p>
+                            </div>`;
+                        } else {
+                            tooltipHtml += `<p class="text-slate-400">Không có dữ liệu.</p>`;
+                        }
+                        tooltipHtml += `</div>`;
+                    }
+
+                    textHtml += `<span class="relative inline-block mr-1 word-tooltip-container">
+                        <span class="cursor-pointer hover:underline decoration-indigo-300 decoration-dotted select-none" onclick="event.stopPropagation(); handleRolePlayWordClick(this, '${word.replace(/'/g, "\\'")}', '${wordKey}', '${msg.text.replace(/'/g, "\\'")}')">${word}</span>
+                        ${tooltipHtml}
+                    </span>`;
+                });
+
+                bubble.innerHTML = `
+                    <span class="speaker-tag">${msg.speaker}</span>
+                    <div class="font-sans font-bold text-xs select-none">${textHtml}</div>
+                    ${msg.ipa ? `<p class="font-mono text-[9px] opacity-75 mt-1">${msg.ipa}</p>` : ''}
+                    ${msg.translation ? `<p class="text-[10px] opacity-80 mt-1 italic">"${msg.translation}"</p>` : ''}
+                    <div class="mt-2 pt-1.5 border-t border-white/15 dark:border-slate-800 flex justify-between items-center gap-2">
+                        <button onclick="playAudioText('${msg.text.replace(/'/g, "\\'")}')" class="p-1 rounded bg-black/10 hover:bg-black/20 dark:bg-white/5 dark:hover:bg-white/10 text-current cursor-pointer transition-colors" title="Phát âm">
+                            <i data-lucide="volume-2" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(bubble);
+            });
+
+            // Smooth scroll to bottom
+            container.scrollTop = container.scrollHeight;
+            lucide.createIcons();
+        }
+
+        // Click-to-Translate inside Roleplay bubble
+        function handleRolePlayWordClick(element, word, key, context) {
+            const cleanWord = word.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, "");
+            if (!cleanWord) return;
+
+            playAudioText(cleanWord);
+            
+            state.lookupKey = key;
+            state.isLookingUp = true;
+            state.wordMeaning = null;
+            renderRolePlayChat();
+
+            // Position the tooltip fixed
+            setTimeout(() => {
+                const tooltipEl = document.querySelector(`.word-tooltip`);
+                if (tooltipEl && element) {
+                    const rect = element.getBoundingClientRect();
+                    tooltipEl.style.position = 'fixed';
+                    tooltipEl.style.bottom = 'auto';
+                    tooltipEl.style.left = 'auto';
+                    tooltipEl.style.transform = 'none';
+                    tooltipEl.style.zIndex = '99999';
+                    
+                    const tooltipWidth = tooltipEl.offsetWidth || 240;
+                    const tooltipHeight = tooltipEl.offsetHeight || 120;
+                    
+                    let targetLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+                    let targetTop = rect.top - tooltipHeight - 10;
+                    
+                    if (targetLeft < 10) targetLeft = 10;
+                    if (targetLeft + tooltipWidth > window.innerWidth - 10) {
+                        targetLeft = window.innerWidth - tooltipWidth - 10;
+                    }
+                    if (targetTop < 10) {
+                        targetTop = rect.bottom + 10;
+                    }
+                    
+                    tooltipEl.style.left = `${targetLeft}px`;
+                    tooltipEl.style.top = `${targetTop}px`;
+                }
+            }, 0);
+
+            fetch('/api/word-meaning', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ word: cleanWord, context: context })
+            })
+            .then(res => res.json())
+            .then(data => {
+                state.wordMeaning = {
+                    word: cleanWord,
+                    meaning: data.meaning || 'Không tìm thấy nghĩa.',
+                    ipa: data.ipa || ''
+                };
+            })
+            .catch(() => {
+                state.wordMeaning = {
+                    word: cleanWord,
+                    meaning: 'Lỗi tra cứu từ điển.',
+                    ipa: ''
+                };
+            })
+            .finally(() => {
+                state.isLookingUp = false;
+                renderRolePlayChat();
+                
+                // Reposition after content loads
+                setTimeout(() => {
+                    const tooltipEl = document.querySelector(`.word-tooltip`);
+                    if (tooltipEl && element) {
+                        const rect = element.getBoundingClientRect();
+                        const tooltipWidth = tooltipEl.offsetWidth || 240;
+                        const tooltipHeight = tooltipEl.offsetHeight || 120;
+                        
+                        let targetLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+                        let targetTop = rect.top - tooltipHeight - 10;
+                        
+                        if (targetLeft < 10) targetLeft = 10;
+                        if (targetLeft + tooltipWidth > window.innerWidth - 10) {
+                            targetLeft = window.innerWidth - tooltipWidth - 10;
+                        }
+                        if (targetTop < 10) {
+                            targetTop = rect.bottom + 10;
+                        }
+                        
+                        tooltipEl.style.left = `${targetLeft}px`;
+                        tooltipEl.style.top = `${targetTop}px`;
+                    }
+                }, 0);
+            });
+        }
+
+        function isUserTurn() {
+            if (!state.rolePlayStarted) return false;
+            if (state.rolePlayMessages.length === 0) {
+                // First turn check
+                return state.selectedRole === state.rolePlaySpeakers[0];
+            }
+            const lastMsg = state.rolePlayMessages[state.rolePlayMessages.length - 1];
+            return !lastMsg.isUser;
+        }
+
+        function startRolePlayConversation() {
+            state.rolePlayStarted = true;
+            state.rolePlayMessages = [];
+            setupRoleSelection();
+            renderRolePlayChat();
+            renderRolePlayControls();
+
+            if (!isUserTurn()) {
+                triggerAiResponse();
+            }
+        }
+
+        function triggerAiResponse() {
+            state.isEvaluatingRolePlay = true;
+            renderRolePlayControls();
+
+            const history = state.rolePlayMessages.map(m => ({
+                speaker: m.speaker,
+                text: m.text,
+                isUser: m.isUser
+            }));
+
+            fetch('/api/roleplay-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    topic: lesson.Title,
+                    level: lesson.Level,
+                    userRole: state.selectedRole,
+                    history: history
+                })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Yêu cầu đàm thoại thất bại.");
+                return res.json();
+            })
+            .then(data => {
+                state.rolePlayMessages.push({
+                    id: data.id,
+                    speaker: data.speaker,
+                    text: data.text,
+                    translation: data.translation,
+                    ipa: data.ipa,
+                    isUser: false,
+                    isPlayed: false
+                });
+                renderRolePlayChat();
+                playAudioText(data.text);
+            })
+            .catch(err => {
+                console.error("AI Roleplay chat error:", err);
+                alert("Lỗi kết nối AI.");
+            })
+            .finally(() => {
+                state.isEvaluatingRolePlay = false;
+                renderRolePlayControls();
+            });
+        }
+
+        function renderRolePlayControls() {
+            const container = document.getElementById("roleplay-controls-container");
+            container.innerHTML = "";
+
+            if (!state.rolePlayStarted) {
+                const card = document.createElement("div");
+                card.className = "text-center p-4 bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-2xl font-sans space-y-2.5 w-full";
+                card.innerHTML = `
+                    <h4 class="font-extrabold text-sm text-slate-800 dark:text-slate-100">Đàm thoại tự do với AI</h4>
+                    <p class="text-xs text-slate-505 max-w-sm mx-auto leading-normal">Nói bất cứ điều gì bạn thích liên quan đến chủ đề bài học. Hãy nhấn nút để bắt đầu!</p>
+                    <button onclick="startRolePlayConversation()" class="w-full py-3.5 bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 hover:scale-[1.02] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all">
+                        <i data-lucide="play" class="w-4 h-4 text-white"></i>
+                        <span>BẮT ĐẦU ĐÀM THOẠI</span>
+                    </button>
+                `;
+                container.appendChild(card);
+                lucide.createIcons();
+                return;
+            }
+
+            if (state.isEvaluatingRolePlay) {
+                const loadingPanel = document.createElement("div");
+                loadingPanel.className = "flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950/40 border border-slate-150 dark:border-slate-850 rounded-2xl gap-2 w-full";
+                loadingPanel.innerHTML = `
+                    <i data-lucide="refresh-cw" class="w-6 h-6 text-indigo-600 animate-spin"></i>
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">AI đang phân tích & soạn câu trả lời tiếp theo...</span>
+                `;
+                container.appendChild(loadingPanel);
+                lucide.createIcons();
+                return;
+            }
+
+            const userTurn = isUserTurn();
+
+            if (!userTurn) {
+                const lastMsg = state.rolePlayMessages[state.rolePlayMessages.length - 1];
+                const aiSpeaker = lastMsg ? lastMsg.speaker : "AI";
+                const bar = document.createElement("div");
+                bar.className = "p-4 bg-slate-50 dark:bg-slate-950/40 border border-slate-150 dark:border-slate-850 rounded-2xl flex justify-between items-center gap-3 font-sans text-xs w-full";
+                bar.innerHTML = `
+                    <div class="text-left flex-1">
+                        <span class="text-[9px] uppercase font-bold text-slate-400 block tracking-wider">Lượt nói của AI (${aiSpeaker})</span>
+                        <p class="font-bold text-indigo-650 dark:text-sky-400 mt-0.5 animate-pulse font-mono">AI vừa trả lời. Hãy lắng nghe và phản hồi lại.</p>
+                    </div>
+                    <button onclick="playAudioText('${lastMsg?.text.replace(/'/g, "\\'")}')" class="px-3.5 py-2 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1 cursor-pointer shrink-0">
+                        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                        <span>Nghe lại</span>
+                    </button>
+                `;
+                container.appendChild(bar);
+            } else {
+                const panel = document.createElement("div");
+                panel.className = "flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950/40 border border-slate-150 dark:border-slate-850 rounded-2xl gap-3 w-full";
+                
+                panel.innerHTML = `
+                    <div class="flex flex-col items-center gap-2.5 w-full">
+                        ${state.isRecording ? `
+                            <div class="w-full text-center px-4 py-2 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/50 rounded-xl">
+                                <p class="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center justify-center gap-1.5 animate-pulse">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                                    <span>Đang thu âm giọng nói... bấm "Gửi thoại" hoặc Enter khi nói xong</span>
+                                </p>
+                                <p class="text-xs font-bold text-slate-800 dark:text-slate-150 mt-1 font-sans">
+                                    "${state.rolePlaySTTText || ''} <span class="text-slate-400 font-normal italic">${state.rolePlayInterimSTT || ''}</span>"
+                                </p>
+                            </div>
+                        ` : ''}
+
+                        <div class="flex items-center justify-center gap-3">
+                            <button id="rp-mic-toggle" onclick="handleToggleRecording()" class="w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md cursor-pointer hover:scale-105 ${
+                                state.isRecording ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            }">
+                                <i data-lucide="${state.isRecording ? 'square' : 'mic'}" class="w-6 h-6 text-white"></i>
+                            </button>
+                            
+                            ${state.isRecording ? `
+                                <button onclick="handleToggleRecording()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors shadow-sm">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                    <span>Gửi thoại (Enter)</span>
+                                </button>
+                            ` : `
+                                <button onclick="simulateRoleplaySpeak()" class="px-2.5 py-1.5 border border-dashed border-indigo-200 text-indigo-500 rounded-lg text-[10px] font-bold dark:border-slate-850 dark:text-sky-400" title="Giả lập giọng nói khi không có micro">
+                                    Giả lập thoại
+                                </button>
+                            `}
+                        </div>
+
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            ${state.isRecording ? "Nói xong bấm Gửi hoặc phím Enter" : "Nhấn Micro để bắt đầu phát biểu tự do"}
+                        </span>
+                    </div>
+                `;
+                container.appendChild(panel);
+            }
+            lucide.createIcons();
+        }
+
+        function sendSpeechMessage(transcript) {
+            if (!transcript.trim()) return;
+
+            state.rolePlayMessages.push({
+                id: `rp-user-${Date.now()}`,
+                speaker: state.selectedRole,
+                text: transcript,
+                translation: "",
+                ipa: "",
+                isUser: true,
+                isPlayed: true
+            });
+
+            renderRolePlayChat();
+            triggerAiResponse();
+        }
+
+        function simulateRoleplaySpeak() {
+            if (state.isRecording) {
+                handleToggleRecording();
+                return;
+            }
+
+            state.isRecording = true;
+            state.rolePlaySTTText = 'Đang nhận diện giọng giả lập...';
+            state.rolePlayInterimSTT = '';
+            renderRolePlayControls();
+
+            const simulationPhrases = [
+                "I would like to order a warm latte, please.",
+                "That sounds like a great idea for our project.",
+                "How much does this cost?",
+                "Could you please repeat that?",
+                "Yes, I completely agree with you."
+            ];
+            const randomPhrase = simulationPhrases[Math.floor(Math.random() * simulationPhrases.length)];
+
+            recordingSimTimer = setTimeout(() => {
+                state.isRecording = false;
+                state.rolePlaySTTText = randomPhrase;
+                state.rolePlayInterimSTT = '';
+                sendSpeechMessage(randomPhrase);
+            }, 2000);
+        }
+
+        function resetRolePlay() {
+            state.rolePlayMessages = [];
+            state.rolePlayStarted = false;
+
+            setupRoleSelection();
+            renderRolePlayChat();
+            renderRolePlayControls();
+        }
+    </script>
+}
