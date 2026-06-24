@@ -14,6 +14,7 @@ Courses
 - title
 - description
 - level [Beginner, Intermediate, Advanced]
+- course_type [video_bank, curriculum, ai_saved]
 - created_at
 - updated_at
 
@@ -27,11 +28,13 @@ Users_Courses
 Lessons
 
 - lesson_id [PK]
-- ourse_id [FK Courses]
+- course_id [FK Courses]
 - title
 - description
 - lesson_order
 - duration
+- created_by_user_id [FK Users, NULL = bài hệ thống]
+- source [curated, ai]
 
 Lesson_Material
 

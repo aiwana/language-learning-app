@@ -17,14 +17,18 @@ GO
 
 CREATE TABLE Courses (
     course_id BIGINT IDENTITY(1,1) PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
+    title NVARCHAR(255) NOT NULL,
     description NVARCHAR(MAX),
     level VARCHAR(20) NOT NULL,
+    course_type VARCHAR(20) NOT NULL DEFAULT 'curriculum',
     created_at DATETIME2 NOT NULL DEFAULT GETDATE(),
     updated_at DATETIME2 NOT NULL DEFAULT GETDATE(),
 
     CONSTRAINT CK_Courses_Level
-        CHECK (level IN ('Beginner', 'Intermediate', 'Advanced'))
+        CHECK (level IN ('Beginner', 'Intermediate', 'Advanced')),
+
+    CONSTRAINT CK_Courses_CourseType
+        CHECK (course_type IN ('video_bank', 'curriculum', 'ai_saved'))
 );
 GO
 
@@ -55,15 +59,24 @@ GO
 CREATE TABLE Lessons (
     lesson_id BIGINT IDENTITY(1,1) PRIMARY KEY,
     course_id BIGINT NOT NULL,
-    title VARCHAR(255) NOT NULL,
+    title NVARCHAR(255) NOT NULL,
     description NVARCHAR(MAX),
     lesson_order INT NOT NULL,
     duration INT NOT NULL, -- seconds
+    created_by_user_id BIGINT NULL,
+    source VARCHAR(20) NOT NULL DEFAULT 'curated',
 
     CONSTRAINT FK_Lessons_Course
         FOREIGN KEY (course_id)
         REFERENCES Courses(course_id)
         ON DELETE CASCADE,
+
+    CONSTRAINT FK_Lessons_CreatedByUser
+        FOREIGN KEY (created_by_user_id)
+        REFERENCES Users(user_id),
+
+    CONSTRAINT CK_Lessons_Source
+        CHECK (source IN ('curated', 'ai')),
 
     CONSTRAINT UQ_Lessons_Course_Order
         UNIQUE (course_id, lesson_order)
