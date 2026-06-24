@@ -1,0 +1,29 @@
+{
+  "sentences": [
+    {
+      "text": "Hello, my name is Alex.",
+      "ipa": "/həˈloʊ maɪ neɪm ɪz ˈælɪks/",
+      "translation": "Xin chào, tôi tên là Alex."
+    },
+    {
+      "text": "Nice to meet you.",
+      "ipa": "/naɪs tuː miːt juː/",
+      "translation": "Rất vui được gặp bạn."
+    },
+    {
+      "text": "How are you today?",
+      "ipa": "/haʊ ɑːr juː təˈdeɪ/",
+      "translation": "Hôm nay bạn khỏe không?"
+    },
+    {
+      "text": "I am fine, thank you.",
+      "ipa": "/aɪ æm faɪn θæŋk juː/",
+      "translation": "Tôi khỏe, cảm ơn bạn."
+    },
+    {
+      "text": "Where are you from?",
+      "ipa": "/weər ɑːr juː frʌm/",
+      "translation": "Bạn đến từ đâu?"
+    }
+  ]
+}

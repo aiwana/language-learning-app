@@ -1,0 +1,29 @@
+{
+  "sentences": [
+    {
+      "text": "Good morning, I would like a latte, please.",
+      "ipa": "/ɡʊd ˈmɔːrnɪŋ aɪ wʊd laɪk ə ˈlɑːteɪ pliːz/",
+      "translation": "Chào buổi sáng, cho tôi một ly latte."
+    },
+    {
+      "text": "What size would you like?",
+      "ipa": "/wʌt saɪz wʊd juː laɪk/",
+      "translation": "Bạn muốn cỡ nào?"
+    },
+    {
+      "text": "A medium one, please.",
+      "ipa": "/ə ˈmiːdiəm wʌn pliːz/",
+      "translation": "Cho tôi cỡ vừa."
+    },
+    {
+      "text": "Would you like anything else?",
+      "ipa": "/wʊd juː laɪk ˈɛniθɪŋ ɛls/",
+      "translation": "Bạn còn gọi thêm gì không?"
+    },
+    {
+      "text": "That is all, thank you.",
+      "ipa": "/ðæt ɪz ɔːl θæŋk juː/",
+      "translation": "Vậy là hết, cảm ơn bạn."
+    }
+  ]
+}

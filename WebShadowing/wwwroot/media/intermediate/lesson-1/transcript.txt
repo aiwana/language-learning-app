@@ -1,0 +1,34 @@
+{
+  "sentences": [
+    {
+      "text": "Tell me about yourself.",
+      "ipa": "/tɛl miː əˈbaʊt jɔːrˈsɛlf/",
+      "translation": "Hãy giới thiệu về bản thân bạn."
+    },
+    {
+      "text": "I am a motivated team player.",
+      "ipa": "/aɪ æm ə ˈmoʊtɪveɪtɪd tiːm ˈpleɪər/",
+      "translation": "Tôi là người có động lực và biết hợp tác nhóm."
+    },
+    {
+      "text": "Why do you want this job?",
+      "ipa": "/waɪ duː juː wɒnt ðɪs dʒɒb/",
+      "translation": "Tại sao bạn muốn công việc này?"
+    },
+    {
+      "text": "I want to grow my career here.",
+      "ipa": "/aɪ wɒnt tuː ɡroʊ maɪ kəˈrɪr hɪr/",
+      "translation": "Tôi muốn phát triển sự nghiệp tại đây."
+    },
+    {
+      "text": "What are your greatest strengths?",
+      "ipa": "/wʌt ɑːr jɔːr ˈɡreɪtɪst strɛŋθs/",
+      "translation": "Điểm mạnh lớn nhất của bạn là gì?"
+    },
+    {
+      "text": "I communicate clearly and learn quickly.",
+      "ipa": "/aɪ kəˈmjuːnɪkeɪt ˈklɪrli ænd lɜːrn ˈkwɪkli/",
+      "translation": "Tôi giao tiếp rõ ràng và học nhanh."
+    }
+  ]
+}
