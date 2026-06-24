@@ -1,0 +1,78 @@
+@model WebShadowing.Models.Course
+
+<section class="course-section mb-4" data-course-title="@Model.Title">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <h2 class="h5 fw-bold mb-1 text-slate-800 dark:text-slate-100">@Model.Title</h2>
+            <p class="text-muted small mb-0">@Model.Description</p>
+        </div>
+        <span class="text-pink-600 font-extrabold text-[10px] uppercase">@Model.Lessons.Count BÀI HỌC</span>
+    </div>
+
+    <div class="scroll-row">
+        @foreach (var lesson in Model.Lessons.OrderBy(l => l.LessonOrder))
+        {
+            var tagClass = "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900";
+            if (lesson.LessonOrder % 4 == 1)
+            {
+                tagClass = "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900";
+            }
+            else if (lesson.LessonOrder % 4 == 2)
+            {
+                tagClass = "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900";
+            }
+            else if (lesson.LessonOrder % 4 == 3)
+            {
+                tagClass = "bg-pink-50 text-pink-700 border-pink-100 dark:bg-pink-950/20 dark:text-pink-400 dark:border-pink-900";
+            }
+
+            var levelLabel = "Đời Sống (Casual)";
+            var levelIcon = "compass";
+            var typeBadge = "HỘI THOẠI";
+            var typeBadgeClass = "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900";
+
+            if (Model.CourseType == WebShadowing.Models.CourseTypes.VideoBank)
+            {
+                typeBadge = "VIDEO";
+                typeBadgeClass = "bg-pink-50 text-pink-700 border-pink-100 dark:bg-pink-950/20 dark:text-pink-400 dark:border-pink-900";
+                levelLabel = "Video Bank";
+                levelIcon = "play-circle";
+            }
+            else if (Model.Level == "Intermediate")
+            {
+                levelLabel = "Công Sở (Professional)";
+                levelIcon = "briefcase";
+            }
+            else if (Model.Level == "Advanced" || Model.Level == "Academic")
+            {
+                levelLabel = "Học Thuật (Academic)";
+                levelIcon = "graduation-cap";
+            }
+
+            <div class="scroll-card lesson-card" data-title="@lesson.Title" data-desc="@lesson.Description">
+                <a asp-action="LessonDetail" asp-route-id="@lesson.LessonId" class="text-decoration-none" style="color: inherit;">
+                    <div class="lesson-inner-card p-3 h-100 d-flex flex-column justify-content-between shadow-sm">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase border @tagClass">Bài @lesson.LessonOrder</span>
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase border @typeBadgeClass">@typeBadge</span>
+                            </div>
+                            <h3 class="fw-bold text-slate-800 dark:text-slate-200 mb-1 leading-snug" style="font-size: 13px;">@lesson.Title</h3>
+                            <p class="text-muted text-xxs mb-2 leading-relaxed line-clamp-2">@lesson.Description</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-1.5 border-t border-slate-100 dark:border-slate-800/60" style="font-size: 10px;">
+                            <span class="text-muted d-flex align-items-center gap-1">
+                                <i data-lucide="@levelIcon" class="w-3.5 h-3.5"></i>
+                                <span>@levelLabel</span>
+                            </span>
+                            <span class="text-muted d-flex align-items-center gap-1">
+                                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                <span>@TimeSpan.FromSeconds(lesson.Duration).ToString(@"m\:ss")</span>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</section>
