@@ -1,0 +1,19 @@
+{
+  "sentences": [
+    {
+      "text": "The greatest way to influence someone is not to tell them to do something.",
+      "ipa": "/ðə ˈɡreɪtɪst weɪ tuː ˈɪnfluəns ˈsʌmwʌn ɪz nɒt tuː tɛl ðɛm tuː duː ˈsʌmθɪŋ/",
+      "translation": "Cách hay nhất để ảnh hưởng ai đó không phải là bảo họ làm điều gì."
+    },
+    {
+      "text": "The greatest way to influence someone is to do it.",
+      "ipa": "/ðə ˈɡreɪtɪst weɪ tuː ˈɪnfluəns ˈsʌmwʌn ɪz tuː duː ɪt/",
+      "translation": "Cách hay nhất để ảnh hưởng ai đó là tự mình làm điều đó."
+    },
+    {
+      "text": "And then when they see you do it and you get the results, they now want to do it because of that.",
+      "ipa": "",
+      "translation": "Rồi khi họ thấy bạn làm và đạt kết quả, họ sẽ muốn làm theo vì điều đó."
+    }
+  ]
+}

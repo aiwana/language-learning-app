@@ -1,0 +1,49 @@
+{
+  "sentences": [
+    {
+      "text": "If you think back to when your best most brilliant ideas strike you, you're rarely focused on something.",
+      "ipa": "/ɪf juː θɪŋk bæk tuː wen jɔːr bɛst moʊst ˈbrɪljənt aɪˈdiːəz straɪk juː/",
+      "translation": "Nếu bạn nghĩ lại về lúc những ý tưởng hay nhất đến với mình, bạn hiếm khi đang tập trung vào điều gì đó."
+    },
+    {
+      "text": "I call this mode \"scatter focus,\" and the research shows that it lets our mind come up with ideas.",
+      "ipa": "/aɪ kɔːl ðɪs moʊd ˈskætər ˈfoʊkəs/",
+      "translation": "Tôi gọi chế độ này là \"scatter focus\", và nghiên cứu cho thấy nó giúp đầu óc sinh ra ý tưởng."
+    },
+    {
+      "text": "It lets our mind plan because of where our mind wanders to.",
+      "ipa": "/ɪt lɛts aʊər maɪnd plæn bɪˈkɔːz əv weər aʊər maɪnd ˈwɒndərz tuː/",
+      "translation": "Nó giúp đầu óc lập kế hoạch nhờ những nơi mà tâm trí lang thang tới."
+    },
+    {
+      "text": "I'm an anti-hustler; I'm one of the laziest people you'll ever meet, and I think that's what gives me so many ideas to talk and write about.",
+      "ipa": "",
+      "translation": "Tôi là người chống văn hóa hustle; tôi là một trong những người lười nhất bạn từng gặp, và tôi nghĩ đó là lý do tôi có rất nhiều ý tưởng để nói và viết."
+    },
+    {
+      "text": "We like to think of distraction as the enemy of focus; it is not.",
+      "ipa": "/wiː laɪk tuː θɪŋk əv dɪˈstrækʃən æz ði ˈɛnəmi əv ˈfoʊkəs/",
+      "translation": "Chúng ta thường nghĩ sự xao nhãng là kẻ thù của sự tập trung; nhưng không phải vậy."
+    },
+    {
+      "text": "It is a symptom of why we find it difficult to focus, which is the fact that our mind is overstimulated.",
+      "ipa": "",
+      "translation": "Đó là triệu chứng của việc ta khó tập trung — bởi đầu óc bị kích thích quá mức."
+    },
+    {
+      "text": "I have a challenge for you: so for two weeks, make your mind less stimulated.",
+      "ipa": "/aɪ hæv ə ˈtʃælɪndʒ fɔːr juː/",
+      "translation": "Tôi có một thử thách cho bạn: trong hai tuần, hãy làm cho đầu óc bớt bị kích thích."
+    },
+    {
+      "text": "There are so many great features on phones, on devices, that'll let us eliminate a lot of the time we waste on our devices.",
+      "ipa": "",
+      "translation": "Có rất nhiều tính năng hay trên điện thoại và thiết bị giúp ta loại bỏ phần lớn thời gian lãng phí."
+    },
+    {
+      "text": "Use those features, not only to become aware of how you spend your time, but how you can spend less so you have more ideas.",
+      "ipa": "",
+      "translation": "Hãy dùng những tính năng đó không chỉ để biết mình dùng thời gian thế nào, mà còn để dùng ít hơn để có thêm ý tưởng."
+    }
+  ]
+}

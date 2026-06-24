@@ -1,0 +1,53 @@
+{
+  "sentences": [
+    {
+      "text": "So last time we talked about AI and ML, right?",
+      "ipa": "",
+      "translation": "Lần trước chúng ta đã nói về AI và ML, đúng không?",
+      "startTime": 0,
+      "endTime": 4
+    },
+    {
+      "text": "So can you explain to me what is machine learning like I'm a 5-year-old?",
+      "ipa": "",
+      "translation": "Bạn giải thích machine learning cho tôi như tôi là trẻ 5 tuổi được không?",
+      "startTime": 4,
+      "endTime": 8
+    },
+    {
+      "text": "Yeah, sure. So imagine you have a toy robot, okay? So at first, when you show it different pictures of animals like cats and dogs, it can't figure out which is a cat and which is a dog.",
+      "ipa": "",
+      "translation": "Được. Hãy tưởng tượng bạn có một con robot đồ chơi. Lúc đầu, khi bạn cho nó xem nhiều ảnh động vật như mèo và chó, nó không phân biệt được đâu là mèo, đâu là chó.",
+      "startTime": 8,
+      "endTime": 16
+    },
+    {
+      "text": "But then, once you start telling it multiple times that this is a cat and this is a dog, it will start getting smart because it starts to remember.",
+      "ipa": "",
+      "translation": "Nhưng khi bạn nói đi nói lại nhiều lần đây là mèo, đây là chó, nó sẽ thông minh hơn vì nó bắt đầu nhớ.",
+      "startTime": 16,
+      "endTime": 26
+    },
+    {
+      "text": "Okay, and then one fine day, if you show an entirely different picture of a cat, a new picture of a cat or dog, it will try to guess it correctly.",
+      "ipa": "",
+      "translation": "Rồi một ngày nào đó, nếu bạn cho nó xem một bức ảnh mèo hoặc chó hoàn toàn mới, nó sẽ cố đoán đúng.",
+      "startTime": 26,
+      "endTime": 30
+    },
+    {
+      "text": "So similarly, machine learning is a process where you train a robot with multiple examples, with so many examples that after a certain point, it will start guessing right answers.",
+      "ipa": "",
+      "translation": "Tương tự, machine learning là quá trình bạn huấn luyện một hệ thống bằng rất nhiều ví dụ, đến một lúc nào đó nó bắt đầu đoán đúng.",
+      "startTime": 30,
+      "endTime": 42
+    },
+    {
+      "text": "Oh, okay. That's a perfect example. Thank you.",
+      "ipa": "",
+      "translation": "Ồ, được rồi. Ví dụ hay quá. Cảm ơn bạn.",
+      "startTime": 42,
+      "endTime": 48
+    }
+  ]
+}

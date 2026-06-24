@@ -1,0 +1,151 @@
+{
+  "sentences": [
+    {
+      "text": "Hello Mrs. Stevens, my name is Jane Phillips. I'm the Personnel Director. I'm pleased to meet you. Please have a seat.",
+      "ipa": "həˈloʊ ˈmɪsɪz ˈstiːvənz, maɪ neɪm ɪz dʒeɪn ˈfɪlɪps. aɪm ðə ˌpɜːrsəˈnɛl dəˈrɛktər. aɪm pliːzd tu miːt ju. pliːz hæv ə siːt.",
+      "translation": "Xin chào bà Stevens, tôi là Jane Phillips, Giám đốc Nhân sự. Rất vui được gặp bà. Mời bà ngồi.",
+      "startTime": 2,
+      "endTime": 11
+    },
+    {
+      "text": "Thank you.",
+      "ipa": "θæŋk ju",
+      "translation": "Cảm ơn bà.",
+      "startTime": 11,
+      "endTime": 12
+    },
+    {
+      "text": "According to your resume, you have several years of office experience.",
+      "ipa": "əˈkɔːrdɪŋ tu jʊər ˈrɛzəˌmeɪ, ju hæv ˈsɛvrəl jɪrz ʌv ˈɔːfɪs ɪkˈspɪriəns.",
+      "translation": "Theo hồ sơ của bà, bà có vài năm kinh nghiệm văn phòng.",
+      "startTime": 12,
+      "endTime": 20
+    },
+    {
+      "text": "Yes, I've had over 10 years experience.",
+      "ipa": "jɛs, aɪv hæd ˈoʊvər tɛn jɪrz ɪkˈspɪriəns.",
+      "translation": "Vâng, tôi đã có hơn 10 năm kinh nghiệm.",
+      "startTime": 20,
+      "endTime": 23
+    },
+    {
+      "text": "Tell me about your qualifications.",
+      "ipa": "tɛl mi əˈbaʊt jʊər ˌkwɑːləfɪˈkeɪʃənz.",
+      "translation": "Hãy kể cho tôi nghe về trình độ của bà.",
+      "startTime": 23,
+      "endTime": 26
+    },
+    {
+      "text": "I can type over 100 words per minute. I'm proficient in many computer programs. I have excellent interpersonal skills. I am well organized and I'm a very fast learner.",
+      "ipa": "aɪ kæn taɪp ˈoʊvər wʌn ˈhʌndrəd wɜːrdz pɜːr ˈmɪnɪt. aɪm prəˈfɪʃənt ɪn ˈmɛni kəmˈpjuːtər ˈproʊɡræmz. aɪ hæv ˈɛksələnt ˌɪntərˈpɜːrsənəl skɪlz. aɪ æm wɛl ˈɔːrɡəˌnaɪzd ænd aɪm ə ˈvɛri fæst ˈlɜːrnər.",
+      "translation": "Tôi gõ được hơn 100 từ mỗi phút. Tôi thành thạo nhiều phần mềm máy tính. Tôi có kỹ năng giao tiếp tốt. Tôi làm việc có tổ chức và học rất nhanh.",
+      "startTime": 26,
+      "endTime": 38
+    },
+    {
+      "text": "I see that you have excellent references. Do you have any questions about the position?",
+      "ipa": "aɪ si ðæt ju hæv ˈɛksələnt ˈrɛfərənsɪz. du ju hæv ˈɛni ˈkwɛstʃənz əˈbaʊt ðə pəˈzɪʃən?",
+      "translation": "Tôi thấy bà có thư giới thiệu rất tốt. Bà có câu hỏi gì về vị trí này không?",
+      "startTime": 38,
+      "endTime": 42
+    },
+    {
+      "text": "Yes, what are the responsibilities in this position?",
+      "ipa": "jɛs, hwʌt ɑːr ðə rɪˌspɑːnsəˈbɪlɪtiz ɪn ðɪs pəˈzɪʃən?",
+      "translation": "Có, trách nhiệm của vị trí này là gì?",
+      "startTime": 42,
+      "endTime": 48
+    },
+    {
+      "text": "We're looking for someone to supervise two Office Clerks, handle all the correspondence, arrange meetings, and manage the front office.",
+      "ipa": "wɪr ˈlʊkɪŋ fɔːr ˈsʌmwʌn tu ˈsuːpərˌvaɪz tu ˈɔːfɪs klɜːrks, ˈhændəl ɔːl ðə ˌkɔːrəˈspɑːndəns, əˈreɪndʒ ˈmiːtɪŋz, ænd ˈmænɪdʒ ðə frʌnt ˈɔːfɪs.",
+      "translation": "Chúng tôi cần người giám sát hai nhân viên văn phòng, xử lý thư từ, sắp xếp cuộc họp và quản lý tiền sảnh.",
+      "startTime": 48,
+      "endTime": 57
+    },
+    {
+      "text": "Have you had any supervisory experience?",
+      "ipa": "hæv ju hæd ˈɛni ˌsuːpərˈvaɪzəri ɪkˈspɪriəns?",
+      "translation": "Bà đã có kinh nghiệm giám sát chưa?",
+      "startTime": 57,
+      "endTime": 60
+    },
+    {
+      "text": "Yes, I supervised three administrators in my last position.",
+      "ipa": "jɛs, aɪ ˈsuːpərˌvaɪzd θri ədˈmɪnɪˌstreɪtərz ɪn maɪ læst pəˈzɪʃən.",
+      "translation": "Có, ở công việc trước tôi đã giám sát ba nhân viên hành chính.",
+      "startTime": 60,
+      "endTime": 67
+    },
+    {
+      "text": "What are the office hours, Mrs. Phillips?",
+      "ipa": "hwʌt ɑːr ðə ˈɔːfɪs ˈaʊərz, ˈmɪsɪz ˈfɪlɪps?",
+      "translation": "Giờ làm việc thế nào, bà Phillips?",
+      "startTime": 67,
+      "endTime": 71
+    },
+    {
+      "text": "8:30 to 4:30, with an hour off for lunch.",
+      "ipa": "eɪt ˈθɜːrti tu fɔːr ˈθɜːrti, wɪθ ən ˈaʊər ɔːf fɔːr lʌntʃ.",
+      "translation": "Từ 8 giờ 30 đến 4 giờ 30, nghỉ trưa một tiếng.",
+      "startTime": 71,
+      "endTime": 76
+    },
+    {
+      "text": "What are your salary expectations, Mrs. Stevens?",
+      "ipa": "hwʌt ɑːr jʊər ˈsæləri ˌɛkspɛkˈteɪʃənz, ˈmɪsɪz ˈstiːvənz?",
+      "translation": "Kỳ vọng lương của bà là bao nhiêu, bà Stevens?",
+      "startTime": 76,
+      "endTime": 79
+    },
+    {
+      "text": "I expect to be paid the going rate for this type of position.",
+      "ipa": "aɪ ɪkˈspɛkt tu bi peɪd ðə ˈɡoʊɪŋ reɪt fɔːr ðɪs taɪp ʌv pəˈzɪʃən.",
+      "translation": "Tôi mong được trả mức lương phổ biến cho loại vị trí này.",
+      "startTime": 79,
+      "endTime": 82
+    },
+    {
+      "text": "Can you tell me about the benefits you offer?",
+      "ipa": "kæn ju tɛl mi əˈbaʊt ðə ˈbɛnəfɪts ju ˈɔːfər?",
+      "translation": "Bà có thể cho tôi biết các phúc lợi không?",
+      "startTime": 82,
+      "endTime": 85
+    },
+    {
+      "text": "Yes, we provide full medical and dental coverage, a pension plan, and a three-week holiday per year.",
+      "ipa": "jɛs, wi prəˈvaɪd fʊl ˈmɛdɪkəl ænd ˈdɛntəl ˈkʌvərɪdʒ, ə ˈpɛnʃən plæn, ænd ə θri-wiːk ˈhɑːləˌdeɪ pɜːr jɪr.",
+      "translation": "Có, chúng tôi cung cấp bảo hiểm y tế và nha khoa đầy đủ, quỹ hưu trí và ba tuần nghỉ phép mỗi năm.",
+      "startTime": 85,
+      "endTime": 92
+    },
+    {
+      "text": "That's very generous. When is the position available?",
+      "ipa": "ðæts ˈvɛri ˈdʒɛnərəs. hwɛn ɪz ðə pəˈzɪʃən əˈveɪləbəl?",
+      "translation": "Phúc lợi rất hậu hĩnh. Khi nào có thể bắt đầu làm việc?",
+      "startTime": 92,
+      "endTime": 95
+    },
+    {
+      "text": "We're hoping the successful applicant can start at the beginning of next month. We'll finish our interviews tomorrow and make a decision by the weekend. We'll contact you next week.",
+      "ipa": "wɪr ˈhoʊpɪŋ ðə səkˈsɛsfəl ˈæplɪkənt kæn stɑːrt æt ðə bɪˈɡɪnɪŋ ʌv nɛkst mʌnθ. wil ˈfɪnɪʃ ˈaʊər ˈɪntərˌvjuz təˈmɑːˌroʊ ænd meɪk ə dɪˈsɪʒən baɪ ðə ˈwiːkˌɛnd. wil ˈkɑːntækt ju nɛkst wiːk.",
+      "translation": "Chúng tôi hy vọng ứng viên trúng tuyển có thể bắt đầu đầu tháng sau. Ngày mai chúng tôi kết thúc phỏng vấn và quyết định cuối tuần. Tuần sau chúng tôi sẽ liên hệ bà.",
+      "startTime": 95,
+      "endTime": 108
+    },
+    {
+      "text": "Thank you very much. It's been a pleasure meeting you. I hope to hear from you soon.",
+      "ipa": "θæŋk ju ˈvɛri mʌtʃ. ɪts bɪn ə ˈplɛʒər ˈmiːtɪŋ ju. aɪ hoʊp tu hɪr frʌm ju suːn.",
+      "translation": "Cảm ơn bà rất nhiều. Rất vui được gặp bà. Tôi hy vọng sớm nhận được hồi âm.",
+      "startTime": 108,
+      "endTime": 113
+    },
+    {
+      "text": "Thanks for coming in to see us, Mrs. Stevens.",
+      "ipa": "θæŋks fɔːr ˈkʌmɪŋ ɪn tu si ʌs, ˈmɪsɪz ˈstiːvənz.",
+      "translation": "Cảm ơn bà đã đến phỏng vấn, bà Stevens.",
+      "startTime": 113,
+      "endTime": 118
+    }
+  ]
+}
