@@ -1,0 +1,360 @@
+@using WebShadowing.Models
+@{
+    ViewData["Title"] = "Cài đặt tài khoản & Mục tiêu học";
+    var profile = ViewBag.UserProfile as UserProfile ?? StaticData.DefaultProfile;
+    var stats = ViewBag.UserStats as UserStats ?? StaticData.DefaultStats;
+}
+
+<div id="settings-view-container" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans animate-slide-up">
+    
+    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[32px] p-6 md:p-8 shadow-sm">
+        <h3 class="text-xl font-black tracking-tight mb-6 text-slate-850 dark:text-slate-100">Cài đặt hồ sơ & Mục tiêu học</h3>
+        
+        <form onsubmit="handleSaveProfileSubmit(event)" class="space-y-6 text-xs font-sans">
+            
+            <!-- Row 1: Member Name & Phone -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="text-[9px] uppercase font-bold text-slate-400 block mb-1.5 font-mono tracking-wider">Tên thành viên</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+                        </span>
+                        <input
+                            type="text"
+                            required
+                            id="profile-name"
+                            value="@profile.Name"
+                            class="w-full pl-10 pr-3.5 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent text-sm focus:outline-none focus:border-indigo-500 font-sans dark:text-white"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[9px] uppercase font-bold text-slate-400 block mb-1.5 font-mono tracking-wider">Số điện thoại liên hệ</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i data-lucide="phone" class="w-4 h-4 text-slate-400"></i>
+                        </span>
+                        <input
+                            type="tel"
+                            id="profile-phone"
+                            value="@profile.Phone"
+                            class="w-full pl-10 pr-3.5 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-transparent text-sm focus:outline-none focus:border-indigo-500 font-sans dark:text-white"
+                            placeholder="09xx xxx xxx"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Email -->
+            <div>
+                <label class="text-[9px] uppercase font-bold text-slate-400 block mb-1.5 font-mono tracking-wider">Địa chỉ Email</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                        <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+                    </span>
+                    <input
+                        type="email"
+                        disabled
+                        value="@profile.Email"
+                        class="w-full pl-10 pr-3.5 py-3 bg-slate-50/50 dark:bg-slate-950/40 text-slate-400 rounded-2xl border border-slate-200/60 dark:border-slate-800 text-sm focus:outline-none font-sans cursor-not-allowed"
+                    />
+                </div>
+                <p class="text-[10px] text-slate-400 mt-2 leading-normal">
+                    Để bảo mật, không được sửa đổi địa chỉ email đăng nhập. Liên hệ hỗ trợ viên nếu đổi thiết bị học.
+                </p>
+            </div>
+
+            <hr class="border-slate-100 dark:border-slate-800/80 my-4" />
+
+            <!-- Row 3: Selects -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="text-[9px] uppercase font-bold text-slate-400 block mb-1.5 font-mono tracking-wider">Khóa học / Chủ đề mong muốn (Miễn phí)</label>
+                    <select id="profile-level" class="w-full bg-transparent border border-slate-200 dark:border-slate-800 rounded-2xl py-3 px-4 focus:outline-none text-xs text-slate-700 dark:text-slate-300">
+                        <option value="Casual" selected="@(profile.Level == UserLevel.Casual)">Casual Speaking (Đời sống)</option>
+                        <option value="Academic" selected="@(profile.Level == UserLevel.Academic)">Academic Prep (Học thuật)</option>
+                        <option value="Professional" selected="@(profile.Level == UserLevel.Professional)">Professional Career (Công việc)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-[9px] uppercase font-bold text-slate-400 block mb-1.5 font-mono tracking-wider">Mục tiêu điểm số trôi chảy</label>
+                    <select id="profile-goal" class="w-full bg-transparent border border-slate-200 dark:border-slate-800 rounded-2xl py-3 px-4 focus:outline-none text-xs text-slate-700 dark:text-slate-300">
+                        <option value="fluency50" selected="@(profile.Goal == LearningGoal.Fluency50)">Ưu tiên trôi chảy tự nhiên (&gt; 50%)</option>
+                        <option value="comprehension70" selected="@(profile.Goal == LearningGoal.Comprehension70)">Làm việc tự tin người khác hiểu (>= 75%)</option>
+                        <option value="accent90" selected="@(profile.Goal == LearningGoal.Accent90)">Phát âm chuẩn xác bản xứ (&gt; 90%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 4: Target Accent Buttons -->
+            <div>
+                <label class="text-[9px] uppercase font-bold text-slate-400 block mb-2.5 font-mono tracking-wider">Giọng phát âm mục tiêu (Target Accent)</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button
+                        type="button"
+                        onclick="setTargetAccent('US')"
+                        id="accent-btn-us"
+                        class="py-3 px-4 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-3 @(profile.TargetAccent == TargetAccent.US ? "border-indigo-600 bg-indigo-50/15 text-indigo-600 dark:border-sky-400 dark:text-sky-400" : "border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-transparent")"
+                    >
+                        <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[9px] text-slate-400 font-mono">US</span>
+                        <span>Giọng Mỹ (General American)</span>
+                    </button>
+                    <button
+                        type="button"
+                        onclick="setTargetAccent('UK')"
+                        id="accent-btn-uk"
+                        class="py-3 px-4 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-3 @(profile.TargetAccent == TargetAccent.UK ? "border-indigo-600 bg-indigo-50/15 text-indigo-600 dark:border-sky-400 dark:text-sky-400" : "border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-transparent")"
+                    >
+                        <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[9px] text-slate-400 font-mono">GB</span>
+                        <span>Giọng Anh (RP / British)</span>
+                    </button>
+                </div>
+            </div>
+
+            <hr class="border-slate-100 dark:border-slate-800/80 my-4" />
+
+            <!-- Row 5: Actions -->
+            <div class="flex items-center justify-between gap-4 pt-2">
+                <button type="button" onclick="alert('Đã reset dữ liệu bộ nhớ từ vựng!')" class="text-slate-450 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300 font-bold bg-transparent border-0 cursor-pointer text-xs">
+                    Reset dữ liệu bộ nhớ từ
+                </button>
+                
+                <button
+                    type="submit"
+                    class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 cursor-pointer shadow-sm border-0"
+                >
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Lưu Cấu Hình Hồ Sơ</span>
+                </button>
+            </div>
+
+            <div id="save-success-banner" class="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200/50 rounded-xl flex items-center gap-2 font-medium hidden">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+                <span>Đã lưu thành công mọi cấu hình học tập và hồ sơ!</span>
+            </div>
+
+        </form>
+
+        <!-- Row 6: Subscription Card -->
+        <div class="mt-8">
+            @if (profile.IsPremium)
+            {
+                <div class="p-5 md:p-6 rounded-[24px] bg-gradient-to-r from-purple-50/50 via-pink-50/30 to-purple-50/40 dark:from-purple-950/20 dark:to-pink-950/10 border border-purple-100/50 dark:border-purple-900/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="space-y-2">
+                        <span class="px-2.5 py-0.5 rounded text-[8px] font-bold text-white bg-indigo-600 uppercase tracking-wider block w-max select-none">
+                            Tài khoản gói cước
+                        </span>
+                        <h4 class="font-extrabold text-sm text-slate-850 dark:text-slate-100 flex items-center gap-1.5">
+                            Đặc quyền Pro VIP active ✨
+                        </h4>
+                        <p class="text-slate-400 text-[11px] leading-relaxed max-w-lg">
+                            Kết nối thành công phương thức đàm thoại đệm: [Google Pay (Simulated)]. Không giới hạn cuộc thoại nhại bài giảng AI.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="cancelVip()"
+                        class="px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 dark:border-rose-950 dark:bg-rose-950/20 dark:text-rose-400 dark:hover:bg-rose-950/40 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"
+                    >
+                        <i data-lucide="credit-card" class="w-4 h-4"></i>
+                        <span>HỦY GÓI PREMIUM</span>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="p-5 md:p-6 rounded-[24px] bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="space-y-2">
+                        <span class="px-2.5 py-0.5 rounded text-[8px] font-bold text-white bg-slate-500 uppercase tracking-wider block w-max select-none">
+                            Tài khoản gói cước
+                        </span>
+                        <h4 class="font-extrabold text-sm text-slate-800 dark:text-slate-200">
+                            Tài khoản miễn phí (Free Plan)
+                        </h4>
+                        <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed max-w-lg">
+                            Bạn đang sử dụng gói Miễn phí. Giới hạn số tim trong ngày, không cho phép thay đổi ngẫu nhiên bài giảng bằng AI.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="openBillingModal()"
+                        class="px-4 py-2.5 bg-gradient-to-tr from-pink-500 to-indigo-600 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-md hover:scale-[1.02] cursor-pointer"
+                    >
+                        <i data-lucide="credit-card" class="w-4 h-4 text-amber-200"></i>
+                        <span>Nâng cấp VIP (Simulate)</span>
+                    </button>
+                </div>
+            }
+        </div>
+
+        <!-- Optional Theme Switcher / Logout row inside container for convenience -->
+        <div class="mt-6 pt-6 border-t border-slate-50 dark:border-slate-800/60 flex flex-wrap gap-4 justify-between items-center text-xs">
+            <button
+                type="button"
+                onclick="toggleTheme()"
+                class="py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1.5 font-bold cursor-pointer dark:text-white"
+            >
+                <span class="dark:hidden flex items-center gap-1.5">
+                    <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-500"></i>
+                    <span>Giao diện Tối</span>
+                </span>
+                <span class="hidden dark:flex items-center gap-1.5">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500"></i>
+                    <span>Giao diện Sáng</span>
+                </span>
+            </button>
+
+            @if (ViewBag.IsAuthenticated == true)
+            {
+                <form asp-controller="Account" asp-action="Logout" method="post"
+                      onsubmit="return confirm('Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?')">
+                    @Html.AntiForgeryToken()
+                    <button type="submit"
+                            class="py-2 px-3 rounded-xl border border-rose-200 hover:bg-rose-50 dark:border-rose-955 dark:hover:bg-rose-955/20 text-rose-600 dark:text-rose-450 flex items-center gap-1.5 font-bold cursor-pointer transition-colors">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        <span>Đăng xuất tài khoản</span>
+                    </button>
+                </form>
+            }
+        </div>
+
+    </div>
+
+    <!-- RENDER MOCK SUBSCRIPTION BILLING POPUP MODAL -->
+    <div id="billing-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl relative font-sans">
+            
+            <button
+              onclick="closeBillingModal()"
+              class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold p-1 cursor-pointer"
+            >
+              ✕
+            </button>
+
+            <div class="text-center mb-5 font-sans">
+                <span class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-sky-400 flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="credit-card" class="w-6 h-6"></i>
+                </span>
+                <h3 class="font-black text-lg tracking-tight dark:text-white">Cổng thanh toán giả định</h3>
+                <p class="text-slate-400 text-xxs mt-1">ShadowSpeak Subscription Billing Simulator - 100% Free</p>
+            </div>
+
+            <div class="space-y-4 font-sans text-xs">
+              
+                <div class="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-bold text-xs dark:text-white">Nâng cấp gói thành viên VIP</span>
+                        <p class="text-[10px] text-slate-400 mt-0.5">Sinh ngẫu nhiên bài giảng AI không giới hạn</p>
+                    </div>
+                    <strong class="text-sm font-extrabold text-indigo-600 dark:text-sky-400">149.000 ₫</strong>
+                </div>
+
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 block mb-1">MÃ SỐ THẺ ĐĂNG KÝ (VISA SIMULATED)</label>
+                    <input
+                      type="text"
+                      id="card-number-input"
+                      value="4111 2222 3333 4444"
+                      class="w-full bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono tracking-wider focus:outline-none focus:border-indigo-500 dark:text-white"
+                    />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[9px] font-bold text-slate-400 block mb-1">NGÀY HẾT HẠN</label>
+                        <input
+                          type="text"
+                          value="12/29"
+                          class="w-full bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs text-center dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold text-slate-400 block mb-1">MÃ BẢO MẬT (CVV)</label>
+                        <input
+                          type="password"
+                          value="123"
+                          class="w-full bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs text-center dark:text-white"
+                        />
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 dark:bg-emerald-500/5 text-emerald-800 dark:text-emerald-400 p-3 rounded-xl border border-emerald-200/50 dark:border-emerald-500/10 flex gap-2 items-start mt-4">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+                    <p class="text-[10px] leading-normal font-sans text-emerald-700 dark:text-emerald-400">
+                        <strong>An toàn tuyệt đối:</strong> Đây hoàn toàn là một giao dịch giả lập. Tài khoản của bạn sẽ được kích hoạt quyền thành viên Pro VIP lập tức mà không phát sinh phí thật nào cả!
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    onclick="handleSimulateSubscriptionCharge()"
+                    class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 tracking-wide shadow cursor-pointer mt-5"
+                >
+                    <span>XÁC NHẬN NẠP TIỀN 149.000₫</span>
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        var activeAccent = "@profile.TargetAccent.ToString()";
+
+        function setTargetAccent(accent) {
+            activeAccent = accent;
+            var usBtn = document.getElementById("accent-btn-us");
+            var ukBtn = document.getElementById("accent-btn-uk");
+
+            if (accent === 'US') {
+                usBtn.className = "py-3 px-4 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-3 border-indigo-600 bg-indigo-50/15 text-indigo-600 dark:border-sky-400 dark:text-sky-400";
+                ukBtn.className = "py-3 px-4 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-3 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-transparent";
+            } else {
+                ukBtn.className = "py-3 px-4 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-3 border-indigo-600 bg-indigo-50/15 text-indigo-600 dark:border-sky-400 dark:text-sky-400";
+                usBtn.className = "py-3 px-4 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-3 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-transparent";
+            }
+        }
+
+        function handleSaveProfileSubmit(event) {
+            event.preventDefault();
+            var banner = document.getElementById("save-success-banner");
+            banner.classList.remove("hidden");
+            setTimeout(function() {
+                banner.classList.add("hidden");
+            }, 2500);
+        }
+
+        function openBillingModal() {
+            document.getElementById("billing-modal").classList.remove("hidden");
+        }
+
+        function closeBillingModal() {
+            document.getElementById("billing-modal").classList.add("hidden");
+        }
+
+        function handleSimulateSubscriptionCharge() {
+            closeBillingModal();
+            alert('Thanh toán giả định thành công! Tài khoản Nguyễn Văn A hiện là thành viên Pro VIP vô hạn.');
+            // Reload page or update UI locally
+            location.reload();
+        }
+
+        function cancelVip() {
+            alert('Hủy Pro VIP thành công. Trải nghiệm gói thường!');
+            location.reload();
+        }
+
+        function toggleTheme() {
+            // Re-trigger layout theme toggling
+            $(".btn-theme-toggle").trigger("click");
+        }
+    </script>
+}
