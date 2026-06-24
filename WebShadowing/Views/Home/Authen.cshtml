@@ -1,0 +1,549 @@
+@{
+    Layout = null; // We don't want the default layout header for the onboarding/auth flow page
+}
+
+<!DOCTYPE html>
+<html lang="vi" class="">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập & Onboarding - ShadowSpeak AI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+                        mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "monospace"]
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script>
+        if (localStorage.getItem('shadow_speak_dark_mode') === 'true') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-50 font-sans min-h-screen">
+
+    <div id="auth-flow-container" class="min-h-screen grid lg:grid-cols-12 bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-50">
+        
+        <!-- Editorial Branding Section - left side -->
+        <div id="auth-branding-panel" class="lg:col-span-5 bg-gradient-to-tr from-sky-600 via-indigo-700 to-indigo-900 text-white p-8 md:p-12 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            
+            <!-- Top Header Logo -->
+            <div class="flex items-center gap-3 relative z-10">
+                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                    <i data-lucide="audio-lines" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="font-sans font-bold text-xl tracking-tight">ShadowSpeak AI</span>
+            </div>
+
+            <!-- Branding Slogan Middle -->
+            <div class="my-auto py-12 relative z-10 max-w-md">
+                <span class="text-sky-300 font-mono text-xs uppercase tracking-widest font-semibold px-2.5 py-1 bg-white/10 rounded-full">Method Shadowing</span>
+                <h1 class="text-3xl md:text-4xl font-sans font-extrabold tracking-tight mt-6 leading-tight text-white">
+                    Luyện phát âm chuẩn Anh - Mỹ cùng Trí Tuệ Nhân Tạo
+                </h1>
+                <p class="text-slate-200 mt-4 text-sm leading-relaxed">
+                    Áp dụng phương pháp Shadowing (Nhại giọng) của chuyên gia kết hợp trí tuệ nhân tạo đánh giá cao độ, ngữ điệu và chỉ ra lỗi sai trên từng ký tự âm tiết.
+                </p>
+                
+                <div class="mt-8 space-y-3.5">
+                    <div class="flex items-center gap-3 text-slate-100 text-sm">
+                        <div class="w-5 h-5 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400">
+                            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        </div>
+                        <span>Lắng nghe audio chuẩn phát âm bản xứ</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-slate-100 text-sm">
+                        <div class="w-5 h-5 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400">
+                            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        </div>
+                        <span>Thu âm nhại giọng phản hồi giọng nói với Web Audio</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-slate-100 text-sm">
+                        <div class="w-5 h-5 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400">
+                            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        </div>
+                        <span>Gemini AI chấm điểm, sửa lỗi phát âm và chú giải IPA</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-slate-100 text-sm">
+                        <div class="w-5 h-5 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400">
+                            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        </div>
+                        <span>Flashcard thuật toán giãn cách hỗ trợ lặp lại từ sai</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Credit Line -->
+            <div class="text-xs text-white/60 relative z-10 flex justify-between items-center">
+                <span>© 2026 ShadowSpeak</span>
+            </div>
+        </div>
+
+        <!-- Interactive Form Flow Panel - right side -->
+        <div id="auth-form-panel" class="lg:col-span-7 flex items-center justify-center p-6 md:p-12">
+            <div class="w-full max-w-lg">
+                
+                <!-- STEP 1: LOGIN & REGISTER -->
+                <div id="step-auth" class="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-100 dark:border-slate-800 animate-slide-up">
+                    <div class="text-center">
+                        <h2 id="auth-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Xin chào quay trở lại!</h2>
+                        <p id="auth-subtitle" class="text-slate-500 dark:text-slate-400 text-sm mt-1.5">Nhập tài khoản để tiếp tục theo dõi chuỗi ngày Streak</p>
+                        <p class="text-[11px] text-slate-400 mt-2">Tài khoản demo: <span class="font-mono">demo@shadowspeak.local</span> / <span class="font-mono">Demo@12345</span></p>
+                    </div>
+
+                    @if (ViewBag.AuthError is string authError && !string.IsNullOrWhiteSpace(authError))
+                    {
+                        <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                            @authError
+                        </div>
+                    }
+
+                    <form id="auth-form" method="post" asp-controller="Account" asp-action="Login" onsubmit="handleAuthSubmit(event)" class="mt-8 space-y-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ReturnUrl" value="@ViewBag.ReturnUrl" />
+                        <div id="register-name-field" class="hidden">
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">HỌ VÀ TÊN</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                    <i data-lucide="user" class="w-4 h-4"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    name="FullName"
+                                    id="input-name"
+                                    class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans dark:text-white"
+                                    placeholder="Phạm Duy Anh"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">EMAIL CHUYÊN DÙNG</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                    <i data-lucide="mail" class="w-4 h-4"></i>
+                                </span>
+                                <input
+                                    type="email"
+                                    name="Email"
+                                    required
+                                    id="input-email"
+                                    class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans dark:text-white"
+                                    placeholder="demo@shadowspeak.local"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-xs font-medium text-slate-500 dark:text-slate-400">MẬT KHẨU KHÓA</label>
+                                <a href="#" class="text-xs text-indigo-600 dark:text-sky-400 hover:underline">Quên mật khẩu?</a>
+                            </div>
+                            <input
+                                type="password"
+                                name="Password"
+                                required
+                                id="input-password"
+                                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans dark:text-white"
+                                placeholder="••••••••"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/10 mt-6"
+                        >
+                            <span id="auth-btn-text">Đăng Nhập Thử Nghiệm</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+
+                    <div class="mt-6">
+                        <div class="relative flex items-center justify-center">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-slate-100 dark:border-slate-800"></div>
+                            </div>
+                            <span class="relative px-3 text-xs text-slate-400 bg-white dark:bg-slate-900 font-mono">HOẶC ĐĂNG NHẬP NHANH</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3.5 mt-5">
+                            <button
+                                type="button"
+                                onclick="goToStep('level')"
+                                class="flex justify-center items-center py-2 px-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm gap-2 cursor-pointer transition-colors"
+                            >
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" width="24" height="24">
+                                  <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.137 4.114-3.41 0-6.173-2.763-6.173-6.173s2.763-6.173 6.173-6.173c1.5 0 2.87.545 3.93 1.446l3.07-3.07C19.16 2.06 15.93 1 12.24 1 5.48 1 0 6.48 0 13.24s5.48 12.24 12.24 12.24c6.76 0 11.74-4.76 11.74-11.74 0-.64-.06-1.28-.18-1.95H12.24z"/>
+                                </svg>
+                                <span>Google OAuth</span>
+                            </button>
+                            <button
+                                type="button"
+                                onclick="goToStep('level')"
+                                class="flex justify-center items-center py-2 px-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm gap-2 cursor-pointer transition-colors"
+                            >
+                                <svg class="w-4 h-4 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                                <span>Facebook</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 text-center text-xs">
+                        <button
+                            type="button"
+                            onclick="toggleAuthMode()"
+                            id="auth-toggle-btn"
+                            class="text-slate-500 dark:text-slate-400 hover:text-indigo-600 font-sans font-medium"
+                        >
+                            Chưa có tài khoản? Đăng ký ngay
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: ENGLISH LEVEL SELECTION -->
+                <div id="step-level" class="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-100 dark:border-slate-800 hidden animate-slide-up">
+                    <div class="text-center">
+                        <span class="font-mono text-xs text-indigo-600 dark:text-sky-400 font-semibold uppercase tracking-wider">Cấu hình cấp độ</span>
+                        <h2 class="text-2xl font-bold tracking-tight mt-1 text-slate-900 dark:text-white">Cấp độ tiếng Anh hiện tại?</h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1.5">
+                            ShadowSpeak thiết kế lộ trình video, audio tương ứng với nhu cầu của riêng bạn
+                        </p>
+                    </div>
+
+                    <div class="mt-8 space-y-4">
+                        <button
+                            type="button"
+                            onclick="setLevel('Casual')"
+                            id="level-casual"
+                            class="w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 border-indigo-600 bg-indigo-50/20 dark:border-sky-500 dark:bg-sky-500/10"
+                        >
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                                <i data-lucide="compass" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-sm tracking-tight text-slate-900 dark:text-white">Đời sống giao tiếp (Casual)</div>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-normal">Luyện nói đời thường, đi du lịch, đàm thoại bạn bè, mua sắm ẩm thực.</p>
+                            </div>
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="setLevel('Academic')"
+                            id="level-academic"
+                            class="w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800"
+                        >
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                                <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-sm tracking-tight text-slate-900 dark:text-white">Học thuật & Trình độ cao (Academic)</div>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-normal">Cải thiện phát âm viết luận, nghiên cứu, từ vựng thi IELTS/TOEFL hùng biện.</p>
+                            </div>
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="setLevel('Professional')"
+                            id="level-professional"
+                            class="w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800"
+                        >
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                                <i data-lucide="briefcase" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-sm tracking-tight text-slate-900 dark:text-white">Công sở & Doanh nghiệp (Professional)</div>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-normal">Đàm phán thương mại, thuyết trình dự án, trả lời phỏng vấn chuyên nghiệp.</p>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Accent setting -->
+                    <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+                        <label class="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-3">
+                            Giọng nói mục tiêu hướng tới (Target Accent)
+                        </label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onclick="setTargetAccent('US')"
+                                id="taccent-us"
+                                class="py-2.5 rounded-xl border font-sans font-semibold text-xs cursor-pointer text-center transition-all border-indigo-600 bg-indigo-50/10 text-indigo-600 dark:border-sky-400 dark:text-sky-400"
+                            >
+                                🇺🇸 Giọng Mỹ (General American)
+                            </button>
+                            <button
+                                type="button"
+                                onclick="setTargetAccent('UK')"
+                                id="taccent-uk"
+                                class="py-2.5 rounded-xl border font-sans font-semibold text-xs cursor-pointer text-center transition-all border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300"
+                            >
+                                🇬🇧 Giọng Anh (RP / British)
+                            </button>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="goToStep('goal')"
+                        class="w-full mt-6 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                    >
+                        <span>Tiếp tục chọn Mục Tiêu</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- STEP 3: LEARNING GOAL -->
+                <div id="step-goal" class="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-100 dark:border-slate-800 hidden animate-slide-up">
+                    <div class="text-center">
+                        <span class="font-mono text-xs text-indigo-600 dark:text-sky-400 font-semibold uppercase tracking-wider">Chọn đích đến</span>
+                        <h2 class="text-2xl font-bold tracking-tight mt-1 text-slate-900 dark:text-white">Mức độ phát âm kỳ vọng?</h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1.5">
+                            Đặt chỉ tiêu điểm số tối thiểu để hoàn thành mọi câu luyện đọc Shadowing
+                        </p>
+                    </div>
+
+                    <div class="mt-8 space-y-4">
+                        <button
+                            type="button"
+                            onclick="setGoal('fluency50')"
+                            id="goal-fluency50"
+                            class="w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800"
+                        >
+                            <div class="flex-1">
+                                <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-sky-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                                    Casual Speaking
+                                </span>
+                                <div class="font-bold text-sm tracking-tight mt-1 text-slate-900 dark:text-white">Luyện giao tiếp phản xạ trôi chảy</div>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-normal">Chấp nhận sai lệch phát âm nhỏ, ưu tiên tốc độ nói nhanh và thói quen ngắt nghỉ tự nhiên.</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-bold text-sm shrink-0 border border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-800">
+                                50%+
+                            </div>
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="setGoal('comprehension70')"
+                            id="goal-comprehension70"
+                            class="w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 border-indigo-600 bg-indigo-50/20 dark:border-sky-500 dark:bg-sky-500/10"
+                        >
+                            <div class="flex-1">
+                                <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-sky-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                                    Standard Clarity
+                                </span>
+                                <div class="font-bold text-sm tracking-tight mt-1 text-slate-900 dark:text-white">Phát âm rõ ràng người nghe hiểu</div>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-normal">Đọc đúng đa số từ, đủ âm cuối quan trọng, giao tiếp làm việc tự tin, trôi trảy.</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-bold text-sm shrink-0 border border-indigo-600 bg-indigo-600 text-white dark:border-sky-400 dark:bg-sky-400 dark:text-slate-950">
+                                70%+
+                            </div>
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="setGoal('accent90')"
+                            id="goal-accent90"
+                            class="w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800"
+                        >
+                            <div class="flex-1">
+                                <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-sky-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                                    Near-Native Mastery
+                                </span>
+                                <div class="font-bold text-sm tracking-tight mt-1 text-slate-900 dark:text-white">Phát âm chuẩn xác bản xứ</div>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-normal">Tiêu chuẩn khắt khe, kiểm tra từng nốt cao độ, trọng âm, nguyên âm đôi, nuốt âm đặc trưng.</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-bold text-sm shrink-0 border border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-800">
+                                90%+
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-500/5 text-amber-800 dark:text-amber-300 rounded-xl p-3 text-xs flex gap-2.5 mt-5 border border-amber-200/50 dark:border-amber-500/10 font-sans">
+                        <i data-lucide="sparkles" class="w-5 h-5 shrink-0 text-amber-500"></i>
+                        <span>
+                            <strong>Lưu ý:</strong> Cấu hình mức độ phát âm cho phép thay đổi hoàn toàn miễn phí bất cứ lúc nào trong bảng <strong>Cài đặt tài khoản</strong>.
+                        </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="goToStep('premium')"
+                        class="w-full mt-6 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                    >
+                        <span>Xem Quyền Lợi Premium</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- STEP 4: PREMIUM SUBSCRIPTION OFFER -->
+                <div id="step-premium" class="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-100 dark:border-slate-800 text-center relative overflow-hidden hidden animate-slide-up">
+                    <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500"></div>
+
+                    <div class="mx-auto w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mt-3">
+                        <i data-lucide="shield" class="w-8 h-8 text-indigo-600 dark:text-indigo-400"></i>
+                    </div>
+
+                    <h2 class="text-2xl font-bold tracking-tight mt-4 text-slate-900 dark:text-white">Kích hoạt Gói Pro Thành Viên?</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs mt-1.5 max-w-sm mx-auto">
+                        Mở khóa không giới hạn số tim luyện tập, công nghệ chấm điểm Gemini AI và tính năng tự tạo bài giảng theo ý muốn.
+                    </p>
+
+                    <div class="mt-6 border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl p-4 text-left space-y-3.5">
+                        <div class="flex gap-2.5 items-start text-xs text-slate-600 dark:text-slate-300">
+                            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mt-0.5 shrink-0 font-bold">✓</span>
+                            <span>Không quảng cáo cắt ngang luồng ghi âm</span>
+                        </div>
+                        <div class="flex gap-2.5 items-start text-xs text-slate-600 dark:text-slate-300">
+                            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mt-0.5 shrink-0 font-bold">✓</span>
+                            <span>Mở rộng phân tích từ vựng IPA chuyên sâu từ Gemini AI</span>
+                        </div>
+                        <div class="flex gap-2.5 items-start text-xs text-slate-600 dark:text-slate-300">
+                            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mt-0.5 shrink-0 font-bold">✓</span>
+                            <span>Vô hạn sinh ngẫu nhiên chủ đề học bằng AI</span>
+                        </div>
+                        <div class="flex gap-2.5 items-start text-xs text-slate-600 dark:text-slate-300">
+                            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mt-0.5 shrink-0 font-bold">✓</span>
+                            <span>Đặc quyền thay đổi cấp độ học tập linh hoạt (Subscription-based)*</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex flex-col md:flex-row items-center justify-between p-4 bg-indigo-50/30 dark:bg-indigo-950/20 rounded-2xl gap-3">
+                        <div class="text-left">
+                            <span class="text-[10px] text-indigo-600 dark:text-sky-400 font-mono uppercase font-bold tracking-wider">HỌC PHÍ THỬ NGHIỆM</span>
+                            <div class="text-xl font-extrabold flex items-baseline gap-1 mt-0.5 text-slate-900 dark:text-white">
+                                <span>149K ₫</span>
+                                <span class="text-xs font-normal text-slate-400">/ tháng</span>
+                            </div>
+                        </div>
+                        <span class="text-xs text-emerald-600 dark:text-emerald-400 px-3 py-1 bg-emerald-100/30 rounded-lg font-mono font-semibold">Tặng miễn phí 3 ngày test</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mt-6">
+                        <button
+                            type="button"
+                            onclick="completeSetup(false)"
+                            class="py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium text-xs cursor-pointer transition-colors"
+                        >
+                            Dùng Gói Miễn Phí
+                        </button>
+                        <button
+                            type="button"
+                            onclick="completeSetup(true)"
+                            class="py-3 px-4 bg-gradient-to-r from-pink-500 to-indigo-600 hover:from-pink-600 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-500/10"
+                        >
+                            <i data-lucide="sparkles" class="w-4 h-4 shrink-0 text-amber-300"></i>
+                            <span>Kích Hoạt VIP MIỄN PHÍ</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Lucide script -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+
+        var selectedLevel = "Casual";
+        var selectedAccent = "US";
+        var selectedGoal = "comprehension70";
+        var isLogin = true;
+        var loginAction = '@Url.Action("Login", "Account")';
+        var registerAction = '@Url.Action("Register", "Account")';
+
+        function handleAuthSubmit(event) {
+            event.preventDefault();
+            var form = document.getElementById("auth-form");
+            var nameInput = document.getElementById("input-name");
+
+            form.action = isLogin ? loginAction : registerAction;
+            nameInput.required = !isLogin;
+            form.submit();
+        }
+
+        function toggleAuthMode() {
+            isLogin = !isLogin;
+            var title = document.getElementById("auth-title");
+            var subtitle = document.getElementById("auth-subtitle");
+            var nameField = document.getElementById("register-name-field");
+            var btnText = document.getElementById("auth-btn-text");
+            var toggleBtn = document.getElementById("auth-toggle-btn");
+
+            if (isLogin) {
+                title.innerText = "Xin chào quay trở lại!";
+                subtitle.innerText = "Nhập tài khoản để tiếp tục theo dõi chuỗi ngày Streak";
+                nameField.classList.add("hidden");
+                btnText.innerText = "Đăng Nhập Thử Nghiệm";
+                toggleBtn.innerText = "Chưa có tài khoản? Đăng ký ngay";
+            } else {
+                title.innerText = "Tạo tài khoản học tập";
+                subtitle.innerText = "Đăng ký thành viên để bắt đầu hành trình nói tiếng Anh trôi chảy";
+                nameField.classList.remove("hidden");
+                btnText.innerText = "Tạo Tài Khoản";
+                toggleBtn.innerText = "Đã có tài khoản? Đăng nhập";
+            }
+        }
+
+        function goToStep(stepId, event) {
+            if (event) event.preventDefault();
+            
+            document.getElementById("step-auth").classList.add("hidden");
+            document.getElementById("step-level").classList.add("hidden");
+            document.getElementById("step-goal").classList.add("hidden");
+            document.getElementById("step-premium").classList.add("hidden");
+
+            document.getElementById("step-" + stepId).classList.remove("hidden");
+        }
+
+        function setLevel(level) {
+            selectedLevel = level;
+            document.getElementById("level-casual").className = "w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800";
+            document.getElementById("level-academic").className = "w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800";
+            document.getElementById("level-professional").className = "w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800";
+
+            document.getElementById("level-" + level.toLowerCase()).className = "w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 border-indigo-600 bg-indigo-50/20 dark:border-sky-500 dark:bg-sky-500/10";
+        }
+
+        function setTargetAccent(accent) {
+            selectedAccent = accent;
+            document.getElementById("taccent-us").className = "py-2.5 rounded-xl border font-sans font-semibold text-xs cursor-pointer text-center transition-all border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300";
+            document.getElementById("taccent-uk").className = "py-2.5 rounded-xl border font-sans font-semibold text-xs cursor-pointer text-center transition-all border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300";
+
+            document.getElementById("taccent-" + accent.toLowerCase()).className = "py-2.5 rounded-xl border font-sans font-semibold text-xs cursor-pointer text-center transition-all border-indigo-600 bg-indigo-50/10 text-indigo-600 dark:border-sky-400 dark:text-sky-400";
+        }
+
+        function setGoal(goal) {
+            selectedGoal = goal;
+            document.getElementById("goal-fluency50").className = "w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800";
+            document.getElementById("goal-comprehension70").className = "w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800";
+            document.getElementById("goal-accent90").className = "w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 border-slate-100 hover:border-slate-200 dark:border-slate-800";
+
+            var btn = document.getElementById("goal-" + goal);
+            btn.className = "w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 border-indigo-600 bg-indigo-50/20 dark:border-sky-500 dark:bg-sky-500/10";
+        }
+
+        function completeSetup(isPremium) {
+            alert(isPremium ? 'Đăng nhập & Kích hoạt gói Pro VIP thành công!' : 'Đăng nhập thành công với gói cơ bản!');
+            window.location.href = '@Url.Action("Index", "Home")';
+        }
+    </script>
+</body>
+</html>
