@@ -1,158 +1,629 @@
-html {
-  font-size: 14px;
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&family=Lexend:wght@700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+
+
+
+/* High Density Design Custom Utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
+.dark .glass {
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.active-sentence {
+  border-left: 4px solid #4f46e5;
+  background: #eef2ff;
+}
+
+.dark .active-sentence {
+  border-left: 4px solid #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+/* Subtitle list rows — stable left border avoids layout shift on highlight */
+.sub-row {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(248 250 252);
+  border-left-width: 4px;
+  border-left-color: transparent;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  color: rgb(100 116 139);
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.dark .sub-row {
+  border-color: rgba(30, 41, 59, 0.6);
+  color: rgb(100 116 139);
+}
+
+.sub-row:hover {
+  background: rgba(248, 250, 252, 0.45);
+}
+
+.dark .sub-row:hover {
+  background: rgba(30, 41, 59, 0.3);
+}
+
+.sub-row.is-active {
+  border-left-color: #4f46e5;
+  background: rgba(79, 70, 229, 0.06);
+  color: rgb(15 23 42);
+  font-weight: 700;
+}
+
+.dark .sub-row.is-active {
+  border-left-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.05);
+  color: rgb(248 250 252);
+}
+
+.sub-row-num {
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 0.375rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(226 232 240);
+  background: rgb(248 250 252);
+  color: rgb(100 116 139);
+}
+
+.dark .sub-row-num {
+  border-color: rgb(30 41 59);
+  background: rgb(15 23 42);
+  color: rgb(148 163 184);
+}
+
+.sub-row.is-active .sub-row-num {
+  border-color: #4f46e5;
+  background: #4f46e5;
+  color: white;
+}
+
+.dark .sub-row.is-active .sub-row-num {
+  border-color: #38bdf8;
+  background: #38bdf8;
+  color: rgb(15 23 42);
+}
+
+.sub-row-text {
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+  user-select: none;
+  color: rgb(30 41 59);
+}
+
+.dark .sub-row-text {
+  color: rgb(203 213 225);
+}
+
+.sub-row.is-active .sub-row-text {
+  color: rgb(15 23 42);
+  font-weight: 700;
+}
+
+.dark .sub-row.is-active .sub-row-text {
+  color: rgb(248 250 252);
+}
+
+#lesson-left-column {
+  overflow-anchor: none;
+}
+
+#words-container {
+  min-height: 5.5rem;
+  align-content: center;
+}
+
+.score-ring {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Accent pulsing for active recording state */
+@keyframes recording-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.animate-rec {
+  animation: recording-pulse 1.8s infinite ease-in-out;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+/* Audio Waveform simulated lines scaling */
+@keyframes wave-bounce {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
 }
 
+.wave-bar {
+  animation: wave-bounce 1.2s infinite ease-in-out;
+}
+
+.wave-bar:nth-child(2n) {
+  animation-delay: 0.15s;
+}
+
+.wave-bar:nth-child(3n) {
+  animation-delay: 0.3s;
+}
+
+.wave-bar:nth-child(4n) {
+  animation-delay: 0.45s;
+}
+
+.wave-bar:nth-child(5n) {
+  animation-delay: 0.6s;
+}
+
+/* Scrollbars styling */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* General clean up */
 body {
-  margin-bottom: 60px;
+  background-color: #f8fafc;
+  font-family: 'Nunito', sans-serif;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* Global Heading Font Overrides (Supporting Vietnamese) */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lexend', sans-serif !important;
+  font-weight: 800 !important;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Set premium colors for headings */
+h1 {
+  color: #3b82f6 !important; /* Premium Blue for page banners */
 }
 
-/* --- Cụm Menu ở giữa --- */
-.custom-nav-center {
-    display: flex;
-    gap: 8px;
+h2, h4 {
+  color: #4f46e5 !important; /* Premium Indigo for sections & widgets */
 }
 
-.custom-nav-center .custom-tab {
-    color: #555555 !important;
-    font-weight: 600;
-    font-size: 15px;
-    padding: 8px 20px;
-    border-radius: 12px; 
-    background-color: transparent !important; 
-    transition: all 0.2s ease-in-out;
+h3 {
+  color: #1e293b; /* Keep default slate for card titles, no !important so hover works */
 }
 
-.custom-nav-center .custom-tab:hover {
-    background-color: #FAF5FF !important; 
+.dark h1 {
+  color: #60a5fa !important;
 }
 
-.custom-nav-center .custom-tab.active {
-    color: #8200DB !important; 
-    background-color: #FAF5FF !important; 
+.dark h2, .dark h4 {
+  color: #818cf8 !important;
 }
 
-.custom-badge-pro {
-    background-color: #9810FA;
-    color: #ffffff;
-    font-size: 11px;
-    letter-spacing: 0.5px;
-    border-radius: 6px;
+.dark h3 {
+  color: #f1f5f9;
 }
 
-/* --- Cụm chỉ số bên phải (Giữ nguyên từ file cũ của bạn) --- */
+.dark body {
+  background-color: #030712;
+}
+
+/* ====== Horizontal Scroll Carousel ====== */
+.scroll-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+  scroll-behavior: smooth;
+}
+
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-row {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scroll-card {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  width: 260px;
+  min-width: 260px;
+}
+
+@media (max-width: 640px) {
+  .scroll-card {
+    width: 220px;
+    min-width: 220px;
+  }
+}
+
+/* ====== Word Tooltip Popup ====== */
+.word-tooltip-container {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.word-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  min-width: 200px;
+  max-width: 280px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  animation: tooltip-in 0.2s ease-out;
+}
+
+.dark .word-tooltip {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.word-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: white;
+}
+
+.dark .word-tooltip::after {
+  border-top-color: #1e293b;
+}
+
+/* ====== IPA Inline Word Grid ====== */
+.ipa-word-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 12px;
+}
+
+.ipa-word-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ipa-word-cell .word-text {
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  padding: 2px 4px;
+  border-radius: 6px;
+  line-height: 1.3;
+}
+
+.ipa-word-cell .word-text:hover {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.dark .ipa-word-cell .word-text:hover {
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.ipa-word-cell .word-ipa {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #6366f1;
+  opacity: 0.85;
+  line-height: 1;
+}
+
+.dark .ipa-word-cell .word-ipa {
+  color: #38bdf8;
+}
+
+/* ====== Role Play Chat Bubbles ====== */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.chat-bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  position: relative;
+  animation: bubble-in 0.25s ease-out;
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-bubble-ai {
+  align-self: flex-start;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 4px;
+  color: #1e293b;
+}
+
+.dark .chat-bubble-ai {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.chat-bubble-user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-bubble .speaker-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* ====== Mobile Responsive Enhancements ====== */
+@media (max-width: 768px) {
+  .chat-bubble {
+    max-width: 92%;
+    font-size: 0.78rem;
+  }
+  .ipa-word-cell .word-text {
+    font-size: 0.95rem;
+  }
+  .ipa-word-cell .word-ipa {
+    font-size: 0.58rem;
+  }
+  .word-tooltip {
+    min-width: 180px;
+    max-width: 250px;
+    padding: 10px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ====== Slide Up Animation ====== */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* Custom Header Styling */
+.custom-tab {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  color: #64748b !important;
+  padding: 6px 18px !important;
+  border-radius: 20px !important;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.custom-tab:hover {
+  color: #a855f7 !important;
+  background-color: rgba(152, 16, 250, 0.04) !important;
+}
+
+.custom-tab.active {
+  color: #9810FA !important;
+  background-color: rgba(152, 16, 250, 0.1) !important;
+}
+
+/* Dark mode custom-tab overrides */
+.dark .custom-tab {
+  color: #94a3b8 !important;
+}
+
+.dark .custom-tab:hover {
+  color: #a78bfa !important;
+  background-color: rgba(192, 132, 252, 0.05) !important;
+}
+
+.dark .custom-tab.active {
+  color: #c084fc !important;
+  background-color: rgba(192, 132, 252, 0.15) !important;
+}
+
+/* Stat Boxes */
 .stat-box {
-    display: inline-flex;
-    align-items: center;
-    height: 34px;
-    padding: 0 12px 0 8px;
-    border-radius: 10px;  
-    font-weight: 700;     
-    font-size: 13.5px;
-    gap: 4px;            
-    border: 1.09px solid transparent; 
+  display: inline-flex;
+  align-items: center;
+  gap: 4px !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  transition: all 0.15s ease-in-out;
+  border: 1px solid transparent;
+  height: 28px;
 }
 
-.stat-box .stat-icon {
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 4px;
-    overflow: visible;
+.stat-box .stat-icon, 
+.stat-box svg {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
 }
 
-.stat-icon.svg-heart {
-    width: 96px;  
-    height: 48px;
-    margin-left: -10px; 
-    margin-right: -60px; 
-}
-
-.stat-icon.svg-exp {
-    width: 108px;
-    height: 48px;
-    margin-left: -10px; 
-    margin-right: -70px; 
+.stat-box svg path,
+.stat-box svg {
+  fill: currentColor !important;
+  stroke: currentColor !important;
 }
 
 .stat-box .stat-value {
-    letter-spacing: -0.2px;
+  line-height: 1;
 }
 
 .stat-box .stat-unit {
-    font-weight: 600;
-    font-size: 12.5px;
-    opacity: 0.9;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
+  margin-left: 1px;
 }
 
+/* Streak box */
 .streak-box {
-    background-color: #FFF7ED;
-    border-color: #FFEDD4;
-    color: #CA3500;
+  background-color: #fff2e8 !important;
+  color: #ff7a00 !important;
+  border-color: #ffd8bf !important;
 }
 
+/* Heart box */
 .heart-box {
-    background-color: #FDF2F8;
-    border-color: #FCE7F3;
-    color: #C6005C;
+  background-color: #fff0f6 !important;
+  color: #eb2f96 !important;
+  border-color: #ffd6e7 !important;
 }
 
+/* Exp box */
 .exp-box {
-    background-color: #FFFBEB;
-    border-color: #FEF3C6;
-    color: #BB4D00;
+  background-color: #feffe6 !important;
+  color: #d48806 !important;
+  border-color: #fffb8f !important;
 }
 
+/* Provip box */
 .provip-box {
-    background-color: #ECFDF5;
-    border-color: #D0FAE5;
-    color: #007A55;
-    padding: 0 12px; 
+  background-color: #e6fffa !important;
+  color: #0d9488 !important;
+  border-color: #b2f2bb !important;
 }
 
-.custom-nav-right .btn-link {
-    text-decoration: none;
-    font-size: 18px;
-    transition: transform 0.2s ease;
+/* Lesson Card Hover Styles */
+.lesson-card {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  display: block;
 }
 
-.btn-logout {
-    transition: transform 0.2s ease;
+.lesson-inner-card {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background-color: white;
 }
 
-.btn-logout:hover svg path {
-    stroke: #EF4444; 
+.lesson-card:hover .lesson-inner-card {
+  border-color: #9810FA !important;
+  box-shadow: 0 4px 12px rgba(152, 16, 250, 0.1) !important;
 }
 
-.btn-logout:active {
-    transform: scale(0.92);
+.lesson-card:hover h3, 
+.lesson-card:hover p, 
+.lesson-card:hover span, 
+.lesson-card:hover small, 
+.lesson-card:hover i {
+  color: #9810FA !important;
 }
 
-.btn-theme-toggle:hover svg path {
-    stroke: #9810FA;
+.text-xxs {
+  font-size: 11px;
 }
-.btn-theme-toggle:active {
-    transform: scale(0.92);
+
+.text-[10px] {
+  font-size: 10px;
+}
+
+/* Fix Tailwind/Bootstrap navbar collapse conflict */
+.navbar-collapse.collapse {
+  visibility: visible !important;
 }
