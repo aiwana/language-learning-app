@@ -1,8 +1,63 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+﻿@{
+    ViewData["Title"] = "Khóa học";
+}
+
+<div class="animate-slide-up py-2">
+    <div class="surface-card py-4 px-5 md:py-5 md:px-6 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <p class="section-label section-label-indigo mb-1">Rebuild v0.1</p>
+                <h1 class="h3 fw-extrabold mb-2">ShadowSpeak AI</h1>
+                <p class="text-body-muted small mb-0">
+                    Nền tảng design system &amp; theme đã sẵn sàng. Các trang Khóa học, Auth và Shadowing sẽ được nối ở các issue tiếp theo.
+                </p>
+            </div>
+            <div class="theme-badge">
+                <span>Giao diện:</span>
+                <strong id="theme-mode-label">Light</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="demo-card p-4 h-100">
+                <p class="section-label section-label-emerald mb-2">Design tokens</p>
+                <h3 class="h6 fw-bold mb-2">Màu &amp; typography</h3>
+                <p class="text-body-muted small mb-3">Nunito, Lexend, JetBrains Mono — palette Indigo / Brand purple / Gamification.</p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <span class="badge rounded-pill" style="background:#9810FA">Brand</span>
+                    <span class="badge rounded-pill" style="background:#4f46e5">Primary</span>
+                    <span class="badge rounded-pill" style="background:#ff6900">Streak</span>
+                    <span class="badge rounded-pill" style="background:#f6339a">Heart</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="demo-card p-4 h-100">
+                <p class="section-label section-label-sky mb-2">Dark / Light</p>
+                <h3 class="h6 fw-bold mb-2">Theme toggle</h3>
+                <p class="text-body-muted small mb-0">
+                    Bấm biểu tượng mặt trăng/mặt trời trên thanh nav. Trạng thái lưu trong <code class="font-mono">localStorage.theme</code> và đồng bộ class <code class="font-mono">html.dark</code>.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="demo-card p-4 h-100">
+                <p class="section-label section-label-violet mb-2">Issue #8 Done</p>
+                <h3 class="h6 fw-bold mb-2">Tiếp theo</h3>
+                <ul class="text-body-muted small mb-0 ps-3">
+                    <li>#9 — Navigation + stats thật</li>
+                    <li>#10 — Auth &amp; onboarding</li>
+                    <li>#11 — Trang Khóa học</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-card p-4 mt-3">
+        <h2 class="h5 fw-bold mb-2">IPA preview</h2>
+        <p class="mb-2 font-mono text-sm ipa-preview">/ˈʃædəʊ ˈspiːkɪŋ/</p>
+        <p class="text-body-muted small mb-0">Font JetBrains Mono dùng cho phiên âm ở các màn Shadowing sau này.</p>
+    </div>
+</div>
