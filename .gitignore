@@ -1,4 +1,3 @@
-## Before shared user-ledger-context triggers
 # =========================================================================
 # File .gitignore chuẩn cho dự án ASP.NET Core & Web Frontend
 # =========================================================================
@@ -36,12 +35,18 @@ live-server/
 Thumbs.db
 
 # 5. Cấu hình bảo mật và Database cục bộ (Tránh lộ thông tin nhạy cảm)
+.env
+.env.*
 appsettings.Development.json
 *.db
 *.db-journal
 *.sqlite
 
-# 6. Các file tạm thời sinh ra khi chạy ứng dụng .NET
+# 6. Test & coverage
+TestResults/
+coverage/
+
+# 7. Các file tạm thời sinh ra khi chạy ứng dụng .NET
 .net/
 *.pubxml
 *.pfx

@@ -1,31 +1,46 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿(function () {
+  const storageKey = 'theme';
 
-// Write your JavaScript code.
+  function applyTheme(theme) {
+    const isDark = theme === 'dark';
+    document.documentElement.classList.toggle('dark', isDark);
 
-//Hàm để xử lý chuyển đổi giao diện sáng/tối
-$(document).ready(function () {
-    const currentTheme = localStorage.getItem("theme");
-
-    if (currentTheme === "dark") {
-        $("body").addClass("dark-mode");
-        $(".btn-theme-toggle .icon-moon").addClass("d-none");   
-        $(".btn-theme-toggle .icon-sun").removeClass("d-none"); 
+    const moon = document.querySelector('.btn-theme-toggle .icon-moon');
+    const sun = document.querySelector('.btn-theme-toggle .icon-sun');
+    if (moon) {
+      moon.classList.toggle('d-none', isDark);
+    }
+    if (sun) {
+      sun.classList.toggle('d-none', !isDark);
     }
 
-    $(".btn-theme-toggle").on("click", function () {
-        $("body").toggleClass("dark-mode");
-        const isDarkMode = $("body").hasClass("dark-mode");
+    const label = document.getElementById('theme-mode-label');
+    if (label) {
+      label.textContent = isDark ? 'Dark' : 'Light';
+    }
+  }
 
-        if (isDarkMode) {
-            $(".btn-theme-toggle .icon-moon").addClass("d-none");
-            $(".btn-theme-toggle .icon-sun").removeClass("d-none");
-            localStorage.setItem("theme", "dark"); 
-        } else {
-           
-            $(".btn-theme-toggle .icon-moon").removeClass("d-none");
-            $(".btn-theme-toggle .icon-sun").addClass("d-none");
-            localStorage.setItem("theme", "light"); 
-        }
+  function getInitialTheme() {
+    const saved = localStorage.getItem(storageKey);
+    if (saved === 'dark' || saved === 'light') {
+      return saved;
+    }
+
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    applyTheme(getInitialTheme());
+
+    const toggle = document.querySelector('.btn-theme-toggle');
+    if (!toggle) {
+      return;
+    }
+
+    toggle.addEventListener('click', function () {
+      const nextTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+      localStorage.setItem(storageKey, nextTheme);
+      applyTheme(nextTheme);
     });
-});
+  });
+})();
