@@ -1,0 +1,7 @@
+[
+  { "sentence_order": 1, "start_time": 0.0, "end_time": 3.0, "text": "True leadership is about influence, not authority." },
+  { "sentence_order": 2, "start_time": 3.0, "end_time": 6.0, "text": "You have to lead by example every single day." },
+  { "sentence_order": 3, "start_time": 6.0, "end_time": 9.5, "text": "People watch what you do more than they listen to what you say." },
+  { "sentence_order": 4, "start_time": 9.5, "end_time": 12.0, "text": "Set the standard and others will follow." },
+  { "sentence_order": 5, "start_time": 12.0, "end_time": 15.0, "text": "That is how you build trust within a team." }
+]
