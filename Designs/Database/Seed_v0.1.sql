@@ -1,9 +1,4 @@
-﻿-- ==============================================================================
--- BƯỚC 3: SEED DATA DEMO CHO v0.1 (Chạy sau Schema_v0.1_Extension.sql)
--- Script này là Idempotent: Chạy nhiều lần sẽ không bị lặp dữ liệu (Duplicate).
--- ==============================================================================
-
-USE EnglishShadowingDB;
+﻿USE EnglishShadowingDB;
 GO
 
 BEGIN TRANSACTION;
