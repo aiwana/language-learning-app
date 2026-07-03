@@ -16,12 +16,13 @@ obj/
 # 2. File cấu hình cá nhân của Visual Studio & VS Code (Tránh xung đột cấu hình máy)
 .vs/
 .vscode/
+.cursor/
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
 
-# Loại trừ file cấu hình user cụ thể trong ảnh của bạn
+# Loại trừ file cấu hình user cụ thể
 WebShadowing.csproj.user
 
 # 3. Thư viện Frontend (Nếu sau này bạn có dùng npm / nodejs)
@@ -38,6 +39,7 @@ Thumbs.db
 .env
 .env.*
 appsettings.Development.json
+**/UserSecrets/
 *.db
 *.db-journal
 *.sqlite
@@ -50,4 +52,4 @@ coverage/
 .net/
 *.pubxml
 *.pfx
-*.publishproparas
+*.publishproj
