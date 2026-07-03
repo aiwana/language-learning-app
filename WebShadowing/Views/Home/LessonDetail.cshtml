@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Bài học";
+    var lessonId = ViewBag.LessonId;
+}
+
+<div class="animate-slide-up py-2">
+    <div class="surface-card py-4 px-5 py-md-5 px-md-6">
+        <p class="section-label section-label-sky mb-1">Shadowing</p>
+        <h1 class="h3 fw-extrabold mb-2">Bài học #@lessonId</h1>
+        <p class="text-body-muted small mb-4">
+            Placeholder — màn chi tiết bài học sẽ được triển khai ở issue sau. Bottom nav vẫn giữ tab <strong>Khóa học</strong> active.
+        </p>
+        <a class="btn btn-outline-primary btn-sm" asp-controller="Home" asp-action="Index">← Về Khóa học</a>
+    </div>
+</div>

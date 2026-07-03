@@ -1,0 +1,37 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var isCoursesActive = action is "Index" or "LessonDetail";
+    var isStatsActive = action == "Stats";
+    var isSettingsActive = action == "Settings";
+}
+
+<nav class="bottom-nav d-md-none" aria-label="Điều hướng chính">
+    <a class="bottom-nav-item @(isCoursesActive ? "active" : "")"
+       asp-controller="Home" asp-action="Index">
+        <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        <span class="bottom-nav-label">Khóa học</span>
+    </a>
+
+    <a class="bottom-nav-item @(isStatsActive ? "active" : "")"
+       asp-controller="Home" asp-action="Stats">
+        <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3v18h18"/>
+            <path d="M18 17V9"/>
+            <path d="M13 17V5"/>
+            <path d="M8 17v-3"/>
+        </svg>
+        <span class="bottom-nav-label">Tiến trình</span>
+    </a>
+
+    <a class="bottom-nav-item @(isSettingsActive ? "active" : "")"
+       asp-controller="Home" asp-action="Settings">
+        <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span class="bottom-nav-label">Tài khoản</span>
+    </a>
+</nav>
