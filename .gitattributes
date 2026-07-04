@@ -1,0 +1,21 @@
+# Chuẩn hóa line ending — tránh ^M trong diff/commit
+* text=auto eol=lf
+
+*.cs     text eol=lf
+*.cshtml text eol=lf
+*.css    text eol=lf
+*.js     text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+*.sql    text eol=lf
+*.sln    text eol=lf
+*.csproj text eol=lf
+
+# Binary — không đổi line ending
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.woff binary
+*.woff2 binary
