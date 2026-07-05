@@ -1,0 +1,7 @@
+[
+  { "sentence_order": 1, "start_time": 0.0, "end_time": 2.5, "text": "Welcome, please take a seat." },
+  { "sentence_order": 2, "start_time": 2.5, "end_time": 5.0, "text": "Could you tell me a little about yourself?" },
+  { "sentence_order": 3, "start_time": 5.0, "end_time": 8.5, "text": "I have over five years of experience in software development." },
+  { "sentence_order": 4, "start_time": 8.5, "end_time": 11.0, "text": "What would you say is your biggest strength?" },
+  { "sentence_order": 5, "start_time": 11.0, "end_time": 14.5, "text": "I am very adaptable and thrive in fast-paced environments." }
+]

@@ -1,0 +1,7 @@
+[
+  { "sentence_order": 1, "start_time": 0.0, "end_time": 2.5, "text": "This is a technique called scatter focus." },
+  { "sentence_order": 2, "start_time": 2.5, "end_time": 6.0, "text": "It allows your brain to connect completely unrelated ideas." },
+  { "sentence_order": 3, "start_time": 6.0, "end_time": 8.5, "text": "You just need to let your mind wander." },
+  { "sentence_order": 4, "start_time": 8.5, "end_time": 11.0, "text": "No phones, no distractions, just you." },
+  { "sentence_order": 5, "start_time": 11.0, "end_time": 14.0, "text": "Try it for 15 minutes a day." }
+]
