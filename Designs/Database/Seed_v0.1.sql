@@ -20,11 +20,13 @@ BEGIN TRANSACTION;
 DECLARE @CurriculumCourseId BIGINT;
 IF NOT EXISTS (SELECT 1 FROM Courses WHERE title = N'Tiếng Anh lớp 6')
 BEGIN
-    INSERT INTO Courses (title, level, learning_mode, description)
-    VALUES (N'Tiếng Anh lớp 6', 'Beginner', 'casual', N'Giáo trình Tiếng Anh cơ bản');
+    INSERT INTO Courses (title, level, learning_mode, course_type, description)
+    VALUES (N'Tiếng Anh lớp 6', 'Beginner', 'casual', 'curriculum', N'Giáo trình Tiếng Anh cơ bản');
     SET @CurriculumCourseId = SCOPE_IDENTITY();
 END
 ELSE BEGIN SELECT @CurriculumCourseId = course_id FROM Courses WHERE title = N'Tiếng Anh lớp 6'; END
+
+UPDATE Courses SET course_type = 'curriculum' WHERE course_id = @CurriculumCourseId;
 
 -- Lesson: Unit 1 My new school
 DECLARE @CurriculumLessonId BIGINT;
@@ -56,11 +58,13 @@ END
 DECLARE @CasualCourseId BIGINT;
 IF NOT EXISTS (SELECT 1 FROM Courses WHERE title = N'Video Bank - Đời sống')
 BEGIN
-    INSERT INTO Courses (title, level, learning_mode) 
-    VALUES (N'Video Bank - Đời sống', 'Beginner', 'casual');
+    INSERT INTO Courses (title, level, learning_mode, course_type)
+    VALUES (N'Video Bank - Đời sống', 'Beginner', 'casual', 'video_bank');
     SET @CasualCourseId = SCOPE_IDENTITY();
 END
 ELSE BEGIN SELECT @CasualCourseId = course_id FROM Courses WHERE title = N'Video Bank - Đời sống'; END
+
+UPDATE Courses SET course_type = 'video_bank' WHERE course_id = @CasualCourseId;
 
 DECLARE @ScatterFocusLessonId BIGINT;
 IF NOT EXISTS (SELECT 1 FROM Lessons WHERE course_id = @CasualCourseId AND title = 'Scatter Focus')
@@ -88,11 +92,13 @@ END
 DECLARE @ProCourseId BIGINT;
 IF NOT EXISTS (SELECT 1 FROM Courses WHERE title = N'Video Bank - Professional')
 BEGIN
-    INSERT INTO Courses (title, level, learning_mode) 
-    VALUES (N'Video Bank - Professional', 'Intermediate', 'professional');
+    INSERT INTO Courses (title, level, learning_mode, course_type)
+    VALUES (N'Video Bank - Professional', 'Intermediate', 'professional', 'video_bank');
     SET @ProCourseId = SCOPE_IDENTITY();
 END
 ELSE BEGIN SELECT @ProCourseId = course_id FROM Courses WHERE title = N'Video Bank - Professional'; END
+
+UPDATE Courses SET course_type = 'video_bank' WHERE course_id = @ProCourseId;
 
 -- Lesson 1: Lead by Example
 DECLARE @LeadLessonId BIGINT;
@@ -140,10 +146,11 @@ END
 -- ---------------------------------------------------------
 IF NOT EXISTS (SELECT 1 FROM Courses WHERE title = N'Video Bank - Học Thuật')
 BEGIN
-    INSERT INTO Courses (title, level, learning_mode) 
-    VALUES (N'Video Bank - Học Thuật', 'Advanced', 'academic');
+    INSERT INTO Courses (title, level, learning_mode, course_type)
+    VALUES (N'Video Bank - Học Thuật', 'Advanced', 'academic', 'video_bank');
     PRINT 'Đã tạo Video Bank Academic (Khung trống)';
 END
 
-COMMIT TRANSACTION;
+UPDATE Courses SET course_type = 'video_bank' WHERE title = N'Video Bank - Học Thuật';
 
+COMMIT TRANSACTION;

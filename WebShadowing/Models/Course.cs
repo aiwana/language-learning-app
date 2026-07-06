@@ -25,6 +25,11 @@ public class Course
     [Column("learning_mode")]
     public string LearningMode { get; set; } = LearningModes.Casual;
 
+    [Required]
+    [MaxLength(20)]
+    [Column("course_type")]
+    public string CourseType { get; set; } = CourseTypes.Curriculum;
+
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 

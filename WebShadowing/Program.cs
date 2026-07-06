@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using WebShadowing.Data;
+using WebShadowing.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ILessonContentService, LessonContentService>();
 
 builder.Services.AddControllersWithViews();
 
@@ -18,7 +22,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
-app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapControllers();
