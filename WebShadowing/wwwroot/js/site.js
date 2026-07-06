@@ -49,37 +49,8 @@
       });
     });
 
-    initNavLoginPreview();
-  });
-
-  // TODO: [AUTHEN BE INTEGRATION REQUIRED]
-  // This function is currently a pure frontend simulation using localStorage.
-  // When integrating with the Backend Auth API, replace this logic with 
-  // real JWT/Session token verification and actual API calls for login/logout.
-  function initNavLoginPreview() {
-    const storageKey = 'navLoggedInPreview';
-
-    function applyNavLoginState(isLoggedIn) {
-      document.body.classList.toggle('nav-logged-in', isLoggedIn);
+    if (document.body.classList.contains('nav-logged-in')) {
+      document.body.classList.add('nav-logged-in');
     }
-
-    // BE Note: Change this to check valid token/session instead of just localStorage
-    applyNavLoginState(localStorage.getItem(storageKey) === 'true');
-
-    document.querySelectorAll('.nav-login-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        // TODO: Call BE Login API here, handle token storage (Cookie/Storage)
-        localStorage.setItem(storageKey, 'true');
-        applyNavLoginState(true);
-      });
-    });
-
-    document.querySelectorAll('.btn-logout').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        // TODO: Call BE Logout API here to revoke token/session
-        localStorage.removeItem(storageKey);
-        applyNavLoginState(false);
-      });
-    });
-  }
+  });
 })();

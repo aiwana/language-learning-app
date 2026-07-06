@@ -1,0 +1,101 @@
+@model WebShadowing.Models.AuthPageViewModel
+@{
+    ViewData["Title"] = "Đăng nhập / Đăng ký";
+    var activeStep = ViewData["ActiveStep"]?.ToString() ?? "login";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-8">
+        <div class="surface-card p-4 p-md-5">
+            <div class="text-center mb-4">
+                <p class="section-label section-label-indigo mb-2">Authentication</p>
+                <h1 class="h3 fw-bold mb-2">Đăng nhập hoặc tạo tài khoản</h1>
+                <p class="text-body-muted mb-0">Bắt đầu hành trình luyện phát âm.</p>
+            </div>
+
+            @if (TempData["AuthError"] is string error)
+            {
+                <div class="alert alert-danger" role="alert">@error</div>
+            }
+
+            @if (activeStep == "level")
+            {
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="border rounded-4 p-4 h-100 mb-4">
+                            <h2 class="h5 fw-bold mb-3">Onboarding Wizard</h2>
+                            <p class="text-body-muted mb-3">Chúc mừng bạn đã đăng ký! Bạn đã được đăng nhập thành công. Nhấn tiếp tục để vào trang Khóa học.</p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Hình thức học mặc định</label>
+                                    <div class="form-control">casual</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mục tiêu phát âm</label>
+                                    <div class="form-control">70</div>
+                                </div>
+                                <div class="col-12">
+                                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary w-100">Tiếp tục tới Khóa học</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 h-100">
+                            <h2 class="h5 fw-bold mb-3">Đăng nhập</h2>
+                            <form asp-controller="Account" asp-action="Login" method="post">
+                                @Html.AntiForgeryToken()
+                                <input asp-for="Login.ReturnUrl" type="hidden" />
+                                <div class="mb-3">
+                                    <label asp-for="Login.Email" class="form-label"></label>
+                                    <input asp-for="Login.Email" class="form-control" />
+                                    <span asp-validation-for="Login.Email" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Login.Password" class="form-label"></label>
+                                    <input asp-for="Login.Password" class="form-control" type="password" />
+                                    <span asp-validation-for="Login.Password" class="text-danger small"></span>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 h-100">
+                            <h2 class="h5 fw-bold mb-3">Đăng ký</h2>
+                            <form asp-controller="Account" asp-action="Register" method="post">
+                                @Html.AntiForgeryToken()
+                                <input asp-for="Register.ReturnUrl" type="hidden" />
+                                <div class="mb-3">
+                                    <label asp-for="Register.FullName" class="form-label"></label>
+                                    <input asp-for="Register.FullName" class="form-control" />
+                                    <span asp-validation-for="Register.FullName" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Register.Email" class="form-label"></label>
+                                    <input asp-for="Register.Email" class="form-control" />
+                                    <span asp-validation-for="Register.Email" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Register.Password" class="form-label"></label>
+                                    <input asp-for="Register.Password" class="form-control" type="password" />
+                                    <span asp-validation-for="Register.Password" class="text-danger small"></span>
+                                </div>
+                                <button type="submit" class="btn btn-outline-primary w-100">Đăng ký</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

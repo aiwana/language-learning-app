@@ -46,6 +46,9 @@ public class User
     [Column("is_vip")]
     public bool IsVip { get; set; }
 
+    [Column("onboarding_completed")]
+    public bool OnboardingCompleted { get; set; }
+
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 
