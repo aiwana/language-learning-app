@@ -1,0 +1,39 @@
+@model WebShadowing.Models.CourseLibraryDto
+
+@{
+    var courseTitle = DisplayText.Fix(Model.Title);
+    var courseDescription = DisplayText.Fix(Model.Description);
+    var mode = ViewData["LearningMode"]?.ToString() ?? WebShadowing.Models.LearningModes.Casual;
+    var modeLabel = ViewData["LearningModeLabel"]?.ToString() ?? "Giao tiếp";
+    var modeIcon = ViewData["ModeIcon"]?.ToString() ?? "compass";
+}
+
+<div class="course-section curriculum-course-row mb-4" data-course-title="@courseTitle">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+        <div>
+            <h2 class="h5 fw-bold mb-1 text-slate-800 dark:text-slate-100">@courseTitle</h2>
+            @if (!string.IsNullOrWhiteSpace(courseDescription))
+            {
+                <p class="text-muted small mb-0">@courseDescription</p>
+            }
+        </div>
+        <span class="text-pink-600 font-extrabold text-10 uppercase flex-shrink-0">@Model.Lessons.Count bài học</span>
+    </div>
+
+    <div class="scroll-row">
+        @foreach (var lesson in Model.Lessons
+            .DistinctBy(lesson => lesson.LessonId)
+            .OrderBy(lesson => lesson.LessonOrder))
+        {
+            var lessonViewData = new ViewDataDictionary(ViewData);
+            lessonViewData["CourseTitle"] = courseTitle;
+            lessonViewData["CourseDescription"] = string.IsNullOrWhiteSpace(courseDescription) ? "Unit luyện shadowing theo giáo trình chuẩn." : courseDescription;
+            lessonViewData["CourseType"] = Model.CourseType;
+            lessonViewData["LearningMode"] = mode;
+            lessonViewData["LearningModeLabel"] = modeLabel;
+            lessonViewData["ModeIcon"] = modeIcon;
+
+            @await Html.PartialAsync("_LessonCard", lesson, lessonViewData)
+        }
+    </div>
+</div>

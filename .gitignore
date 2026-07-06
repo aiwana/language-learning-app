@@ -10,6 +10,7 @@
 x64/
 x86/
 build/
+.build-check/
 bin/
 obj/
 
@@ -40,6 +41,7 @@ Thumbs.db
 .env.*
 appsettings.Development.json
 **/UserSecrets/
+**/App_Data/DataProtectionKeys/
 *.db
 *.db-journal
 *.sqlite
