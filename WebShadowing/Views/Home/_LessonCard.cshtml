@@ -1,0 +1,86 @@
+@model WebShadowing.Models.LessonSummaryDto
+
+@{
+    var mode = ViewData["LearningMode"]?.ToString() ?? WebShadowing.Models.LearningModes.Casual;
+    var modeLabel = ViewData["LearningModeLabel"]?.ToString() ?? "Giao tiếp";
+    var modeIcon = ViewData["ModeIcon"]?.ToString() ?? "compass";
+    var courseType = ViewData["CourseType"]?.ToString() ?? WebShadowing.Models.CourseTypes.Curriculum;
+    var courseDescription = DisplayText.Fix(ViewData["CourseDescription"]?.ToString());
+    var cardClass = ViewData["CardClass"]?.ToString() ?? string.Empty;
+    var isVideoBank = courseType == WebShadowing.Models.CourseTypes.VideoBank;
+    var lessonTypeClass = isVideoBank ? "lesson-card-video" : "lesson-card-curriculum";
+    var lessonTypeIcon = isVideoBank ? "play-circle" : "book-open";
+    var title = DisplayText.Fix(Model.Title);
+    var cardDescription = string.IsNullOrWhiteSpace(courseDescription)
+        ? (isVideoBank ? "Video luyện nghe và shadowing theo mục tiêu học." : "Unit luyện shadowing theo giáo trình chuẩn.")
+        : courseDescription;
+    var duration = TimeSpan.FromSeconds(Model.Duration).ToString(@"m\:ss");
+    var disabledTitle = "Chưa có học liệu";
+}
+
+@if (Model.HasContent)
+{
+    <a asp-action="LessonDetail"
+       asp-route-id="@Model.LessonId"
+       asp-route-mode="@mode"
+       class="scroll-card lesson-card @lessonTypeClass text-decoration-none @cardClass"
+       data-title="@title"
+       data-desc="@cardDescription"
+       style="color: inherit;">
+        <div class="lesson-inner-card p-3 h-100 d-flex flex-column justify-content-between shadow-sm">
+            <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="lesson-type-icon" aria-hidden="true">
+                        <i data-lucide="@lessonTypeIcon"></i>
+                    </span>
+                    <span class="px-2 py-1 rounded text-9 font-extrabold uppercase border bg-slate-50 text-slate-500 border-slate-100">Bài @Model.LessonOrder</span>
+                </div>
+                <h3 class="fw-bold text-slate-800 dark:text-slate-200 mb-1 leading-snug lesson-title">@title</h3>
+                <p class="text-muted text-xxs mb-2 leading-relaxed line-clamp-2">@cardDescription</p>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top border-slate-100 dark:border-slate-800" style="font-size: 10px;">
+                <span class="lesson-foot-label text-muted d-flex align-items-center gap-1">
+                    <i data-lucide="@modeIcon" class="w-3.5 h-3.5"></i>
+                    <span>@modeLabel</span>
+                </span>
+                <span class="lesson-duration-label text-muted d-flex align-items-center gap-1">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                    <span>@duration</span>
+                </span>
+            </div>
+        </div>
+    </a>
+}
+else
+{
+    <div class="scroll-card lesson-card @lessonTypeClass lesson-card-disabled text-decoration-none opacity-50 @cardClass"
+         data-title="@title"
+         data-desc="@cardDescription"
+         style="color: inherit;"
+         aria-disabled="true"
+         title="@disabledTitle">
+        <div class="lesson-inner-card p-3 h-100 d-flex flex-column justify-content-between shadow-sm">
+            <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="lesson-type-icon" aria-hidden="true">
+                        <i data-lucide="@lessonTypeIcon"></i>
+                    </span>
+                    <span class="px-2 py-1 rounded text-9 font-extrabold uppercase border bg-slate-50 text-slate-500 border-slate-100">Bài @Model.LessonOrder</span>
+                </div>
+                <h3 class="fw-bold text-slate-800 dark:text-slate-200 mb-1 leading-snug lesson-title">@title</h3>
+                <p class="text-muted text-xxs mb-2 leading-relaxed line-clamp-2">@cardDescription</p>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top border-slate-100 dark:border-slate-800" style="font-size: 10px;">
+                <span class="lesson-foot-label text-muted d-flex align-items-center gap-1">
+                    <i data-lucide="@modeIcon" class="w-3.5 h-3.5"></i>
+                    <span>@modeLabel</span>
+                </span>
+                <span class="lesson-duration-label text-muted d-flex align-items-center gap-1">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                    <span>@duration</span>
+                </span>
+            </div>
+            <span class="no-content-label">Chưa có học liệu</span>
+        </div>
+    </div>
+}

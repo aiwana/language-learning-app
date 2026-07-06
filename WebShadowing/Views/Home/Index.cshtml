@@ -1,63 +1,221 @@
-﻿@{
-    ViewData["Title"] = "Khóa học";
+@model WebShadowing.Models.CourseLibraryViewModel
+
+@{
+    ViewData["Title"] = "Thư viện bài học";
+    var curriculumCourses = Model.CurriculumCourses
+        .GroupBy(course => DisplayText.Fix(course.Title), StringComparer.OrdinalIgnoreCase)
+        .Select(group => group.First())
+        .ToList();
+    var allVideoLessons = Model.VideoBankCourses
+        .SelectMany(course => course.Lessons.Select(lesson => new { Course = course, Lesson = lesson }))
+        .GroupBy(item => DisplayText.Fix(item.Lesson.Title), StringComparer.OrdinalIgnoreCase)
+        .Select(group => group.First())
+        .OrderBy(item => item.Course.CourseId)
+        .ThenBy(item => item.Lesson.LessonOrder)
+        .ToList();
 }
 
-<div class="animate-slide-up py-2">
-    <div class="surface-card py-4 px-5 py-md-5 px-md-6 mb-4">
-        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-            <div>
-                <p class="section-label section-label-indigo mb-1">Rebuild v0.1</p>
-                <h1 class="h3 fw-extrabold mb-2">ShadowSpeak AI</h1>
-                <p class="text-body-muted small mb-0">
-                    Nền tảng design system &amp; theme đã sẵn sàng. Các trang Khóa học, Auth và Shadowing sẽ được nối ở các issue tiếp theo.
-                </p>
+<div class="container py-4 animate-slide-up">
+    <div class="library-hero border border-slate-100 dark:border-slate-800 rounded-3xl py-3 px-5 md:py-4 md:px-6 shadow-sm mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 position-relative overflow-hidden" style="background-image: url('/images/banner.png'); background-size: cover; background-position: center right;">
+        <!-- Overlay for better text readability -->
+        <div class="position-absolute top-0 start-0 w-100 h-100 banner-overlay" style="z-index: 0;"></div>
+        
+        <div class="library-hero-copy position-relative" style="z-index: 1;">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <h1 class="h3 fw-extrabold mb-0 text-primary dark:text-blue-400">Thư viện bài học ShadowSpeak AI</h1>
+                <span class="badge rounded-pill px-3 py-1.5 d-inline-flex align-items-center shadow-sm" style="background: linear-gradient(135deg, #9810FA, #6366F1); color: white; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.5px;">
+                    @Model.LearningModeLabel
+                </span>
             </div>
-            <div class="theme-badge">
-                <span>Giao diện:</span>
-                <strong id="theme-mode-label">Light</strong>
-            </div>
+            <p class="text-slate-700 dark:text-slate-300 small mb-0 fw-medium">Giáo trình chuẩn, Video Bank và bài học AI sắp ra mắt - tất cả mở cùng phòng luyện Shadowing / Dictation / IPA.</p>
+        </div>
+        <div class="library-search position-relative" style="z-index: 1;">
+            <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-slate-400" style="z-index: 10;">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+            </span>
+            <input type="text" id="lesson-search-input" onkeyup="filterLessons()" class="form-control rounded-pill border-slate-200 dark:border-slate-700 glass py-2.5 ps-5 text-sm shadow-sm library-search-input" placeholder="Tìm bài học..." style="color: var(--color-text);" />
         </div>
     </div>
 
-    <div class="row g-3">
-        <div class="col-md-4">
-            <div class="demo-card p-4 h-100">
-                <p class="section-label section-label-emerald mb-2">Design tokens</p>
-                <h3 class="h6 fw-bold mb-2">Màu &amp; typography</h3>
-                <p class="text-body-muted small mb-3">Nunito, Lexend, JetBrains Mono — palette Indigo / Brand purple / Gamification.</p>
-                <div class="d-flex gap-2 flex-wrap">
-                    <span class="badge rounded-pill" style="background:#9810FA">Brand</span>
-                    <span class="badge rounded-pill" style="background:#4f46e5">Primary</span>
-                    <span class="badge rounded-pill" style="background:#ff6900">Streak</span>
-                    <span class="badge rounded-pill" style="background:#f6339a">Heart</span>
-                </div>
+    @if (Model.IsError)
+    {
+        <div class="alert alert-danger d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                <span>@Model.ErrorMessage</span>
             </div>
+            <a class="btn btn-sm btn-outline-danger rounded-pill fw-bold" asp-action="Index" asp-route-mode="@Model.LearningMode">Thử lại</a>
         </div>
-        <div class="col-md-4">
-            <div class="demo-card p-4 h-100">
-                <p class="section-label section-label-sky mb-2">Dark / Light</p>
-                <h3 class="h6 fw-bold mb-2">Theme toggle</h3>
-                <p class="text-body-muted small mb-0">
-                    Bấm biểu tượng mặt trăng/mặt trời trên thanh nav. Trạng thái lưu trong <code class="font-mono">localStorage.theme</code> và đồng bộ class <code class="font-mono">html.dark</code>.
-                </p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="demo-card p-4 h-100">
-                <p class="section-label section-label-violet mb-2">Issue #8 Done</p>
-                <h3 class="h6 fw-bold mb-2">Tiếp theo</h3>
-                <ul class="text-body-muted small mb-0 ps-3">
-                    <li>#9 — Navigation + stats thật</li>
-                    <li>#10 — Auth &amp; onboarding</li>
-                    <li>#11 — Trang Khóa học</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            <div class="col-lg-8">
+                <section class="library-block mb-4" data-library-block="curriculum">
+                    <div class="mb-2 mt-4">
+                        <span class="text-10 font-extrabold uppercase tracking-widest text-indigo-500">Giáo trình</span>
+                    </div>
 
-    <div class="demo-card p-4 mt-3">
-        <h2 class="h5 fw-bold mb-2">IPA preview</h2>
-        <p class="mb-2 font-mono small ipa-preview">/ˈʃædəʊ ˈspiːkɪŋ/</p>
-        <p class="text-body-muted small mb-0">Font JetBrains Mono dùng cho phiên âm ở các màn Shadowing sau này.</p>
-    </div>
+                    @if (curriculumCourses.Count > 0)
+                    {
+                        foreach (var course in curriculumCourses)
+                        {
+                            var courseViewData = new ViewDataDictionary(ViewData);
+                            courseViewData["LearningMode"] = Model.LearningMode;
+                            courseViewData["LearningModeLabel"] = Model.LearningModeLabel;
+                            courseViewData["ModeIcon"] = Model.ModeIcon;
+
+                            @await Html.PartialAsync("_CourseSection", course, courseViewData)
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            Chưa có giáo trình cho mục tiêu <strong>@Model.LearningModeLabel</strong> của bạn.
+                        </div>
+                    }
+                </section>
+
+                <section class="library-block mb-4" data-library-block="video-bank">
+                    <div class="d-flex justify-content-between align-items-center gap-3 mb-2 mt-4">
+                        <span class="text-10 font-extrabold uppercase tracking-widest text-pink-500">Video Bank</span>
+                        @if (allVideoLessons.Count > 0)
+                        {
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-primary rounded-pill fw-bold video-toggle-btn"
+                                    onclick="toggleVideoBankAll(this)"
+                                    aria-expanded="false"
+                                    aria-controls="video-bank-all">
+                                Hiển thị tất cả
+                            </button>
+                        }
+                    </div>
+
+                    @if (allVideoLessons.Count > 0)
+                    {
+                        <div class="course-section" data-course-title="Video Bank">
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                                <div>
+                                    <h2 class="h5 fw-bold mb-1 text-slate-800 dark:text-slate-100">Video Bank</h2>
+                                    <p class="text-muted small mb-0">Một hàng video theo mục tiêu @Model.LearningModeLabel, kéo ngang để xem thêm.</p>
+                                </div>
+                                <span class="text-pink-600 font-extrabold text-10 uppercase flex-shrink-0">@allVideoLessons.Count video</span>
+                            </div>
+
+                            <div id="video-bank-row" class="scroll-row video-bank-row">
+                                @foreach (var item in allVideoLessons)
+                                {
+                                    var videoViewData = new ViewDataDictionary(ViewData);
+                                    videoViewData["CourseTitle"] = DisplayText.Fix(item.Course.Title);
+                                    videoViewData["CourseDescription"] = "Video luyện nghe và shadowing theo mục tiêu học.";
+                                    videoViewData["CourseType"] = item.Course.CourseType;
+                                    videoViewData["LearningMode"] = Model.LearningMode;
+                                    videoViewData["LearningModeLabel"] = "Video Bank";
+                                    videoViewData["ModeIcon"] = "play-circle";
+
+                                    @await Html.PartialAsync("_LessonCard", item.Lesson, videoViewData)
+                                }
+                            </div>
+
+                            <div id="video-bank-all" class="video-bank-all-grid d-none mt-3">
+                                @foreach (var item in allVideoLessons)
+                                {
+                                    var videoGridViewData = new ViewDataDictionary(ViewData);
+                                    videoGridViewData["CourseTitle"] = DisplayText.Fix(item.Course.Title);
+                                    videoGridViewData["CourseDescription"] = "Video luyện nghe và shadowing theo mục tiêu học.";
+                                    videoGridViewData["CourseType"] = item.Course.CourseType;
+                                    videoGridViewData["LearningMode"] = Model.LearningMode;
+                                    videoGridViewData["LearningModeLabel"] = "Video Bank";
+                                    videoGridViewData["ModeIcon"] = "play-circle";
+                                    videoGridViewData["CardClass"] = "video-grid-card";
+
+                                    @await Html.PartialAsync("_LessonCard", item.Lesson, videoGridViewData)
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            Chưa có video cho mục tiêu <strong>@Model.LearningModeLabel</strong> của bạn.
+                        </div>
+                    }
+                </section>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block">
+                <aside class="ai-prompt-panel position-sticky" style="top: 80px;" aria-label="Bài học AI sắp ra mắt">
+                    <div class="ai-prompt-glow" aria-hidden="true"></div>
+
+                    <div class="ai-prompt-head">
+                        <div class="ai-prompt-orb">
+                            <i data-lucide="sparkles"></i>
+                        </div>
+                        <div>
+                            <span class="ai-prompt-kicker">AI LESSON STUDIO</span>
+                            <h4>Bài học AI</h4>
+                        </div>
+                    </div>
+
+                    <p class="ai-prompt-copy">
+                        Nhập thử chủ đề bài học bạn muốn luyện. Tính năng tạo bài tự động sẽ được mở trong phiên bản tiếp theo.
+                    </p>
+
+                    <form id="ai-generator-form" class="ai-prompt-form" onsubmit="event.preventDefault()">
+                        <div>
+                            <label for="ai-prompt-input">PROMPT NỘI DUNG</label>
+                            <textarea id="ai-prompt-input" rows="5" class="form-control ai-prompt-textarea" placeholder="Tính năng sắp ra mắt..."></textarea>
+                        </div>
+
+                        <div>
+                            <label for="ai-level-input">CẤP ĐỘ</label>
+                            <select id="ai-level-input" class="form-select form-select-sm ai-prompt-select">
+                                <option value="coming-soon">Tính năng sắp ra mắt</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" id="generate-ai-btn" class="ai-prompt-button">
+                            <i data-lucide="sparkles"></i>
+                            <span>Xem trước ý tưởng</span>
+                        </button>
+                    </form>
+                </aside>
+            </div>
+        </div>
+    }
 </div>
+
+@section Scripts {
+    <script>
+        function filterLessons() {
+            const input = document.getElementById('lesson-search-input');
+            const query = input ? input.value.toLowerCase().trim() : '';
+
+            document.querySelectorAll('.lesson-card[data-title]').forEach(card => {
+                const title = (card.getAttribute('data-title') || '').toLowerCase();
+                const desc = (card.getAttribute('data-desc') || '').toLowerCase();
+                card.classList.toggle('d-none', !(title.includes(query) || desc.includes(query)));
+            });
+
+            document.querySelectorAll('.course-section').forEach(section => {
+                const filterableCards = section.querySelectorAll('.lesson-card[data-title]');
+                if (filterableCards.length === 0) return;
+
+                const visibleCards = section.querySelectorAll('.lesson-card[data-title]:not(.d-none)');
+                section.classList.toggle('d-none', visibleCards.length === 0);
+            });
+        }
+
+        function toggleVideoBankAll(button) {
+            const target = document.getElementById('video-bank-all');
+            const row = document.getElementById('video-bank-row');
+            if (!target) return;
+
+            const isHidden = target.classList.toggle('d-none');
+            if (row) {
+                row.classList.toggle('d-none', !isHidden);
+            }
+            button.setAttribute('aria-expanded', String(!isHidden));
+            button.textContent = isHidden ? 'Hiển thị tất cả' : 'Thu gọn';
+        }
+    </script>
+}
