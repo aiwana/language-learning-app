@@ -9,18 +9,27 @@ namespace WebShadowing.Controllers;
 public class HomeController : Controller
 {
     private readonly ICourseService _courseService;
+    private readonly IUserContextService _userContext;
+    private readonly IHostEnvironment _env;
     private readonly ILogger<HomeController> _logger;
 
-    public HomeController(ICourseService courseService, ILogger<HomeController> logger)
+    public HomeController(
+        ICourseService courseService,
+        IUserContextService userContext,
+        IHostEnvironment env,
+        ILogger<HomeController> logger)
     {
         _courseService = courseService;
+        _userContext = userContext;
+        _env = env;
         _logger = logger;
     }
 
     [Authorize]
     public async Task<IActionResult> Index([FromQuery] string? mode, CancellationToken cancellationToken)
     {
-        var effectiveMode = !string.IsNullOrWhiteSpace(mode) ? mode : LearningModes.Casual;
+        var userMode = await _userContext.GetLearningModeAsync(cancellationToken);
+        var effectiveMode = _env.IsDevelopment() && !string.IsNullOrWhiteSpace(mode) ? mode : userMode;
         var normalizedMode = NormalizeMode(effectiveMode);
 
         var viewModel = new CourseLibraryViewModel
@@ -60,9 +69,13 @@ public class HomeController : Controller
     }
 
     [Authorize]
-    public IActionResult LessonDetail(long id)
+    public async Task<IActionResult> LessonDetail(long id, [FromQuery] string? mode, CancellationToken cancellationToken)
     {
+        var userMode = await _userContext.GetLearningModeAsync(cancellationToken);
+        var effectiveMode = _env.IsDevelopment() && !string.IsNullOrWhiteSpace(mode) ? mode : userMode;
+
         ViewBag.LessonId = id;
+        ViewBag.LearningMode = NormalizeMode(effectiveMode);
         return View();
     }
 
