@@ -1,266 +1,95 @@
 @model WebShadowing.Models.AuthPageViewModel
 @{
-    ViewData["Title"] = "Authentication";
+    ViewData["Title"] = "Đăng nhập / Đăng ký";
     var activeStep = ViewData["ActiveStep"]?.ToString() ?? "login";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-
-            <div class="shadow-lg rounded-4 border-0 p-4 bg-white">
-
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold">ShadowSpeak AI</h2>
-                    <p class="text-muted mb-0">
-                        Learn English smarter with AI
-                    </p>
-                </div>
-
-                @if (TempData["AuthError"] is string error)
-                {
-                    <div class="alert alert-danger">
-                        @error
-                    </div>
-                }
-
-                @if (activeStep == "level")
-                {
-                    <div class="text-center">
-
-                        <div class="display-5 mb-3">
-                            🎉
-                        </div>
-
-                        <h3 class="fw-bold">
-                            Welcome!
-                        </h3>
-
-                        <p class="text-muted mb-4">
-                            Your account has been created successfully.
-                            Let's start your learning journey.
-                        </p>
-
-                        <div class="progress mb-4" style="height:8px;">
-                            <div class="progress-bar" style="width:100%"></div>
-                        </div>
-
-                        <div class="card border-0 bg-light rounded-4 p-3 mb-3">
-
-                            <div class="d-flex justify-content-between">
-
-                                <span>Learning Mode</span>
-
-                                <strong>Casual</strong>
-
-                            </div>
-
-                            <hr />
-
-                            <div class="d-flex justify-content-between">
-
-                                <span>Pronunciation Goal</span>
-
-                                <strong>70</strong>
-
-                            </div>
-
-                        </div>
-
-                        <a asp-controller="Home"
-                           asp-action="Index"
-                           class="btn btn-primary btn-lg w-100">
-
-                            Continue →
-
-                        </a>
-
-                    </div>
-                }
-                else
-                {
-
-                    <div class="auth-tabs mb-4">
-
-                        <button id="loginTab"
-                                type="button"
-                                class="tab-btn active">
-
-                            Sign In
-
-                        </button>
-
-                        <button id="registerTab"
-                                type="button"
-                                class="tab-btn">
-
-                            Register
-
-                        </button>
-
-                    </div>
-
-                    <div id="loginPanel">
-
-                        <h4 class="fw-bold mb-3">
-                            Welcome Back 👋
-                        </h4>
-
-                        <form asp-controller="Account"
-                              asp-action="Login"
-                              method="post">
-
-                            @Html.AntiForgeryToken()
-
-                            <input asp-for="Login.ReturnUrl"
-                                   type="hidden" />
-
-                            <div class="mb-3">
-
-                                <label asp-for="Login.Email"
-                                       class="form-label"></label>
-
-                                <input asp-for="Login.Email"
-                                       class="form-control form-control-lg" />
-
-                                <span asp-validation-for="Login.Email"
-                                      class="text-danger small"></span>
-
-                            </div>
-
-                            <div class="mb-4">
-
-                                <label asp-for="Login.Password"
-                                       class="form-label"></label>
-
-                                <input asp-for="Login.Password"
-                                       type="password"
-                                       class="form-control form-control-lg" />
-
-                                <span asp-validation-for="Login.Password"
-                                      class="text-danger small"></span>
-
-                            </div>
-
-                            <button class="btn btn-primary btn-lg w-100">
-
-                                Sign In
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                    <div id="registerPanel" style="display:none;">
-
-                        <h4 class="fw-bold mb-3">
-                            Create Account ✨
-                        </h4>
-
-                        <form asp-controller="Account"
-                              asp-action="Register"
-                              method="post">
-
-                            @Html.AntiForgeryToken()
-
-                            <input asp-for="Register.ReturnUrl"
-                                   type="hidden" />
-
-                            <div class="mb-3">
-
-                                <label asp-for="Register.FullName"
-                                       class="form-label"></label>
-
-                                <input asp-for="Register.FullName"
-                                       class="form-control form-control-lg" />
-
-                                <span asp-validation-for="Register.FullName"
-                                      class="text-danger small"></span>
-
-                            </div>
-
-                            <div class="mb-3">
-
-                                <label asp-for="Register.Email"
-                                       class="form-label"></label>
-
-                                <input asp-for="Register.Email"
-                                       class="form-control form-control-lg" />
-
-                                <span asp-validation-for="Register.Email"
-                                      class="text-danger small"></span>
-
-                            </div>
-
-                            <div class="mb-4">
-
-                                <label asp-for="Register.Password"
-                                       class="form-label"></label>
-
-                                <input asp-for="Register.Password"
-                                       type="password"
-                                       class="form-control form-control-lg" />
-
-                                <span asp-validation-for="Register.Password"
-                                      class="text-danger small"></span>
-
-                            </div>
-
-                            <button class="btn btn-outline-primary btn-lg w-100">
-
-                                Register
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                }
-
+<div class="row justify-content-center py-4">
+    <div class="col-lg-8">
+        <div class="surface-card p-4 p-md-5">
+            <div class="text-center mb-4">
+                <p class="section-label section-label-indigo mb-2">Authentication</p>
+                <h1 class="h3 fw-bold mb-2">Đăng nhập hoặc tạo tài khoản</h1>
+                <p class="text-body-muted mb-0">Bắt đầu hành trình luyện phát âm.</p>
             </div>
 
+            @if (TempData["AuthError"] is string error)
+            {
+                <div class="alert alert-danger" role="alert">@error</div>
+            }
+
+            @if (activeStep == "level")
+            {
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="border rounded-4 p-4 h-100 mb-4">
+                            <h2 class="h5 fw-bold mb-3">Onboarding Wizard</h2>
+                            <p class="text-body-muted mb-3">Chúc mừng bạn đã đăng ký! Bạn đã được đăng nhập thành công. Nhấn tiếp tục để vào trang Khóa học.</p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Hình thức học mặc định</label>
+                                    <div class="form-control">casual</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mục tiêu phát âm</label>
+                                    <div class="form-control">70</div>
+                                </div>
+                                <div class="col-12">
+                                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary w-100">Tiếp tục tới Khóa học</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="auth-toggle mb-4">
+                    <button type="button" class="auth-tab active" data-target="login-panel">Đăng nhập</button>
+                    <button type="button" class="auth-tab" data-target="register-panel">Đăng ký</button>
+                </div>
+
+                <div id="login-panel" class="auth-panel">
+                    <div class="border rounded-4 p-4 h-100">
+                        <h2 class="h4 fw-bold mb-2">Chào mừng trở lại 👋</h2>
+                        <p class="text-body-muted mb-4">Đăng nhập để tiếp tục học.</p>
+                        <form asp-controller="Account" asp-action="Login" method="post">
+                            @Html.AntiForgeryToken()
+                            <input asp-for="Login.ReturnUrl" type="hidden" />
+                            <div class="mb-3">
+                                <label asp-for="Login.Email" class="form-label"></label>
+                                <input asp-for="Login.Email" class="form-control"/>
+                                <span asp-validation-for="Login.Email" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label asp-for="Login.Password" class="form-label"></label>
+                                <input asp-for="Login.Password" type="password" class="form-control"/>
+                                <span asp-validation-for="Login.Password" class="text-danger small"></span>
+                            </div>
+                            <button class="btn btn-primary w-100">Đăng nhập</button>
+                        </form>
+                    </div>
+                </div>
+                <div id="register-panel" class="auth-panel" style="display:none">
+                    <div class="border rounded-4 p-4 h-100">
+                        <h2 class="h4 fw-bold mb-2">Tạo tài khoản ✨</h2>
+                        <p class="text-body-muted mb-4">Bắt đầu hành trình luyện phát âm.</p>
+                        <form asp-controller="Account" asp-action="Register" method="post">
+                            @Html.AntiForgeryToken()
+                            <input asp-for="Register.ReturnUrl" type="hidden" />
+                            <div class="mb-3"><label asp-for="Register.FullName"></label><input asp-for="Register.FullName" class="form-control"/><span asp-validation-for="Register.FullName" class="text-danger small"></span></div>
+                            <div class="mb-3"><label asp-for="Register.Email"></label><input asp-for="Register.Email" class="form-control"/><span asp-validation-for="Register.Email" class="text-danger small"></span></div>
+                            <div class="mb-4"><label asp-for="Register.Password"></label><input asp-for="Register.Password" type="password" class="form-control"/><span asp-validation-for="Register.Password" class="text-danger small"></span></div>
+                            <button class="btn btn-outline-primary w-100">Đăng ký</button>
+                        </form>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
 
-@section Scripts{
-
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
-    <script>
-
-        const loginTab = document.getElementById("loginTab");
-        const registerTab = document.getElementById("registerTab");
-
-        if(loginTab && registerTab){
-
-            const loginPanel=document.getElementById("loginPanel");
-            const registerPanel=document.getElementById("registerPanel");
-
-            loginTab.onclick=function(){
-
-                loginTab.classList.add("active");
-                registerTab.classList.remove("active");
-
-                loginPanel.style.display="block";
-                registerPanel.style.display="none";
-
-            }
-
-            registerTab.onclick=function(){
-
-                registerTab.classList.add("active");
-                loginTab.classList.remove("active");
-
-                loginPanel.style.display="none";
-                registerPanel.style.display="block";
-
-            }
-
-        }
-
-    </script>
-
+<script>document.querySelectorAll(".auth-tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".auth-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById("login-panel").style.display="none";document.getElementById("register-panel").style.display="none";document.getElementById(b.dataset.target).style.display="block";});</script>
 }
