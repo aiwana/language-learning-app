@@ -613,3 +613,10 @@ body.nav-logged-in .nav-logged-in-only.nav-login-btn {
 .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(79, 70, 229, 0.35);
 }
+
+
+/* Auth redesign */
+.auth-toggle{display:flex;background:#eef2ff;border-radius:14px;padding:6px;gap:6px;margin-bottom:24px}
+.auth-tab{flex:1;border:none;background:transparent;padding:12px;font-weight:700;border-radius:10px}
+.auth-tab.active{background:var(--color-primary);color:#fff}
+.auth-panel{animation:slide-up .25s}
