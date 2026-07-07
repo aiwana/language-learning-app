@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   const storageKey = 'theme';
 
   function applyTheme(theme) {
@@ -49,30 +49,8 @@
       });
     });
 
-    initNavLoginPreview();
-  });
-
-  function initNavLoginPreview() {
-    const storageKey = 'navLoggedInPreview';
-
-    function applyNavLoginState(isLoggedIn) {
-      document.body.classList.toggle('nav-logged-in', isLoggedIn);
+    if (document.body.classList.contains('nav-logged-in')) {
+      document.body.classList.add('nav-logged-in');
     }
-
-    applyNavLoginState(localStorage.getItem(storageKey) === 'true');
-
-    document.querySelectorAll('.nav-login-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        localStorage.setItem(storageKey, 'true');
-        applyNavLoginState(true);
-      });
-    });
-
-    document.querySelectorAll('.btn-logout').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        localStorage.removeItem(storageKey);
-        applyNavLoginState(false);
-      });
-    });
-  }
+  });
 })();

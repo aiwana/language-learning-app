@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebShadowing.Models;
 using WebShadowing.Services;
@@ -16,6 +17,7 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    [Authorize]
     public async Task<IActionResult> Index([FromQuery] string? mode, CancellationToken cancellationToken)
     {
         var effectiveMode = !string.IsNullOrWhiteSpace(mode) ? mode : LearningModes.Casual;
@@ -39,33 +41,45 @@ public class HomeController : Controller
         {
             _logger.LogError(ex, "Failed to load course library data for mode {LearningMode}", normalizedMode);
             viewModel.IsError = true;
-            viewModel.ErrorMessage = "Kh\u00f4ng t\u1ea3i \u0111\u01b0\u1ee3c kh\u00f3a h\u1ecdc. Vui l\u00f2ng th\u1eed l\u1ea1i.";
+            viewModel.ErrorMessage = "Khong tai duoc khoa hoc. Vui long thu lai.";
         }
 
         return View(viewModel);
     }
 
+    [Authorize]
     public IActionResult Stats()
     {
         return View();
     }
 
+    [Authorize]
     public IActionResult Settings()
     {
         return View();
     }
 
+    [Authorize]
     public IActionResult LessonDetail(long id)
     {
         ViewBag.LessonId = id;
         return View();
     }
 
+    [AllowAnonymous]
+    public IActionResult Authen(string? step)
+    {
+        ViewData["ActiveStep"] = string.IsNullOrWhiteSpace(step) ? "login" : step;
+        return View(new AuthPageViewModel());
+    }
+
+    [AllowAnonymous]
     public IActionResult Privacy()
     {
         return View();
     }
 
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
@@ -81,9 +95,9 @@ public class HomeController : Controller
 
     private static string GetModeLabel(string mode) => mode switch
     {
-        LearningModes.Academic => "H\u1ecdc thu\u1eadt",
-        LearningModes.Professional => "C\u00f4ng vi\u1ec7c",
-        _ => "Giao ti\u1ebfp"
+        LearningModes.Academic => "Hoc thuat",
+        LearningModes.Professional => "Cong viec",
+        _ => "Giao tiep"
     };
 
     private static string GetModeIcon(string mode) => mode switch

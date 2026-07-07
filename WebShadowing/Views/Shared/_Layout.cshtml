@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebShadowing.styles.css" asp-append-version="true" />
 </head>
-<body class="d-flex flex-column min-vh-100 has-bottom-nav" data-bs-no-jquery>
-    @{
+<body class="d-flex flex-column min-vh-100 has-bottom-nav @(User.Identity?.IsAuthenticated == true ? "nav-logged-in" : "")" data-bs-no-jquery>
+    @{ 
         var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
         var isCoursesActive = action is "Index" or "LessonDetail";
         var isStatsActive = action == "Stats";
@@ -94,14 +94,17 @@
                             </svg>
                         </button>
 
-                        <button type="button" class="btn btn-sm btn-outline-primary nav-login-btn nav-guest-only">Đăng nhập</button>
-                        <button type="button" class="btn btn-link p-0 shadow-none btn-logout btn-logout--compact nav-logged-in-only" title="Đăng xuất" aria-label="Đăng xuất">
-                            <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M15.4943 25.4867H12.1635C11.7218 25.4867 11.2982 25.3113 10.9858 24.9989C10.6735 24.6866 10.498 24.263 10.498 23.8213V12.1635C10.498 11.7218 10.6735 11.2982 10.9858 10.9858C11.2982 10.6735 11.7218 10.498 12.1635 10.498H15.4943" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M21.3232 22.1561L25.4868 17.9926L21.3232 13.8291" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M25.4866 17.9927H15.4941" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
+                        <a class="btn btn-sm btn-outline-primary nav-login-btn nav-guest-only" asp-controller="Home" asp-action="Authen">Đăng nhập</a>
+                        <form class="nav-logged-in-only" asp-controller="Account" asp-action="Logout" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-link p-0 shadow-none btn-logout btn-logout--compact" title="Đăng xuất" aria-label="Đăng xuất">
+                                <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M15.4943 25.4867H12.1635C11.7218 25.4867 11.2982 25.3113 10.9858 24.9989C10.6735 24.6866 10.498 24.263 10.498 23.8213V12.1635C10.498 11.7218 10.6735 11.2982 10.9858 10.9858C11.2982 10.6735 11.7218 10.498 12.1635 10.498H15.4943" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M21.3232 22.1561L25.4868 17.9926L21.3232 13.8291" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M25.4866 17.9927H15.4941" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </form>
                 </div>
             </div>
         </nav>

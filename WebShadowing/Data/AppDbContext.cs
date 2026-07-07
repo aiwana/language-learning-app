@@ -130,6 +130,7 @@ public class AppDbContext : DbContext
             entity.Property(u => u.PronunciationTarget).HasDefaultValue(PronunciationTargets.Comprehension70);
             entity.Property(u => u.Accent).HasDefaultValue(Accents.EnUs);
             entity.Property(u => u.IsVip).HasDefaultValue(false);
+            entity.Property(u => u.OnboardingCompleted).HasDefaultValue(false);
         });
     }
 }
