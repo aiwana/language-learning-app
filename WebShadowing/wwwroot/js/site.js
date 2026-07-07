@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   const storageKey = 'theme';
 
   function applyTheme(theme) {
