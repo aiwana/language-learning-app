@@ -1,7 +1,90 @@
 [
-  { "sentence_order": 1, "start_time": 0.0, "end_time": 3.0, "text": "Oh, someone is knocking at the door." },
-  { "sentence_order": 2, "start_time": 3.0, "end_time": 5.0, "text": "Hi, Vy." },
-  { "sentence_order": 3, "start_time": 5.0, "end_time": 7.0, "text": "You are early!" },
-  { "sentence_order": 4, "start_time": 7.0, "end_time": 9.5, "text": "Phong is having breakfast." },
-  { "sentence_order": 5, "start_time": 9.5, "end_time": 12.0, "text": "Hi, Mrs. Nguyen." }
+  {
+    "sentence_order": 1,
+    "start_time": 16.0,
+    "end_time": 19.0,
+    "text": "Hi, Vy.",
+    "translation": "Chào Vy.",
+    "ipa": "haɪ, vi."
+  },
+  {
+    "sentence_order": 2,
+    "start_time": 19.0,
+    "end_time": 21.0,
+    "text": "Hi, Phong. Are you ready?",
+    "translation": "Chào Phong. Cậu đã sẵn sàng chưa?",
+    "ipa": "haɪ, fɑŋ. ɑr ju ˈrɛdi?"
+  },
+  {
+    "sentence_order": 3,
+    "start_time": 21.0,
+    "end_time": 24.0,
+    "text": "Just a minute.",
+    "translation": "Chỉ một phút nữa thôi.",
+    "ipa": "ʤʌst ə ˈmɪnət."
+  },
+  {
+    "sentence_order": 4,
+    "start_time": 24.0,
+    "end_time": 27.0,
+    "text": "Oh, this is Duy, my new friend.",
+    "translation": "À, đây là Duy, bạn mới của tớ.",
+    "ipa": "oʊ, ðɪs ɪz dwi, maɪ nu frɛnd."
+  },
+  {
+    "sentence_order": 5,
+    "start_time": 27.0,
+    "end_time": 31.0,
+    "text": "Hi, Duy. Nice to meet you.",
+    "translation": "Chào Duy, rất vui khi được gặp cậu.",
+    "ipa": "haɪ, dwi. naɪs tʊ mit ju."
+  },
+  {
+    "sentence_order": 6,
+    "start_time": 31.0,
+    "end_time": 37.0,
+    "text": "Hi, Phong. I live near here, and we go to the same school!",
+    "translation": "Chào Phong. Tớ sống ở gần đây, và chúng ta đi học cùng trường đó!",
+    "ipa": "haɪ, fɑŋ. aɪ lɪv nɪr hɪr, ænd wi goʊ tʊ ðə seɪm skul!"
+  },
+  {
+    "sentence_order": 7,
+    "start_time": 37.0,
+    "end_time": 42.0,
+    "text": "Good. Hmm, your school bag looks heavy.",
+    "translation": "Vậy thì hay quá. Này, cặp cậu trông nặng nhỉ.",
+    "ipa": "gʊd. hm, jʊr skul bæg lʊks ˈhɛvi."
+  },
+  {
+    "sentence_order": 8,
+    "start_time": 42.0,
+    "end_time": 49.0,
+    "text": "Yes! I have new books, and we have new subjects to study.",
+    "translation": "Ừ, tớ có nhiều sách, và bọn tớ có nhiều môn để học.",
+    "ipa": "jɛs! aɪ hæv nu bʊks, ænd wi hæv nu ˈsʌbʤɪkts tʊ ˈstʌdi."
+  },
+  {
+    "sentence_order": 9,
+    "start_time": 49.0,
+    "end_time": 53.0,
+    "text": "And a new uniform, Duy! You look smart!",
+    "translation": "Và cậu còn có đồng phục mới nữa. Duy này, trông cậu rất bảnh đó!",
+    "ipa": "ænd ə nu ˈjunəˌfɔrm, dwi! ju lʊk smɑrt!"
+  },
+  {
+    "sentence_order": 10,
+    "start_time": 53.0,
+    "end_time": 57.0,
+    "text": "Thanks, Phong. We always look smart in our uniforms.",
+    "translation": "Cảm ơn nhé Phong. Bọn mình đều trông rất là bảnh bao trong bộ đồng phục.",
+    "ipa": "θæŋks, fɑŋ. wi ˈɔlˌweɪz lʊk smɑrt ɪn aʊər ˈjunəˌfɔrmz."
+  },
+  {
+    "sentence_order": 11,
+    "start_time": 57.0,
+    "end_time": 62.0,
+    "text": "Let me put on my uniform. Then we can go.",
+    "translation": "Để tớ mặc đồng phục, rồi sau đó chúng ta đi nha.",
+    "ipa": "lɛt mi pʊt ɑn maɪ ˈjunəˌfɔrm. ðɛn wi kæn goʊ."
+  }
 ]
