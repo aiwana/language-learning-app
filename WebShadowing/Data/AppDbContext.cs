@@ -56,6 +56,7 @@ public class AppDbContext : DbContext
         {
             entity.Property(c => c.Level).HasMaxLength(20);
             entity.Property(c => c.LearningMode).HasDefaultValue(LearningModes.Casual);
+            entity.Property(c => c.CourseType).HasDefaultValue(CourseTypes.Curriculum);
         });
 
         modelBuilder.Entity<Lesson>(entity =>
