@@ -1,101 +1,346 @@
 @model WebShadowing.Models.AuthPageViewModel
 @{
     ViewData["Title"] = "Đăng nhập / Đăng ký";
-    var activeStep = ViewData["ActiveStep"]?.ToString() ?? "login";
+    var activeStep = (ViewData["ActiveStep"]?.ToString() ?? "login").ToLowerInvariant();
+    var selectedMode = Context.Request.Query["learningMode"].ToString();
+    if (string.IsNullOrWhiteSpace(selectedMode)) selectedMode = LearningModes.Casual;
+    var selectedAccent = Context.Request.Query["accent"].ToString();
+    if (selectedAccent is not Accents.EnUs and not Accents.EnGb) selectedAccent = Accents.EnUs;
+    var isOnboarding = activeStep is "level" or "goal";
+    var authError = TempData["AuthError"] as string;
 }
 
-<div class="row justify-content-center py-4">
-    <div class="col-lg-8">
-        <div class="surface-card p-4 p-md-5">
-            <div class="text-center mb-4">
-                <p class="section-label section-label-indigo mb-2">Authentication</p>
-                <h1 class="h3 fw-bold mb-2">Đăng nhập hoặc tạo tài khoản</h1>
-                <p class="text-body-muted mb-0">Bắt đầu hành trình luyện phát âm.</p>
+@if (isOnboarding)
+{
+    <main class="onboarding-shell" id="main-content">
+        <header class="onboarding-header">
+            <a class="auth-logo auth-logo--dark" asp-controller="Home" asp-action="Index" aria-label="ShadowSpeak AI - Trang chủ">
+                <span class="auth-logo-mark" aria-hidden="true">
+                    <svg viewBox="0 0 32 32"><path d="M7 13v6M11 9v14M15 6v20M19 10v12M23 8v16M27 13v6" /></svg>
+                </span>
+                <span>ShadowSpeak</span>
+            </a>
+            <div class="onboarding-progress" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="@(activeStep == "goal" ? 2 : 1)" aria-label="Tiến trình thiết lập">
+                <span style="--progress: @(activeStep == "goal" ? "66%" : "33%")"></span>
             </div>
+            <a class="onboarding-close" asp-controller="Home" asp-action="Index" aria-label="Đóng thiết lập">×</a>
+        </header>
 
-            @if (TempData["AuthError"] is string error)
-            {
-                <div class="alert alert-danger" role="alert">@error</div>
-            }
+        @if (!string.IsNullOrWhiteSpace(authError))
+        {
+            <div class="auth-alert onboarding-alert" role="alert"><span aria-hidden="true">!</span>@authError</div>
+        }
 
-            @if (activeStep == "level")
-            {
-                <div class="row g-4">
-                    <div class="col-12">
-                        <div class="border rounded-4 p-4 h-100 mb-4">
-                            <h2 class="h5 fw-bold mb-3">Onboarding Wizard</h2>
-                            <p class="text-body-muted mb-3">Chúc mừng bạn đã đăng ký! Bạn đã được đăng nhập thành công. Nhấn tiếp tục để vào trang Khóa học.</p>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Hình thức học mặc định</label>
-                                    <div class="form-control">casual</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Mục tiêu phát âm</label>
-                                    <div class="form-control">70</div>
-                                </div>
-                                <div class="col-12">
-                                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary w-100">Tiếp tục tới Khóa học</a>
-                                </div>
+        @if (activeStep == "level")
+        {
+            <section class="onboarding-content onboarding-content--level" aria-labelledby="level-title">
+                <div class="onboarding-heading">
+                    <span class="onboarding-kicker">Bước 1 · Chọn lộ trình</span>
+                    <h1 id="level-title">Bạn học tiếng Anh để làm gì?</h1>
+                    <p>Chúng tôi sẽ cá nhân hóa bài học và tình huống luyện nói cho bạn.</p>
+                </div>
+                <form asp-controller="Home" asp-action="Authen" method="get" class="choice-form" data-choice-form>
+                    <input type="hidden" name="step" value="goal" />
+                    <div class="choice-list" role="radiogroup" aria-label="Mục đích học">
+                        <label class="choice-card choice-card--mint">
+                            <input type="radio" name="learningMode" value="@LearningModes.Casual" checked="@(selectedMode == LearningModes.Casual ? "checked" : null)" />
+                            <span class="choice-icon" aria-hidden="true">
+                                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M0 14C0 6.26802 6.26801 0 14 0H33.9842C41.7161 0 47.9842 6.26801 47.9842 14V33.9842C47.9842 41.7161 41.7161 47.9842 33.9842 47.9842H14C6.26802 47.9842 0 41.7161 0 33.9842V14Z" fill="#D0FAE5"/>
+                                    <path d="M21.9927 13.9956V15.9956M25.9917 13.9956V15.9956M17.9941 13.9956V15.9956" stroke="#00BC7D" stroke-width="1.99934" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M27.9908 19.9937C28.256 19.9937 28.5102 20.099 28.6977 20.2864C28.8852 20.4739 28.9905 20.7282 28.9905 20.9933V28.9907C28.9905 30.0512 28.5692 31.0683 27.8193 31.8182C27.0694 32.5681 26.0523 32.9894 24.9918 32.9894H18.9938C17.9333 32.9894 16.9162 32.5681 16.1663 31.8182C15.4164 31.0683 14.9951 30.0512 14.9951 28.9907V20.9933C14.9951 20.7282 15.1004 20.4739 15.2879 20.2864C15.4754 20.099 15.7297 19.9937 15.9948 19.9937H29.9902C31.0507 19.9937 32.0678 20.4149 32.8177 21.1648C33.5676 21.9147 33.9889 22.9318 33.9889 23.9923C33.9889 25.0529 33.5676 26.0699 32.8177 26.8198C32.0678 27.5697 31.0507 27.991 29.9902 27.991H28.9905" stroke="#00BC7D" stroke-width="1.99934" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span class="choice-copy"><strong>Đời sống</strong><small>Giao tiếp hằng ngày, du lịch và trò chuyện tự nhiên</small></span>
+                            <span class="choice-radio" aria-hidden="true"></span>
+                        </label>
+                        <label class="choice-card choice-card--blue">
+                            <input type="radio" name="learningMode" value="@LearningModes.Academic" checked="@(selectedMode == LearningModes.Academic ? "checked" : null)" />
+                            <span class="choice-icon" aria-hidden="true">
+                                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M0 14C0 6.26802 6.26801 0 14 0H33.9842C41.7161 0 47.9842 6.26801 47.9842 14V33.9842C47.9842 41.7161 41.7161 47.9842 33.9842 47.9842H14C6.26802 47.9842 0 41.7161 0 33.9842V14Z" fill="#DBEAFE"/>
+                                    <path d="M33.409 22.9145C33.588 22.8356 33.7398 22.7059 33.8458 22.5415C33.9518 22.3771 34.0072 22.1852 34.0051 21.9896C34.0031 21.794 33.9438 21.6033 33.8344 21.4411C33.7251 21.2789 33.5706 21.1524 33.39 21.0772L24.8218 17.1744C24.5614 17.0556 24.2784 16.9941 23.9921 16.9941C23.7058 16.9941 23.4229 17.0556 23.1624 17.1744L14.5952 21.0732C14.4172 21.1511 14.2658 21.2792 14.1595 21.4418C14.0532 21.6045 13.9966 21.7946 13.9966 21.9889C13.9966 22.1831 14.0532 22.3732 14.1595 22.5359C14.2658 22.6985 14.4172 22.8266 14.5952 22.9046L23.1624 26.8113C23.4229 26.9301 23.7058 26.9916 23.9921 26.9916C24.2784 26.9916 24.5614 26.9301 24.8218 26.8113L33.409 22.9145Z" stroke="#2B7FFF" stroke-width="1.99934" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M33.9888 21.9927V27.9907M17.9941 24.4922V27.991C17.9941 28.7864 18.6261 29.5492 19.7509 30.1117C20.8758 30.6741 22.4014 30.99 23.9922 30.99C25.5829 30.99 27.1086 30.6741 28.2334 30.1117C29.3583 29.5492 29.9902 28.7864 29.9902 27.991V24.4922" stroke="#2B7FFF" stroke-width="1.99934" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span class="choice-copy"><strong>Học thuật</strong><small>Phục vụ học tập, thi cử (IELTS, TOEFL) và nghiên cứu tài liệu</small></span>
+                            <span class="choice-radio" aria-hidden="true"></span>
+                        </label>
+                        <label class="choice-card choice-card--amber">
+                            <input type="radio" name="learningMode" value="@LearningModes.Professional" checked="@(selectedMode == LearningModes.Professional ? "checked" : null)" />
+                            <span class="choice-icon" aria-hidden="true">
+                                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M0 14C0 6.26802 6.26801 0 14 0H33.9842C41.7161 0 47.9842 6.26801 47.9842 14V33.9842C47.9842 41.7161 41.7161 47.9842 33.9842 47.9842H14C6.26802 47.9842 0 41.7161 0 33.9842V14Z" fill="#FEF3C6"/>
+                                    <path d="M27.991 31.9897V15.9949C27.991 15.4647 27.7804 14.9561 27.4054 14.5812C27.0305 14.2062 26.5219 13.9956 25.9917 13.9956H21.993C21.4627 13.9956 20.9542 14.2062 20.5792 14.5812C20.2043 14.9561 19.9937 15.4647 19.9937 15.9949V31.9897" stroke="#FE9A00" stroke-width="1.99934" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M31.9897 17.9941H15.9949C14.8907 17.9941 13.9956 18.8893 13.9956 19.9935V29.9902C13.9956 31.0944 14.8907 31.9895 15.9949 31.9895H31.9897C33.0939 31.9895 33.989 31.0944 33.989 29.9902V19.9935C33.989 18.8893 33.0939 17.9941 31.9897 17.9941Z" stroke="#FE9A00" stroke-width="1.99934" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span class="choice-copy"><strong>Công việc</strong><small>Giao tiếp chuyên nghiệp, thuyết trình, phỏng vấn và đàm phán</small></span>
+                            <span class="choice-radio" aria-hidden="true"></span>
+                        </label>
+                    </div>
+                    <fieldset class="accent-picker">
+                        <legend>Chọn chuẩn phát âm</legend>
+                        <div class="accent-options" role="radiogroup" aria-label="Chuẩn phát âm">
+                            <label class="accent-option">
+                                <input type="radio" name="accent" value="@Accents.EnUs" checked="@(selectedAccent == Accents.EnUs ? "checked" : null)" />
+                                <span class="accent-flag" aria-hidden="true">🇺🇸</span>
+                                <span class="accent-copy"><strong>Anh-Mỹ</strong><small>Giọng Mỹ phổ biến</small></span>
+                                <span class="choice-radio" aria-hidden="true"></span>
+                            </label>
+                            <label class="accent-option">
+                                <input type="radio" name="accent" value="@Accents.EnGb" checked="@(selectedAccent == Accents.EnGb ? "checked" : null)" />
+                                <span class="accent-flag" aria-hidden="true">🇬🇧</span>
+                                <span class="accent-copy"><strong>Anh-Anh</strong><small>Giọng Anh tiêu chuẩn</small></span>
+                                <span class="choice-radio" aria-hidden="true"></span>
+                            </label>
+                        </div>
+                    </fieldset>
+                    <div class="onboarding-actions">
+                        <button class="auth-primary onboarding-next" type="submit">Tiếp tục <span aria-hidden="true">→</span></button>
+                    </div>
+                </form>
+            </section>
+        }
+        else
+        {
+            <section class="onboarding-content onboarding-content--goal" aria-labelledby="goal-title">
+                <div class="onboarding-heading">
+                    <span class="onboarding-kicker">Bước 2 · Chọn đích đến</span>
+                    <h1 id="goal-title">Mức độ phát âm kỳ vọng?</h1>
+                    <p>Đặt chỉ tiêu điểm số tối thiểu để hoàn thành mỗi câu luyện đọc Shadowing.</p>
+                </div>
+                <form class="choice-form" data-choice-form data-goal-form>
+                    <input type="hidden" name="learningMode" value="@selectedMode" />
+                    <input type="hidden" name="accent" value="@selectedAccent" />
+                    <div class="goal-list" role="radiogroup" aria-label="Mục tiêu phát âm">
+                        <label class="goal-card">
+                            <input type="radio" name="PronunciationTarget" value="50" />
+                            <span class="goal-copy"><small>Casual speaking</small><strong>Luyện giao tiếp phản xạ trôi chảy</strong><span>Chấp nhận sai lệch phát âm nhỏ, ưu tiên tốc độ nói nhanh và thói quen ngắt nghỉ tự nhiên.</span></span>
+                            <span class="goal-score">50%+</span>
+                        </label>
+                        <label class="goal-card">
+                            <input type="radio" name="PronunciationTarget" value="70" checked />
+                            <span class="goal-copy"><small>Standard clarity</small><strong>Phát âm rõ ràng, người nghe hiểu</strong><span>Đọc đúng đa số từ, đủ âm cuối quan trọng và giao tiếp tự tin, trôi chảy.</span></span>
+                            <span class="goal-score">70%+</span>
+                        </label>
+                        <label class="goal-card">
+                            <input type="radio" name="PronunciationTarget" value="90" />
+                            <span class="goal-copy"><small>Near-native mastery</small><strong>Phát âm chuẩn xác bản xứ</strong><span>Tiêu chuẩn khắt khe, kiểm tra từng nét cao độ, trọng âm, nguyên âm đôi và nuốt âm đặc trưng.</span></span>
+                            <span class="goal-score">90%+</span>
+                        </label>
+                    </div>
+                    <aside class="goal-note"><span aria-hidden="true">✦</span><p><strong>Lưu ý:</strong> Cấu hình mức độ phát âm có thể thay đổi bất cứ lúc nào trong phần Cài đặt tài khoản.</p></aside>
+                    <div class="goal-actions">
+                        <a asp-controller="Home" asp-action="Authen" asp-route-step="level" asp-route-learningMode="@selectedMode" asp-route-accent="@selectedAccent" class="auth-back">← Quay lại</a>
+                        <button class="auth-primary" type="button" data-show-premium>Xem quyền lợi Premium <span aria-hidden="true">→</span></button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="onboarding-content onboarding-content--premium" aria-labelledby="premium-title" data-premium-step hidden>
+                <article class="premium-card">
+                    <div class="premium-accent-line" aria-hidden="true"></div>
+                    <div class="premium-heading">
+                        <span class="premium-shield" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 19 6v5c0 4.6-2.8 8.3-7 10-4.2-1.7-7-5.4-7-10V6l7-3Z" /></svg>
+                        </span>
+                        <span class="onboarding-kicker">Bước 3 · Khám phá Pro</span>
+                        <h1 id="premium-title" tabindex="-1">Kích hoạt gói Pro thành viên?</h1>
+                        <p>Mở khóa không giới hạn số lần luyện tập, phân tích phát âm chuyên sâu và các công cụ học bằng AI.</p>
+                    </div>
+
+                    <ul class="premium-benefits">
+                        <li><span>✓</span> Không quảng cáo cắt ngang luồng ghi âm</li>
+                        <li><span>✓</span> Phân tích từ vựng IPA chuyên sâu bằng Gemini AI</li>
+                        <li><span>✓</span> Tạo bài giảng và câu hỏi ôn tập không giới hạn</li>
+                        <li><span>✓</span> Đổi cấp độ học tập linh hoạt</li>
+                        <li><span>✓</span> Tải file thu âm và thống kê lịch sử phát âm nâng cao</li>
+                    </ul>
+
+                    <div class="premium-price-row">
+                        <div><small>Học phí dự kiến</small><strong>149K₫<span>/ tháng</span></strong></div>
+                        <span class="premium-trial">Tặng miễn phí 3 ngày test</span>
+                    </div>
+                    <p class="premium-disclaimer">Bạn có thể bắt đầu học ngay. Gói VIP mở quyền truy cập nội dung VIP; gói Miễn Phí tiếp tục với nội dung thường.</p>
+
+                    <form asp-controller="Account" asp-action="CompleteOnboarding" method="post" class="premium-actions" data-plan-actions>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="LearningMode" value="@selectedMode" />
+                        <input type="hidden" name="Accent" value="@selectedAccent" />
+                        <input type="hidden" name="PronunciationTarget" value="70" data-plan-target />
+                        <input type="hidden" name="Plan" value="free" data-plan-value />
+                        <button class="premium-back" type="button" data-hide-premium>← Quay lại</button>
+                        <button class="premium-free-button" type="submit" value="free">Dùng gói Miễn Phí</button>
+                        <button class="premium-vip-button" type="submit" value="vip"><span aria-hidden="true">✦</span> Học với gói VIP</button>
+                    </form>
+                    <div class="onboarding-status" data-onboarding-status role="status" aria-live="polite"></div>
+                </article>
+            </section>
+        }
+    </main>
+}
+else
+{
+    <main class="auth-page" id="main-content">
+        <aside class="auth-story" aria-label="Giới thiệu ShadowSpeak AI">
+            <div class="auth-story-glow auth-story-glow--one"></div>
+            <div class="auth-story-glow auth-story-glow--two"></div>
+            <div class="auth-story-inner">
+                <a class="auth-logo" asp-controller="Home" asp-action="Index" aria-label="ShadowSpeak AI - Trang chủ">
+                    <span class="auth-logo-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M7 13v6M11 9v14M15 6v20M19 10v12M23 8v16M27 13v6" /></svg></span>
+                    <span>ShadowSpeak AI</span>
+                </a>
+                <div class="auth-pitch">
+                    <span class="auth-method">Method shadowing</span>
+                    <h1>Luyện phát âm chuẩn<br />Anh – Mỹ cùng AI</h1>
+                    <p>Nghe, nhại và nhận phản hồi chi tiết trên từng âm tiết. ShadowSpeak biến mỗi lần luyện nói thành một bước tiến có thể đo lường.</p>
+                    <ul class="auth-benefits">
+                        <li><span>✓</span> Audio chuẩn phát âm bản xứ</li>
+                        <li><span>✓</span> Thu âm và phản hồi giọng nói ngay trên web</li>
+                        <li><span>✓</span> AI chấm điểm, sửa lỗi và chú giải IPA</li>
+                        <li><span>✓</span> Flashcard giãn cách giúp nhớ từ lâu hơn</li>
+                    </ul>
+                </div>
+                <p class="auth-copyright">© 2026 ShadowSpeak.</p>
+            </div>
+        </aside>
+
+        <section class="auth-form-side" aria-label="Khu vực tài khoản">
+            <div class="auth-form-card">
+                @if (!string.IsNullOrWhiteSpace(authError))
+                {
+                    <div class="auth-alert" role="alert"><span aria-hidden="true">!</span>@authError</div>
+                }
+
+                @if (activeStep == "register")
+                {
+                    <div class="auth-form-heading">
+                        <span class="auth-form-eyebrow">Bắt đầu miễn phí</span>
+                        <h1>Tạo tài khoản mới</h1>
+                        <p>Tạo tài khoản để lưu tiến trình và bắt đầu hành trình cải thiện phát âm.</p>
+                    </div>
+                    <form asp-controller="Account" asp-action="Register" method="post" class="auth-form">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Register.ReturnUrl" type="hidden" />
+                        <div class="auth-field">
+                            <label asp-for="Register.FullName">Tên hiển thị</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-person-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M15.8214 17.4869V15.8215C15.8214 14.9382 15.4705 14.0909 14.8459 13.4663C14.2212 12.8416 13.374 12.4907 12.4906 12.4907H7.49439C6.611 12.4907 5.7638 12.8416 5.13915 13.4663C4.5145 14.0909 4.16357 14.9382 4.16357 15.8215V17.4869" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M9.99244 9.15968C11.832 9.15968 13.3233 7.66842 13.3233 5.82886C13.3233 3.9893 11.832 2.49805 9.99244 2.49805C8.15288 2.49805 6.66162 3.9893 6.66162 5.82886C6.66162 7.66842 8.15288 9.15968 9.99244 9.15968Z" stroke="#90A1B9" stroke-width="1.66541" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <input asp-for="Register.FullName" autocomplete="name" placeholder="Nhập tên của bạn" />
                             </div>
+                            <span asp-validation-for="Register.FullName" class="auth-validation"></span>
                         </div>
+                        <div class="auth-field">
+                            <label asp-for="Register.Email">Email chuyên dùng</label>
+                            <div class="auth-input-wrap"><span aria-hidden="true">✉</span><input asp-for="Register.Email" autocomplete="email" placeholder="ban@email.com" /></div>
+                            <span asp-validation-for="Register.Email" class="auth-validation"></span>
+                        </div>
+                        <div class="auth-field">
+                            <label asp-for="Register.Password">Mật khẩu khóa</label>
+                            <div class="auth-input-wrap auth-input-wrap--plain"><input asp-for="Register.Password" type="password" autocomplete="new-password" placeholder="Tối thiểu 8 ký tự" /></div>
+                            <span asp-validation-for="Register.Password" class="auth-validation"></span>
+                        </div>
+                        <button type="submit" class="auth-primary">Đăng ký tài khoản <span aria-hidden="true">→</span></button>
+                    </form>
+                }
+                else
+                {
+                    <div class="auth-form-heading">
+                        <span class="auth-form-eyebrow">Tiếp tục hành trình</span>
+                        <h1>Xin chào quay trở lại</h1>
+                        <p>Đăng nhập để tiếp tục chuỗi ngày luyện nói và theo dõi tiến bộ của bạn.</p>
                     </div>
+                    <form asp-controller="Account" asp-action="Login" method="post" class="auth-form">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Login.ReturnUrl" type="hidden" />
+                        <div class="auth-field">
+                            <label asp-for="Login.Email">Email chuyên dùng</label>
+                            <div class="auth-input-wrap"><span aria-hidden="true">✉</span><input asp-for="Login.Email" autocomplete="email" placeholder="ban@email.com" /></div>
+                            <span asp-validation-for="Login.Email" class="auth-validation"></span>
+                        </div>
+                        <div class="auth-field">
+                            <div class="auth-label-row"><label asp-for="Login.Password">Mật khẩu khóa</label><span>Ít nhất 8 ký tự</span></div>
+                            <div class="auth-input-wrap auth-input-wrap--plain"><input asp-for="Login.Password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" /></div>
+                            <span asp-validation-for="Login.Password" class="auth-validation"></span>
+                        </div>
+                        <button type="submit" class="auth-primary">Đăng nhập <span aria-hidden="true">→</span></button>
+                    </form>
+                }
+
+                <div class="auth-divider"><span>hoặc tiếp tục với</span></div>
+                <div class="auth-socials">
+                    <button type="button" disabled title="Đăng nhập Google sẽ sớm được hỗ trợ"><strong class="google-g">G</strong> Google</button>
+                    <button type="button" disabled title="Đăng nhập Facebook sẽ sớm được hỗ trợ"><strong class="facebook-f">f</strong> Facebook</button>
                 </div>
-            }
-            else
-            {
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="border rounded-4 p-4 h-100">
-                            <h2 class="h5 fw-bold mb-3">Đăng nhập</h2>
-                            <form asp-controller="Account" asp-action="Login" method="post">
-                                @Html.AntiForgeryToken()
-                                <input asp-for="Login.ReturnUrl" type="hidden" />
-                                <div class="mb-3">
-                                    <label asp-for="Login.Email" class="form-label"></label>
-                                    <input asp-for="Login.Email" class="form-control" />
-                                    <span asp-validation-for="Login.Email" class="text-danger small"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="Login.Password" class="form-label"></label>
-                                    <input asp-for="Login.Password" class="form-control" type="password" />
-                                    <span asp-validation-for="Login.Password" class="text-danger small"></span>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="border rounded-4 p-4 h-100">
-                            <h2 class="h5 fw-bold mb-3">Đăng ký</h2>
-                            <form asp-controller="Account" asp-action="Register" method="post">
-                                @Html.AntiForgeryToken()
-                                <input asp-for="Register.ReturnUrl" type="hidden" />
-                                <div class="mb-3">
-                                    <label asp-for="Register.FullName" class="form-label"></label>
-                                    <input asp-for="Register.FullName" class="form-control" />
-                                    <span asp-validation-for="Register.FullName" class="text-danger small"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="Register.Email" class="form-label"></label>
-                                    <input asp-for="Register.Email" class="form-control" />
-                                    <span asp-validation-for="Register.Email" class="text-danger small"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="Register.Password" class="form-label"></label>
-                                    <input asp-for="Register.Password" class="form-control" type="password" />
-                                    <span asp-validation-for="Register.Password" class="text-danger small"></span>
-                                </div>
-                                <button type="submit" class="btn btn-outline-primary w-100">Đăng ký</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-</div>
+                <p class="auth-switch">
+                    @if (activeStep == "register")
+                    { <text>Đã có tài khoản? <a asp-controller="Home" asp-action="Authen" asp-route-step="login">Đăng nhập</a></text> }
+                    else
+                    { <text>Chưa có tài khoản? <a asp-controller="Home" asp-action="Authen" asp-route-step="register">Đăng ký ngay</a></text> }
+                </p>
+                <p class="auth-legal">Bằng cách tiếp tục, bạn đồng ý với <a asp-controller="Home" asp-action="Privacy">chính sách quyền riêng tư</a>.</p>
+            </div>
+        </section>
+    </main>
+}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll('[data-choice-form]').forEach(function (form) {
+            function syncChoices() {
+                form.querySelectorAll('label:has(input[type="radio"])').forEach(function (label) {
+                    label.classList.toggle('is-selected', label.querySelector('input').checked);
+                });
+            }
+            form.addEventListener('change', syncChoices);
+            syncChoices();
+        });
+
+        const goalStep = document.querySelector('.onboarding-content--goal');
+        const premiumStep = document.querySelector('[data-premium-step]');
+        const progress = document.querySelector('.onboarding-progress');
+        const progressFill = progress?.querySelector('span');
+        const status = document.querySelector('[data-onboarding-status]');
+        const planForm = document.querySelector('[data-plan-actions]');
+        const planTarget = document.querySelector('[data-plan-target]');
+        const planValue = document.querySelector('[data-plan-value]');
+
+        function setPremiumVisible(visible) {
+            if (!goalStep || !premiumStep) return;
+            goalStep.hidden = visible;
+            premiumStep.hidden = !visible;
+            if (progress) progress.setAttribute('aria-valuenow', visible ? '3' : '2');
+            if (progressFill) progressFill.style.setProperty('--progress', visible ? '100%' : '66%');
+            if (visible) premiumStep.querySelector('h1')?.focus({ preventScroll: true });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.querySelector('[data-show-premium]')?.addEventListener('click', function () {
+            const selectedTarget = document.querySelector('[data-goal-form] [name="PronunciationTarget"]:checked');
+            if (planTarget && selectedTarget) planTarget.value = selectedTarget.value;
+            setPremiumVisible(true);
+        });
+
+        document.querySelector('[data-hide-premium]')?.addEventListener('click', function () {
+            setPremiumVisible(false);
+        });
+
+        planForm?.addEventListener('submit', function (event) {
+            if (planValue && event.submitter) planValue.value = event.submitter.value;
+            planForm.querySelectorAll('button[type="submit"]').forEach(function (button) {
+                button.disabled = true;
+            });
+            if (status) {
+                status.className = 'onboarding-status is-visible';
+                status.textContent = 'Đang lưu lựa chọn và mở khóa học…';
+            }
+        });
+    </script>
 }

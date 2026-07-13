@@ -7,9 +7,10 @@
     <script src="~/js/theme-init.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebShadowing.styles.css" asp-append-version="true" />
 </head>
-<body class="d-flex flex-column min-vh-100 has-bottom-nav @(User.Identity?.IsAuthenticated == true ? "nav-logged-in" : "")" data-bs-no-jquery>
+<body class="d-flex flex-column min-vh-100 has-bottom-nav @(User.Identity?.IsAuthenticated == true ? "nav-logged-in" : "") @(ViewContext.RouteData.Values["action"]?.ToString() == "Authen" ? "auth-shell-body" : "")" data-bs-no-jquery>
     @{ 
         var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
         var isCoursesActive = action is "Index" or "LessonDetail";
@@ -125,6 +126,7 @@
 
     <partial name="_BottomNav" />
 
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

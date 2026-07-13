@@ -43,3 +43,17 @@ public class AuthPageViewModel
     public RegisterViewModel Register { get; set; } = new();
     public string ActiveStep { get; set; } = "login";
 }
+
+public class OnboardingSelectionViewModel
+{
+    [Required]
+    public string LearningMode { get; set; } = LearningModes.Casual;
+
+    [Required]
+    public string Accent { get; set; } = Accents.EnUs;
+
+    public byte PronunciationTarget { get; set; } = PronunciationTargets.Comprehension70;
+
+    [Required]
+    public string Plan { get; set; } = "free";
+}
