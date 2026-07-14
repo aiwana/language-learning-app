@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebShadowing.Models;
@@ -11,17 +12,20 @@ public class HomeController : Controller
     private readonly ICourseService _courseService;
     private readonly IUserContextService _userContext;
     private readonly IHostEnvironment _env;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<HomeController> _logger;
 
     public HomeController(
         ICourseService courseService,
         IUserContextService userContext,
         IHostEnvironment env,
+        IConfiguration configuration,
         ILogger<HomeController> logger)
     {
         _courseService = courseService;
         _userContext = userContext;
         _env = env;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -73,9 +77,32 @@ public class HomeController : Controller
     {
         var userMode = await _userContext.GetLearningModeAsync(cancellationToken);
         var effectiveMode = _env.IsDevelopment() && !string.IsNullOrWhiteSpace(mode) ? mode : userMode;
+        var normalizedMode = NormalizeMode(effectiveMode);
+        var pronunciationTarget = await _userContext.GetPronunciationTargetAsync(cancellationToken);
+        var lessonResult = await _courseService.GetLessonAsync(
+            id,
+            normalizedMode,
+            pronunciationTarget,
+            cancellationToken);
+
+        if (lessonResult.Status == LessonLookupStatus.Forbidden)
+        {
+            return Forbid();
+        }
+
+        if (lessonResult.Lesson is null)
+        {
+            return NotFound();
+        }
 
         ViewBag.LessonId = id;
-        ViewBag.LearningMode = NormalizeMode(effectiveMode);
+        ViewBag.LearningMode = normalizedMode;
+        ViewBag.LessonTitle = lessonResult.Lesson.Title;
+        ViewBag.PronunciationAiConfigured = !string.IsNullOrWhiteSpace(
+            _configuration["OPENAI_API_KEY"] ?? _configuration["OpenAI:ApiKey"]);
+        ViewBag.InitialLessonJson = JsonSerializer.Serialize(
+            lessonResult.Lesson,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
         return View();
     }
 

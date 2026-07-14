@@ -7,7 +7,8 @@ public interface ILessonContentService
     Task<IReadOnlyList<LessonSentenceDto>> GetSentencesAsync(
         long lessonId,
         IReadOnlyCollection<LessonMaterial> materials,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        IReadOnlyCollection<LessonSentence>? preloadedDbSentences = null);
 
     Task<bool> HasSentencesAsync(
         long lessonId,

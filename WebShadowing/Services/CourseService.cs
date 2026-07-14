@@ -135,6 +135,8 @@ public sealed class CourseService : ICourseService
             .AsNoTracking()
             .Include(lesson => lesson.Course)
             .Include(lesson => lesson.Materials)
+            .Include(lesson => lesson.Sentences)
+            .AsSingleQuery()
             .FirstOrDefaultAsync(lesson => lesson.LessonId == lessonId, cancellationToken);
 
         if (lesson is null)
@@ -165,7 +167,8 @@ public sealed class CourseService : ICourseService
         var sentences = await _lessonContentService.GetSentencesAsync(
             lesson.LessonId,
             lesson.Materials.ToList(),
-            cancellationToken);
+            cancellationToken,
+            lesson.Sentences.ToList());
 
         return LessonLookupResult.Found(new LessonDetailDto
         {
@@ -270,14 +273,19 @@ public sealed class CourseService : ICourseService
 
     private static LessonMediaDto BuildMedia(IEnumerable<LessonMaterial> materials)
     {
-        var audioUrl = materials
+        var materialList = materials.ToList();
+
+        var audioUrl = materialList
             .Where(material => material.MaterialType == MaterialTypes.Audio)
             .Select(material => material.ContentUrl)
             .FirstOrDefault();
 
-        var videoUrl = materials
+        audioUrl ??= InferKnownAudioUrl(materialList);
+
+        var videoUrl = materialList
             .Where(material => material.MaterialType == MaterialTypes.Video)
             .Select(material => material.ContentUrl)
+            .Where(url => !IsPlaceholderMediaUrl(url))
             .FirstOrDefault();
 
         return new LessonMediaDto
@@ -325,5 +333,22 @@ public sealed class CourseService : ICourseService
         }
 
         return null;
+    }
+
+    private static bool IsPlaceholderMediaUrl(string? url)
+    {
+        return !string.IsNullOrWhiteSpace(url)
+            && url.Contains("dummy", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string? InferKnownAudioUrl(IEnumerable<LessonMaterial> materials)
+    {
+        var hasUnit1Transcript = materials.Any(material =>
+            material.MaterialType == MaterialTypes.Transcript
+            && material.ContentUrl.Contains("/media/curriculum/grade-6/unit-1/", StringComparison.OrdinalIgnoreCase));
+
+        return hasUnit1Transcript
+            ? "/media/curriculum/grade-6/unit-1/unit-1-getting-started-ex-1.wav"
+            : null;
     }
 }

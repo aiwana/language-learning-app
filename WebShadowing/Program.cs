@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.Threading.RateLimiting;
 using WebShadowing.Data;
 using WebShadowing.Services;
 
@@ -15,6 +19,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ILessonContentService, LessonContentService>();
+builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache(options => options.SizeLimit = 2_000);
+builder.Services.AddScoped<IPronunciationAssessmentService, OpenAiPronunciationAssessmentService>();
+builder.Services.AddSingleton<ILanguageReferenceService, OpenAiLanguageReferenceService>();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("pronunciation-ai", context => BuildAiRateLimiter(context, permitLimit: 10));
+    options.AddPolicy("language-reference-ai", context => BuildAiRateLimiter(context, permitLimit: 30));
+});
 
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(
@@ -45,10 +59,18 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllersWithViews();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 
 var app = builder.Build();
+
+app.UseResponseCompression();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -59,6 +81,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRouting();
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -70,3 +93,21 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.Run();
+
+static RateLimitPartition<string> BuildAiRateLimiter(HttpContext context, int permitLimit)
+{
+    var userKey = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        ?? context.User.Identity?.Name
+        ?? context.Connection.RemoteIpAddress?.ToString()
+        ?? "unknown";
+
+    return RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: userKey,
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = permitLimit,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        });
+}

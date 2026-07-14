@@ -112,4 +112,10 @@ public sealed class LessonSentenceDto
     public int Order { get; set; }
     public string Text { get; set; } = string.Empty;
     public string? Translation { get; set; }
+    /// <summary>IPA phiên âm của câu (lấy từ transcript JSON, nếu có).</summary>
+    public string? Ipa { get; set; }
+    /// <summary>Giây bắt đầu trong file audio/video (nullable nếu không có timestamp).</summary>
+    public double? StartTime { get; set; }
+    /// <summary>Giây kết thúc trong file audio/video (nullable nếu không có timestamp).</summary>
+    public double? EndTime { get; set; }
 }
