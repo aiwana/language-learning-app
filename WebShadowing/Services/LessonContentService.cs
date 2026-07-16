@@ -7,11 +7,6 @@ namespace WebShadowing.Services;
 
 public sealed class LessonContentService : ILessonContentService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
-
     private readonly AppDbContext _db;
     private readonly IWebHostEnvironment _env;
 
@@ -24,28 +19,44 @@ public sealed class LessonContentService : ILessonContentService
     public async Task<IReadOnlyList<LessonSentenceDto>> GetSentencesAsync(
         long lessonId,
         IReadOnlyCollection<LessonMaterial> materials,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IReadOnlyCollection<LessonSentence>? preloadedDbSentences = null)
     {
-        var dbSentences = await _db.LessonSentences
-            .AsNoTracking()
-            .Where(sentence => sentence.LessonId == lessonId)
-            .OrderBy(sentence => sentence.SentenceOrder)
-            .Select(sentence => new LessonSentenceDto
-            {
-                SentenceId = sentence.SentenceId,
-                Order = sentence.SentenceOrder,
-                Text = sentence.Text,
-                Translation = sentence.Translation
-            })
-            .ToListAsync(cancellationToken);
+        var transcriptSentences = await LoadTranscriptSentencesAsync(materials, cancellationToken);
 
-        if (dbSentences.Count > 0)
+        var dbSentences = preloadedDbSentences is null
+            ? await _db.LessonSentences
+                .AsNoTracking()
+                .Where(sentence => sentence.LessonId == lessonId)
+                .OrderBy(sentence => sentence.SentenceOrder)
+                .Select(sentence => new LessonSentenceDto
+                {
+                    SentenceId = sentence.SentenceId,
+                    Order = sentence.SentenceOrder,
+                    Text = sentence.Text,
+                    Translation = sentence.Translation
+                })
+                .ToListAsync(cancellationToken)
+            : preloadedDbSentences
+                .OrderBy(sentence => sentence.SentenceOrder)
+                .Select(MapDbSentence)
+                .ToList();
+
+        if (transcriptSentences.Count > 0)
         {
-            return dbSentences;
+            return MergeTranscriptWithDbSentences(transcriptSentences, dbSentences);
         }
 
-        return await LoadTranscriptSentencesAsync(materials, cancellationToken);
+        return dbSentences;
     }
+
+    private static LessonSentenceDto MapDbSentence(LessonSentence sentence) => new()
+    {
+        SentenceId = sentence.SentenceId,
+        Order = sentence.SentenceOrder,
+        Text = sentence.Text,
+        Translation = sentence.Translation
+    };
 
     public async Task<bool> HasSentencesAsync(
         long lessonId,
@@ -118,7 +129,10 @@ public sealed class LessonContentService : ILessonContentService
                     SentenceId = 0,
                     Order = GetInt32(item, "sentence_order") ?? GetInt32(item, "order") ?? sentences.Count + 1,
                     Text = text,
-                    Translation = GetString(item, "translation")
+                    Translation = GetString(item, "translation"),
+                    Ipa = GetString(item, "ipa"),
+                    StartTime = GetDouble(item, "start_time") ?? GetDouble(item, "startTime"),
+                    EndTime = GetDouble(item, "end_time") ?? GetDouble(item, "endTime")
                 });
             }
 
@@ -128,10 +142,53 @@ public sealed class LessonContentService : ILessonContentService
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
         {
-            // Transcript file is corrupt, locked, or unreadable.
-            // Per spec: fallback errors return [] so hasContent stays false — do NOT 500.
             return [];
         }
+    }
+
+    private static IReadOnlyList<LessonSentenceDto> MergeTranscriptWithDbSentences(
+        IReadOnlyList<LessonSentenceDto> transcriptSentences,
+        IReadOnlyList<LessonSentenceDto> dbSentences)
+    {
+        if (dbSentences.Count == 0)
+        {
+            return transcriptSentences;
+        }
+
+        var dbByText = dbSentences
+            .GroupBy(sentence => NormalizeSentenceKey(sentence.Text))
+            .Where(group => !string.IsNullOrWhiteSpace(group.Key))
+            .ToDictionary(group => group.Key, group => group.First());
+
+        var dbByOrder = dbSentences
+            .GroupBy(sentence => sentence.Order)
+            .ToDictionary(group => group.Key, group => group.First());
+
+        return transcriptSentences
+            .Select(transcript =>
+            {
+                dbByText.TryGetValue(NormalizeSentenceKey(transcript.Text), out var dbMatch);
+
+                if (dbMatch is null
+                    && dbByOrder.TryGetValue(transcript.Order, out var orderMatch)
+                    && NormalizeSentenceKey(orderMatch.Text) == NormalizeSentenceKey(transcript.Text))
+                {
+                    dbMatch = orderMatch;
+                }
+
+                return new LessonSentenceDto
+                {
+                    SentenceId = dbMatch?.SentenceId ?? 0,
+                    Order = transcript.Order,
+                    Text = transcript.Text,
+                    Translation = transcript.Translation ?? dbMatch?.Translation,
+                    Ipa = transcript.Ipa,
+                    StartTime = transcript.StartTime,
+                    EndTime = transcript.EndTime
+                };
+            })
+            .OrderBy(sentence => sentence.Order)
+            .ToList();
     }
 
     private string? ResolveWebRootPath(string? contentUrl)
@@ -157,5 +214,29 @@ public sealed class LessonContentService : ILessonContentService
         return element.TryGetProperty(propertyName, out var property) && property.TryGetInt32(out var value)
             ? value
             : null;
+    }
+
+    private static double? GetDouble(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var property))
+        {
+            return null;
+        }
+
+        return property.TryGetDouble(out var value) ? value : null;
+    }
+
+    private static string NormalizeSentenceKey(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return string.Empty;
+        }
+
+        return new string(text
+            .ToLowerInvariant()
+            .Where(character => char.IsLetterOrDigit(character) || char.IsWhiteSpace(character))
+            .ToArray())
+            .Trim();
     }
 }

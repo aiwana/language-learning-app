@@ -49,8 +49,5 @@
       });
     });
 
-    if (document.body.classList.contains('nav-logged-in')) {
-      document.body.classList.add('nav-logged-in');
-    }
   });
 })();

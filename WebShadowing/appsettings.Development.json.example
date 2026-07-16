@@ -2,6 +2,10 @@
   "ConnectionStrings": {
     "DefaultConnection": "Server=localhost;Database=EnglishShadowingDB;Trusted_Connection=True;TrustServerCertificate=True"
   },
+  "OpenAI": {
+    "AudioModel": "gpt-audio",
+    "TextModel": "gpt-4o-mini"
+  },
   "Logging": {
     "LogLevel": {
       "Default": "Information",

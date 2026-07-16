@@ -1,15 +1,276 @@
 @{
-    ViewData["Title"] = "Bài học";
-    var lessonId = ViewBag.LessonId;
+    ViewData["Title"] = "Shadowing Studio";
+    var lessonId = (long)(ViewBag.LessonId ?? 0L);
+    var learningMode = (string)(ViewBag.LearningMode ?? "casual");
+    var lessonTitle = (string)(ViewBag.LessonTitle ?? "Bài học");
+    var initialLessonJson = (string)(ViewBag.InitialLessonJson ?? "null");
+    var pronunciationAiConfigured = (bool)(ViewBag.PronunciationAiConfigured ?? false);
 }
 
-<div class="animate-slide-up py-2">
-    <div class="surface-card py-4 px-5 py-md-5 px-md-6">
-        <p class="section-label section-label-sky mb-1">Shadowing</p>
-        <h1 class="h3 fw-extrabold mb-2">Bài học #@lessonId</h1>
-        <p class="text-body-muted small mb-4">
-            Placeholder — màn chi tiết bài học sẽ được triển khai ở issue sau. Bottom nav vẫn giữ tab <strong>Khóa học</strong> active.
-        </p>
-        <a class="btn btn-outline-primary btn-sm" asp-controller="Home" asp-action="Index">← Về Khóa học</a>
-    </div>
+<link rel="stylesheet" href="~/css/lesson-detail.css" asp-append-version="true" />
+
+<script>
+    window.__lessonId = @lessonId;
+    window.__learningMode = "@learningMode";
+    window.__initialLesson = @Html.Raw(initialLessonJson);
+    window.__pronunciationAiConfigured = @pronunciationAiConfigured.ToString().ToLowerInvariant();
+</script>
+
+<div id="dict-bubble"
+     class="dict-bubble d-none"
+     role="dialog"
+     aria-modal="false"
+     aria-labelledby="dict-word"
+     aria-live="polite">
+    <button type="button" class="dict-bubble-close" aria-label="Đóng từ điển">x</button>
+    <p class="dict-bubble-word" id="dict-word"></p>
+    <p class="dict-bubble-ipa font-mono" id="dict-ipa"></p>
+    <p class="dict-bubble-meaning" id="dict-meaning"></p>
 </div>
+
+<main class="lesson-detail-page lesson-detail-simple">
+    <section id="page-error" class="d-none lesson-empty-state">
+        <div class="lesson-state-icon lesson-state-icon-red">
+            <i data-lucide="alert-circle"></i>
+        </div>
+        <h1>Không tải được bài học</h1>
+        <p id="page-error-msg">Vui lòng thử lại sau ít phút.</p>
+        <a class="btn btn-outline-primary btn-sm rounded-pill fw-bold" asp-controller="Home" asp-action="Index" asp-route-mode="@learningMode">
+            Về danh sách khóa học
+        </a>
+    </section>
+
+    <section id="lesson-studio" class="lesson-studio-shell">
+        <header class="lesson-simple-hero">
+            <div class="lesson-simple-copy">
+                <a class="lesson-back-link" asp-controller="Home" asp-action="Index" asp-route-mode="@learningMode">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Khóa học</span>
+                </a>
+                <span class="lesson-kicker">Shadowing Studio</span>
+                <h1 id="lesson-title">@lessonTitle</h1>
+                <p>Luyện theo từng đoạn ngắn, thu âm lại và chỉ qua câu tiếp theo khi đạt mục tiêu phát âm.</p>
+            </div>
+
+            <div class="lesson-simple-stats" aria-label="Thông tin luyện tập">
+                <div class="lesson-simple-stat lesson-simple-stat-blue">
+                    <strong id="subtitles-count">0</strong>
+                    <span>câu luyện</span>
+                </div>
+                <div class="lesson-simple-stat lesson-simple-stat-violet">
+                    <strong id="pronunciation-target-label">70%</strong>
+                    <span>mục tiêu</span>
+                </div>
+            </div>
+        </header>
+
+        <nav class="lesson-mode-tabs" aria-label="Chế độ luyện tập" role="tablist">
+            <button type="button"
+                    id="shadowing-tab"
+                    class="lesson-mode-tab is-active"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="shadowing-tab-panel"
+                    data-tab="shadowing"
+                    onclick="switchTab('shadowing')">
+                <i data-lucide="mic-2"></i>
+                <span>Shadowing Studio</span>
+            </button>
+            <button type="button"
+                    class="lesson-mode-tab is-locked"
+                    role="tab"
+                    aria-selected="false"
+                    aria-disabled="true"
+                    title="Tính năng VIP"
+                    data-tab="ai-dialogue"
+                    onclick="switchTab('ai-dialogue')">
+                <i data-lucide="lock-keyhole"></i>
+                <span>Đối thoại AI</span>
+                <small>VIP</small>
+            </button>
+            <button type="button"
+                    class="lesson-mode-tab is-coming-soon"
+                    role="tab"
+                    aria-selected="false"
+                    aria-disabled="true"
+                    data-tab="dictation"
+                    onclick="switchTab('dictation')">
+                <i data-lucide="headphones"></i>
+                <span>Nghe chép</span>
+                <small>Sắp ra mắt</small>
+            </button>
+            <button type="button"
+                    class="lesson-mode-tab is-coming-soon"
+                    role="tab"
+                    aria-selected="false"
+                    aria-disabled="true"
+                    data-tab="ipa-match"
+                    onclick="switchTab('ipa-match')">
+                <i data-lucide="spell-check-2"></i>
+                <span>Ghép IPA</span>
+                <small>Sắp ra mắt</small>
+            </button>
+        </nav>
+
+        <section id="shadowing-tab-panel"
+                 class="lesson-top-grid"
+                 role="tabpanel"
+                 aria-labelledby="shadowing-tab">
+            <div class="lesson-left-stack">
+                <div class="lesson-media-stage">
+                    <div id="youtube-player-wrap" class="d-none lesson-media-card lesson-primary-media">
+                        <div class="ratio ratio-16x9">
+                            <div id="youtube-player"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <section class="lesson-practice-section" aria-label="Câu đang luyện và thu âm">
+                    <article class="lesson-panel lesson-practice-card lesson-recording-workbench">
+                        <div class="lesson-panel-head">
+                            <div>
+                                <span class="lesson-panel-kicker lesson-panel-kicker-violet">Câu đang luyện</span>
+                                <h2>Luyện phát âm</h2>
+                            </div>
+                            <span id="sentence-time-info" class="lesson-time-chip d-none"></span>
+                        </div>
+
+                        <div id="audio-player-wrap" class="d-none lesson-practice-audio">
+                            <audio id="lesson-audio" controls preload="metadata"></audio>
+                        </div>
+
+                        <div class="lesson-practice-grid">
+                            <div class="lesson-practice-text-column">
+                                <div id="words-container" class="words-container" aria-live="polite"></div>
+                                <p id="target-translation" class="lesson-translation"></p>
+
+                                <div class="lesson-action-row">
+                                    <button id="play-sample-btn"
+                                            type="button"
+                                            class="lesson-icon-button lesson-icon-button-blue"
+                                            onclick="playCurrentSentenceAudio()"
+                                            disabled>
+                                        <i data-lucide="volume-2"></i>
+                                        <span>Nghe mẫu</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="lesson-recorder-box">
+                                <div class="lesson-recorder-copy">
+                                    <p id="rec-status-text"
+                                       class="lesson-rec-status"
+                                       role="status"
+                                       aria-live="polite">Nhấn nút xanh để bắt đầu thu âm.</p>
+                                </div>
+
+                                <div class="lesson-recorder-actions">
+                                    <button id="record-btn"
+                                            type="button"
+                                            class="lesson-record-button"
+                                            onclick="toggleRecording()"
+                                            aria-label="Bắt đầu thu âm">
+                                        <i data-lucide="mic"></i>
+                                        <span id="record-btn-label">BẮT ĐẦU THU ÂM</span>
+                                    </button>
+
+                                    <button id="playback-btn"
+                                            type="button"
+                                            class="lesson-secondary-button d-none"
+                                            onclick="playbackRecording()"
+                                            aria-label="Nghe lại bản thu">
+                                        <i data-lucide="headphones"></i>
+                                        <span>Nghe lại</span>
+                                    </button>
+
+                                    <button id="clear-btn"
+                                            type="button"
+                                            class="lesson-secondary-button d-none"
+                                            onclick="clearRecording()"
+                                            aria-label="Xóa bản thu">
+                                        <i data-lucide="rotate-ccw"></i>
+                                        <span>Thu lại</span>
+                                    </button>
+
+                                    <button id="next-sentence-btn"
+                                            type="button"
+                                            class="lesson-next-button d-none"
+                                            onclick="advanceSentence()"
+                                            aria-label="Câu tiếp theo">
+                                        <span>Câu tiếp theo</span>
+                                        <i data-lucide="arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+            </div>
+
+            <aside class="lesson-panel lesson-score-panel lesson-ai-side-card" aria-label="Chấm điểm AI">
+                <div class="lesson-panel-head">
+                    <div>
+                        <span class="lesson-panel-kicker lesson-panel-kicker-red">Chấm điểm AI</span>
+                        <h2>Kết quả phát âm</h2>
+                    </div>
+                    <i data-lucide="sparkles"></i>
+                </div>
+
+                <div class="lesson-score-layout">
+                    <div class="score-ring-section">
+                        <div id="score-ring-wrap" class="score-ring-wrap">
+                            <svg class="score-svg" viewBox="0 0 128 128" aria-hidden="true">
+                                <circle cx="64" cy="64" r="58" fill="none" stroke="#e2e8f0" stroke-width="10" />
+                                <circle id="score-ring" cx="64" cy="64" r="58"
+                                        fill="none" stroke="#e2e8f0" stroke-width="10"
+                                        stroke-linecap="round"
+                                        transform="rotate(-90 64 64)"
+                                        style="stroke-dasharray:364;stroke-dashoffset:364;transition:stroke-dashoffset 0.6s ease,stroke 0.4s ease;" />
+                            </svg>
+                            <div class="score-center">
+                                <span id="score-num" class="score-num">--</span>
+                                <span class="score-unit">%</span>
+                            </div>
+                        </div>
+
+                        <div id="score-loading" class="d-none lesson-score-loading">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Đang chấm điểm...</span>
+                            </div>
+                            <p>Đang chấm điểm...</p>
+                        </div>
+                    </div>
+
+                    <div class="lesson-score-copy">
+                        <h2 id="score-feedback-title" class="score-feedback-title text-muted">Chưa có dữ liệu</h2>
+                        <p id="score-feedback-sub">Nghe mẫu rồi thu âm câu hiện tại.</p>
+                    </div>
+
+                    <textarea id="ai-detailed-feedback"
+                              class="ai-feedback-textarea"
+                              rows="5"
+                              readonly
+                              aria-label="Nhận xét chi tiết của AI">@(!pronunciationAiConfigured ? "Chưa kết nối AI, vui lòng kiểm tra lại!" : string.Empty)</textarea>
+                </div>
+            </aside>
+        </section>
+
+        <section class="lesson-subtitles-section" aria-label="Phụ đề" data-shadowing-content>
+            <article class="lesson-panel lesson-subtitle-panel">
+                <div class="lesson-panel-head">
+                    <div>
+                        <span class="lesson-panel-kicker lesson-panel-kicker-blue">Phụ đề</span>
+                        <h2>Chọn câu để luyện</h2>
+                    </div>
+                    <i data-lucide="list-checks"></i>
+                </div>
+                <ol id="subtitle-list" class="subtitle-list" aria-label="Danh sách câu luyện tập"></ol>
+            </article>
+        </section>
+    </section>
+</main>
+
+@section Scripts {
+    <script defer src="~/js/lesson-shadowing.js" asp-append-version="true"></script>
+}

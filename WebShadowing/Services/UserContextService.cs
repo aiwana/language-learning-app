@@ -10,6 +10,7 @@ public class UserContextService : IUserContextService
 {
     private readonly AppDbContext _db;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private UserPreferences? _cachedPreferences;
 
     public UserContextService(AppDbContext db, IHttpContextAccessor httpContextAccessor)
     {
@@ -33,36 +34,42 @@ public class UserContextService : IUserContextService
 
     public async Task<string> GetLearningModeAsync(CancellationToken cancellationToken = default)
     {
-        var userId = GetCurrentUserId();
-        if (userId is null)
-        {
-            return LearningModes.Casual;
-        }
-
-        var mode = await _db.Users
-            .AsNoTracking()
-            .Where(user => user.UserId == userId.Value)
-            .Select(user => user.LearningMode)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        return NormalizeMode(mode);
+        return (await GetPreferencesAsync(cancellationToken)).LearningMode;
     }
 
     public async Task<byte> GetPronunciationTargetAsync(CancellationToken cancellationToken = default)
     {
+        return (await GetPreferencesAsync(cancellationToken)).PronunciationTarget;
+    }
+
+    private async Task<UserPreferences> GetPreferencesAsync(CancellationToken cancellationToken)
+    {
+        if (_cachedPreferences is not null)
+        {
+            return _cachedPreferences;
+        }
+
         var userId = GetCurrentUserId();
         if (userId is null)
         {
-            return PronunciationTargets.Comprehension70;
+            return _cachedPreferences = new UserPreferences(
+                LearningModes.Casual,
+                PronunciationTargets.Comprehension70);
         }
 
-        var target = await _db.Users
+        var preferences = await _db.Users
             .AsNoTracking()
             .Where(user => user.UserId == userId.Value)
-            .Select(user => (byte?)user.PronunciationTarget)
+            .Select(user => new
+            {
+                user.LearningMode,
+                PronunciationTarget = (byte?)user.PronunciationTarget
+            })
             .FirstOrDefaultAsync(cancellationToken);
 
-        return target ?? PronunciationTargets.Comprehension70;
+        return _cachedPreferences = new UserPreferences(
+            NormalizeMode(preferences?.LearningMode),
+            preferences?.PronunciationTarget ?? PronunciationTargets.Comprehension70);
     }
 
     private static string NormalizeMode(string? mode)
@@ -74,4 +81,6 @@ public class UserContextService : IUserContextService
             _ => LearningModes.Casual
         };
     }
+
+    private sealed record UserPreferences(string LearningMode, byte PronunciationTarget);
 }
