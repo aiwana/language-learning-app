@@ -55,6 +55,10 @@ public class User
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; }
 
+    [Timestamp]
+    [Column("row_version")]
+    public byte[]? RowVersion { get; set; }
+
     public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();
 
     public ICollection<PracticeSession> PracticeSessions { get; set; } = new List<PracticeSession>();

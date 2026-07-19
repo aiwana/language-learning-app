@@ -47,3 +47,88 @@ public static class Accents
     public const string EnUs = "en-us";
     public const string EnGb = "en-gb";
 }
+
+public static class PracticeTabs
+{
+    public const string Shadowing = "shadowing";
+    public const string AiDialogue = "ai-dialogue";
+    public const string Dictation = "dictation";
+    public const string IpaMatch = "ipa-match";
+}
+
+public static class ProgressStatuses
+{
+    public const string NotStarted = "not_started";
+    public const string InProgress = "in_progress";
+    public const string Completed = "completed";
+}
+
+public static class ExerciseTypes
+{
+    public const string Pronunciation = "pronunciation";
+    public const string Shadowing = "shadowing";
+    public const string Dictation = "dictation";
+    public const string IpaMatch = "ipa_match";
+    public const string AiDialogue = "ai_dialogue";
+}
+
+public static class AttemptResults
+{
+    public const string Pending = "pending";
+    public const string Passed = "passed";
+    public const string Failed = "failed";
+    public const string Abandoned = "abandoned";
+}
+
+public static class SourceReviewStatuses
+{
+    public const string Pending = "pending";
+    public const string Approved = "approved";
+    public const string Rejected = "rejected";
+}
+
+public static class ThemePreferences
+{
+    public const string System = "system";
+    public const string Light = "light";
+    public const string Dark = "dark";
+}
+
+public static class ModeChangeActors
+{
+    public const string User = "user";
+    public const string Admin = "admin";
+    public const string System = "system";
+    public const string Onboarding = "onboarding";
+}
+
+public static class SubscriptionStatuses
+{
+    public const string Pending = "pending";
+    public const string Active = "active";
+    public const string PastDue = "past_due";
+    public const string Cancelled = "cancelled";
+    public const string Expired = "expired";
+}
+
+public static class BillingPeriods
+{
+    public const string Monthly = "monthly";
+    public const string Yearly = "yearly";
+    public const string Lifetime = "lifetime";
+}
+
+public static class PaymentStatuses
+{
+    public const string Pending = "pending";
+    public const string Succeeded = "succeeded";
+    public const string Failed = "failed";
+    public const string Refunded = "refunded";
+}
+
+public static class PaymentTypes
+{
+    public const string Purchase = "purchase";
+    public const string Renewal = "renewal";
+    public const string Refund = "refund";
+}
