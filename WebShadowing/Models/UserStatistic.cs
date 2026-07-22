@@ -29,6 +29,10 @@ public class UserStatistic
 
     public int Exp { get; set; }
 
+    [Timestamp]
+    [Column("row_version")]
+    public byte[]? RowVersion { get; set; }
+
     [ForeignKey(nameof(UserId))]
     public User User { get; set; } = null!;
 }

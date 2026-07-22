@@ -46,4 +46,16 @@ dotnet run
 ```bash
 sqlcmd -S localhost -d master -E -i Designs/Database/DatabaseCreation.sql
 sqlcmd -S localhost -d EnglishShadowingDB -E -i Designs/Database/Schema_v0p1_extension.sql
+sqlcmd -S localhost -d EnglishShadowingDB -E -i Database/production_learning_schema_update.sql
 ```
+
+## SQL Server integration tests
+
+The test project uses SQL Server, not SQLite. Each test factory derives server and credentials from `WEBSHADOWING_TEST_SQLSERVER`, replaces its database name with an isolated `EnglishShadowingDB_Test_<guid>` name, and deletes that test database during cleanup.
+
+```powershell
+$env:WEBSHADOWING_TEST_SQLSERVER="Server=localhost;Database=ignored;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+dotnet test ..\WebShadowing.AuthFlowTests\WebShadowing.AuthFlowTests.csproj
+```
+
+The configured login needs permission to create and drop databases. Never point the test variable at credentials that should not have that permission; the supplied database name is intentionally ignored as a safety measure.

@@ -22,6 +22,12 @@ public class LessonSentence
 
     public string? Translation { get; set; }
 
+    [Column("start_ms")]
+    public int? StartMilliseconds { get; set; }
+
+    [Column("end_ms")]
+    public int? EndMilliseconds { get; set; }
+
     [ForeignKey(nameof(LessonId))]
     public Lesson Lesson { get; set; } = null!;
 }
