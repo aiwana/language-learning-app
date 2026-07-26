@@ -66,14 +66,15 @@ public sealed class ProductionSchemaIntegrationTests
         Assert.Equal(1, await ScalarAsync(db, "SELECT COUNT(*) AS [Value] FROM dbo.User_Saved_Lessons"));
         Assert.Equal(1, await ScalarAsync(db, "SELECT COUNT(*) AS [Value] FROM dbo.Saved_AI_Lesson_Segments"));
         Assert.Equal(1, await ScalarAsync(db, "SELECT COUNT(*) AS [Value] FROM dbo.Lesson_Sentences WHERE [text] = N'Preserve this sentence.'"));
-        Assert.Equal(12, await ScalarAsync(db, """
+        Assert.Equal(13, await ScalarAsync(db, """
             SELECT COUNT(*) AS [Value]
             FROM sys.tables
             WHERE name IN (
                 'User_Lesson_Progress', 'User_Sentence_Progress', 'Practice_Attempts',
                 'Word_Error_Statistics', 'Vocabulary_Items', 'Favorite_Sentences',
                 'User_Settings', 'Mode_Change_History', 'User_Saved_Lessons',
-                'Saved_AI_Lesson_Segments', 'VIP_Subscriptions', 'Payment_Transactions')
+                'Saved_AI_Lesson_Segments', 'VIP_Subscriptions', 'Payment_Transactions',
+                'Gamification_Ledger')
             """));
         Assert.Equal(9, await ScalarAsync(db, """
             SELECT COUNT(*) AS [Value]
@@ -136,6 +137,12 @@ public sealed class ProductionSchemaIntegrationTests
             await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
             db.ChangeTracker.Clear();
 
+            db.GamificationLedger.AddRange(
+                NewLedger(user.UserId, "completion-retry"),
+                NewLedger(user.UserId, "completion-retry"));
+            await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+            db.ChangeTracker.Clear();
+
             db.PaymentTransactions.AddRange(
                 NewPayment(user.UserId, "payment-retry", "provider-tx-1"),
                 NewPayment(user.UserId, "payment-retry", "provider-tx-2"));
@@ -186,11 +193,25 @@ public sealed class ProductionSchemaIntegrationTests
         Currency = "VND"
     };
 
+    private static GamificationLedgerEntry NewLedger(long userId, string sourceId) => new()
+    {
+        UserId = userId,
+        SourceType = GamificationSourceTypes.SentenceCompletion,
+        SourceId = sourceId,
+        Reason = "test",
+        ExpDelta = 20,
+        ExpBalance = 20,
+        HeartsBalance = 5,
+        StreakBalance = 1,
+        CreatedAt = DateTime.UtcNow
+    };
+
     private static Task<int> ScalarAsync(AppDbContext db, string sql) =>
         db.Database.SqlQueryRaw<int>(sql).SingleAsync();
 
     private static Task DowngradeToLegacySchemaAsync(AppDbContext db) => db.Database.ExecuteSqlRawAsync("""
         DROP TABLE IF EXISTS dbo.Payment_Transactions;
+        DROP TABLE IF EXISTS dbo.Gamification_Ledger;
         DROP TABLE IF EXISTS dbo.VIP_Subscriptions;
         DROP TABLE IF EXISTS dbo.Practice_Attempts;
         DROP TABLE IF EXISTS dbo.Saved_AI_Lesson_Segments;

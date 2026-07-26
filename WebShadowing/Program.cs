@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using WebShadowing.Data;
+using WebShadowing.Models;
 using WebShadowing.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +74,22 @@ builder.Services.AddResponseCompression(options =>
 });
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddScoped<IUserStatsService, UserStatsService>();
+builder.Services.AddScoped<IGamificationService, GamificationService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddOptions<GamificationOptions>()
+    .Bind(builder.Configuration.GetSection(GamificationOptions.SectionName))
+    .ValidateDataAnnotations()
+    .Validate(
+        options => options.MaxHearts >= options.HeartExchangeAmount,
+        "Gamification:MaxHearts must be at least HeartExchangeAmount.")
+    .ValidateOnStart();
+builder.Services.Configure<VipStubOptions>(options =>
+{
+    options.Enabled = builder.Configuration.GetValue<bool?>(
+        $"{VipStubOptions.SectionName}:Enabled")
+        ?? builder.Environment.IsDevelopment();
+});
 
 var app = builder.Build();
 

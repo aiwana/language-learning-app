@@ -17,6 +17,7 @@ const state = {
     currentIndex: 0,
     unlockedIndex: 0,
     completedIndexes: new Set(),
+    activeTab: "shadowing",
     aiAvailable: window.__pronunciationAiConfigured !== false,
     isRecording: false,
     mediaRecorder: null,
@@ -36,6 +37,9 @@ const state = {
     ipaIdleHandle: null,
     subtitleButtons: [],
     dictController: null,
+    attemptIdempotencyKey: null,
+    answerIdempotencyKey: null,
+    answerController: null,
 };
 
 const dom = {};
@@ -75,6 +79,17 @@ function initDom() {
     dom.dictWord = document.getElementById("dict-word");
     dom.dictIpa = document.getElementById("dict-ipa");
     dom.dictMeaning = document.getElementById("dict-meaning");
+    dom.shadowingPanel = document.getElementById("shadowing-tab-panel");
+    dom.answerPanel = document.getElementById("answer-tab-panel");
+    dom.answerModeKicker = document.getElementById("answer-mode-kicker");
+    dom.answerModeTitle = document.getElementById("answer-mode-title");
+    dom.answerModeInstruction = document.getElementById("answer-mode-instruction");
+    dom.answerTarget = document.getElementById("answer-target");
+    dom.answerPlayBtn = document.getElementById("answer-play-btn");
+    dom.answerInput = document.getElementById("practice-answer-input");
+    dom.answerSubmitBtn = document.getElementById("submit-practice-answer");
+    dom.answerNextBtn = document.getElementById("next-practice-answer");
+    dom.answerStatus = document.getElementById("practice-answer-status");
 }
 
 // =====================================================================
@@ -99,10 +114,150 @@ function initTabBar() {
 }
 
 function switchTab(tabName) {
-    if (tabName === "shadowing") return;
-    showToast(tabName === "ai-dialogue"
-        ? "Tính năng VIP sẽ được mở ở phiên bản sau."
-        : "Tính năng này sắp ra mắt.");
+    if (tabName === "ai-dialogue") {
+        showToast("Tính năng VIP sẽ được mở ở phiên bản sau.");
+        return;
+    }
+    if (!["shadowing", "dictation", "ipa-match"].includes(tabName)) return;
+
+    state.activeTab = tabName;
+    document.querySelectorAll(".lesson-mode-tab").forEach(tab => {
+        const active = tab.dataset.tab === tabName;
+        tab.classList.toggle("is-active", active);
+        tab.setAttribute("aria-selected", String(active));
+        tab.setAttribute("tabindex", active ? "0" : "-1");
+    });
+
+    const isShadowing = tabName === "shadowing";
+    document.querySelectorAll("[data-shadowing-content]").forEach(element => {
+        element.classList.toggle("d-none", !isShadowing);
+    });
+    dom.answerPanel?.classList.toggle("d-none", isShadowing);
+    state.answerController?.abort();
+    state.answerController = null;
+    state.answerIdempotencyKey = null;
+
+    if (!isShadowing) {
+        resetRecordingState({ resetScore: false });
+        renderAnswerPrompt();
+        dom.answerInput?.focus();
+    }
+}
+
+function renderAnswerPrompt() {
+    const sentence = state.sentences[state.currentIndex];
+    if (!sentence || state.activeTab === "shadowing") return;
+
+    const isDictation = state.activeTab === "dictation";
+    if (dom.answerModeKicker) {
+        dom.answerModeKicker.textContent = isDictation ? "Nghe chép" : "Ghép IPA";
+    }
+    if (dom.answerModeTitle) {
+        dom.answerModeTitle.textContent = isDictation
+            ? "Nhập câu bạn nghe được"
+            : "Nhập phiên âm IPA của câu";
+    }
+    if (dom.answerModeInstruction) {
+        dom.answerModeInstruction.textContent = isDictation
+            ? "Nghe câu mẫu rồi nhập chính xác nội dung. Dấu câu và chữ hoa không ảnh hưởng kết quả."
+            : "Nhập phiên âm IPA tương ứng với câu bên dưới. Dấu / hoặc [ ] là tùy chọn.";
+    }
+    if (dom.answerTarget) {
+        dom.answerTarget.textContent = isDictation
+            ? `Câu ${state.currentIndex + 1} / ${state.sentences.length}`
+            : sentence.text;
+    }
+    if (dom.answerInput) {
+        dom.answerInput.value = "";
+        dom.answerInput.placeholder = isDictation
+            ? "Nhập nội dung bạn nghe được..."
+            : "/phiên âm IPA/";
+    }
+    dom.answerPlayBtn?.classList.toggle("d-none", !isDictation);
+    if (dom.answerSubmitBtn) {
+        dom.answerSubmitBtn.disabled = !isDictation && !sentence.ipa;
+    }
+    dom.answerNextBtn?.classList.add("d-none");
+    if (dom.answerStatus) {
+        dom.answerStatus.className = "lesson-answer-status";
+        dom.answerStatus.textContent = !isDictation && !sentence.ipa
+            ? "Câu này chưa có dữ liệu IPA để chấm."
+            : "";
+    }
+    state.answerIdempotencyKey = null;
+}
+
+async function submitPracticeAnswer() {
+    const sentence = state.sentences[state.currentIndex];
+    const answer = dom.answerInput?.value.trim() ?? "";
+    if (!sentence || !["dictation", "ipa-match"].includes(state.activeTab)) return;
+    if (!answer) {
+        if (dom.answerStatus) dom.answerStatus.textContent = "Vui lòng nhập câu trả lời.";
+        return;
+    }
+
+    state.answerController?.abort();
+    state.answerController = new AbortController();
+    state.answerIdempotencyKey ??= createIdempotencyKey(`${state.activeTab}-attempt`);
+    if (dom.answerSubmitBtn) dom.answerSubmitBtn.disabled = true;
+    if (dom.answerStatus) {
+        dom.answerStatus.className = "lesson-answer-status";
+        dom.answerStatus.textContent = "Đang kiểm tra...";
+    }
+
+    try {
+        const response = await fetch("/api/practice/evaluate-answer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Idempotency-Key": state.answerIdempotencyKey
+            },
+            body: JSON.stringify({
+                lessonId: state.lessonData.lessonId,
+                sentenceId: sentence.sentenceId,
+                practiceTab: state.activeTab,
+                answer
+            }),
+            signal: state.answerController.signal
+        });
+        const payload = await response.json().catch(() => ({}));
+        state.answerIdempotencyKey = null;
+        if (!response.ok) {
+            throw new Error(payload.message || `Không thể kiểm tra câu trả lời (${response.status}).`);
+        }
+
+        window.applyGamificationTransaction?.(payload.gamification);
+        if (dom.answerStatus) {
+            dom.answerStatus.className = `lesson-answer-status ${payload.passed ? "is-success" : "is-error"}`;
+            dom.answerStatus.textContent = payload.feedback
+                || (payload.passed ? "Chính xác!" : "Chưa chính xác, hãy thử lại.");
+        }
+        dom.answerNextBtn?.classList.toggle("d-none", !payload.passed);
+        if (payload.passed) {
+            state.unlockedIndex = Math.max(
+                state.unlockedIndex,
+                Math.min(state.currentIndex + 1, state.sentences.length - 1));
+        }
+    } catch (error) {
+        if (error.name === "AbortError") return;
+        if (dom.answerStatus) {
+            dom.answerStatus.className = "lesson-answer-status is-error";
+            dom.answerStatus.textContent = error.message || "Mất kết nối. Hãy thử lại.";
+        }
+    } finally {
+        if (dom.answerSubmitBtn) {
+            dom.answerSubmitBtn.disabled = state.activeTab === "ipa-match" && !sentence.ipa;
+        }
+    }
+}
+
+function advanceAnswerSentence() {
+    if (state.currentIndex >= state.sentences.length - 1) {
+        showToast("Bạn đã hoàn thành tất cả câu trong chế độ này!");
+        return;
+    }
+    state.unlockedIndex = Math.max(state.unlockedIndex, state.currentIndex + 1);
+    selectSentence(state.currentIndex + 1);
 }
 
 function initLesson(lesson) {
@@ -432,6 +587,9 @@ function selectSentence(idx) {
     state.currentIndex = idx;
     renderCurrentSentence(state.sentences[idx]);
     updateSubtitleListUI();
+    if (state.activeTab !== "shadowing") {
+        renderAnswerPrompt();
+    }
 }
 
 function renderCurrentSentence(sentence) {
@@ -561,6 +719,7 @@ async function startRecording() {
     try {
         stopLessonPlayback();
         resetRecordingState({ resetScore: false });
+        state.attemptIdempotencyKey = createIdempotencyKey("attempt");
 
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         state.mediaRecorder = new MediaRecorder(stream);
@@ -708,22 +867,16 @@ async function evaluateCurrentRecording() {
     formData.append("lessonId", String(state.lessonData.lessonId));
     formData.append("sentenceId", String(sentence.sentenceId));
     formData.append("sentenceIndex", String(state.currentIndex));
-    formData.append("learningMode", window.__learningMode ?? "casual");
+    state.attemptIdempotencyKey ??= createIdempotencyKey("attempt");
     if (state.audioBlob) {
         const isWav = state.audioBlob.type === "audio/wav";
         formData.append("audio", state.audioBlob, isWav ? "recording.wav" : "recording.webm");
     }
 
-    const idempotencyKey = await createIdempotencyKey(
-        state.lessonData.lessonId,
-        sentence.sentenceId,
-        state.audioBlob
-    );
-
     try {
         const response = await fetch("/api/practice/evaluate-shadowing", {
             method: "POST",
-            headers: { "Idempotency-Key": idempotencyKey },
+            headers: { "Idempotency-Key": state.attemptIdempotencyKey },
             body: formData,
             signal: state.evaluationController.signal
         });
@@ -734,6 +887,7 @@ async function evaluateCurrentRecording() {
         }
 
         state.aiAvailable = true;
+        window.applyGamificationTransaction?.(payload.gamification);
 
         state.recognizedText = payload.transcript?.trim() ?? "";
         if (!state.recognizedText) {
@@ -754,22 +908,6 @@ async function evaluateCurrentRecording() {
         showEvaluationError(error.message || "Không chấm được bản thu. Vui lòng thử lại.");
     } finally {
         setScoreLoading(false);
-    }
-}
-
-async function createIdempotencyKey(lessonId, sentenceId, audioBlob) {
-    if (!audioBlob) {
-        return `shadow-${lessonId}-${sentenceId}-${Date.now()}`;
-    }
-
-    try {
-        const buffer = await audioBlob.arrayBuffer();
-        const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, "0")).join("");
-        return `shadow-${lessonId}-${sentenceId}-${hashHex.slice(0, 32)}`;
-    } catch {
-        return `shadow-${lessonId}-${sentenceId}-${Date.now()}`;
     }
 }
 
@@ -905,6 +1043,7 @@ function resetRecordingState({ resetScore }) {
     state.audioBlob = null;
     state.audioUrl = null;
     state.audioPlayback = null;
+    state.attemptIdempotencyKey = null;
 
     setRecordBtnState("idle");
     if (dom.playbackBtn) dom.playbackBtn.classList.add("d-none");
@@ -1035,6 +1174,12 @@ function hideDictionary() {
 // =====================================================================
 function normalizeWord(word) {
     return word.replace(/[.,!?;:"'()\u2018\u2019\u201c\u201d]/g, "").toLowerCase().trim();
+}
+
+function createIdempotencyKey(prefix) {
+    const id = window.crypto?.randomUUID?.()
+        ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    return `${prefix}-${id}`;
 }
 
 function escapeHtml(str) {

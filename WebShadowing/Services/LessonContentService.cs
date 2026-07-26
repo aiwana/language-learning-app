@@ -34,7 +34,8 @@ public sealed class LessonContentService : ILessonContentService
                     SentenceId = sentence.SentenceId,
                     Order = sentence.SentenceOrder,
                     Text = sentence.Text,
-                    Translation = sentence.Translation
+                    Translation = sentence.Translation,
+                    Ipa = sentence.Ipa
                 })
                 .ToListAsync(cancellationToken)
             : preloadedDbSentences
@@ -55,7 +56,8 @@ public sealed class LessonContentService : ILessonContentService
         SentenceId = sentence.SentenceId,
         Order = sentence.SentenceOrder,
         Text = sentence.Text,
-        Translation = sentence.Translation
+        Translation = sentence.Translation,
+        Ipa = sentence.Ipa
     };
 
     public async Task<bool> HasSentencesAsync(
@@ -182,7 +184,7 @@ public sealed class LessonContentService : ILessonContentService
                     Order = transcript.Order,
                     Text = transcript.Text,
                     Translation = transcript.Translation ?? dbMatch?.Translation,
-                    Ipa = transcript.Ipa,
+                    Ipa = transcript.Ipa ?? dbMatch?.Ipa,
                     StartTime = transcript.StartTime,
                     EndTime = transcript.EndTime
                 };

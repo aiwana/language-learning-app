@@ -3,18 +3,37 @@
 }
 
 <div class="animate-slide-up py-2">
-    <div class="surface-card py-4 px-5 py-md-5 px-md-6">
+    <div class="surface-card py-4 px-3 py-md-5 px-md-5">
         <p class="section-label section-label-violet mb-1">Tài khoản</p>
         <h1 class="h3 fw-extrabold mb-2">Cài đặt &amp; hồ sơ</h1>
-        <p class="text-body-muted small mb-0">Coming soon — nội dung đầy đủ sẽ có ở milestone M2.</p>
+        <p class="text-body-muted small mb-0">Quản lý trải nghiệm học và phiên đăng nhập của bạn.</p>
 
-        <hr class="my-4 border-secondary opacity-25" />
+        <section class="settings-mobile-tools" aria-labelledby="mobile-settings-title">
+            <h2 id="mobile-settings-title">Tùy chọn ứng dụng</h2>
 
-        <div class="d-flex flex-wrap gap-3 align-items-center settings-mobile-tools">
-            <button class="btn btn-outline-secondary btn-sm btn-theme-toggle d-md-none" type="button" aria-label="Chuyển dark/light mode">
-                <span class="theme-toggle-label-light">🌙 Giao diện tối</span>
-                <span class="theme-toggle-label-dark d-none">☀️ Giao diện sáng</span>
-            </button>
-        </div>
+            <div class="settings-mobile-row">
+                <div class="settings-mobile-copy">
+                    <span class="settings-mobile-icon" aria-hidden="true"><i data-lucide="palette"></i></span>
+                    <span><strong>Giao diện</strong><small>Chuyển giữa chế độ sáng và tối</small></span>
+                </div>
+                <button class="settings-mobile-action btn-theme-toggle" type="button" aria-label="Chuyển dark/light mode">
+                    <span class="theme-toggle-label-light"><i data-lucide="moon" aria-hidden="true"></i> Giao diện tối</span>
+                    <span class="theme-toggle-label-dark d-none"><i data-lucide="sun" aria-hidden="true"></i> Giao diện sáng</span>
+                </button>
+            </div>
+
+            <div class="settings-mobile-row">
+                <div class="settings-mobile-copy">
+                    <span class="settings-mobile-icon settings-mobile-icon--danger" aria-hidden="true"><i data-lucide="log-out"></i></span>
+                    <span><strong>Phiên đăng nhập</strong><small>Đăng xuất khỏi tài khoản trên thiết bị này</small></span>
+                </div>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="settings-mobile-action settings-mobile-action--danger" type="submit">
+                        Đăng xuất
+                    </button>
+                </form>
+            </div>
+        </section>
     </div>
 </div>

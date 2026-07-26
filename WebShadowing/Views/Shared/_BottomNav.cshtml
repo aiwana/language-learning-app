@@ -5,9 +5,10 @@
     var isSettingsActive = action == "Settings";
 }
 
-<nav class="bottom-nav d-md-none" aria-label="Điều hướng chính">
+<nav class="bottom-nav d-lg-none" aria-label="Điều hướng chính trên thiết bị di động">
     <a class="bottom-nav-item @(isCoursesActive ? "active" : "")"
-       asp-controller="Home" asp-action="Index">
+       asp-controller="Home" asp-action="Index"
+       aria-current="@(isCoursesActive ? "page" : null)">
         <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -16,18 +17,20 @@
     </a>
 
     <a class="bottom-nav-item @(isStatsActive ? "active" : "")"
-       asp-controller="Home" asp-action="Stats">
+       asp-controller="Home" asp-action="Stats"
+       aria-current="@(isStatsActive ? "page" : null)">
         <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3 3v18h18"/>
             <path d="M18 17V9"/>
             <path d="M13 17V5"/>
             <path d="M8 17v-3"/>
         </svg>
-        <span class="bottom-nav-label">Tiến trình</span>
+        <span class="bottom-nav-label">Tiến trình <span>&amp; Thẻ nhớ</span></span>
     </a>
 
     <a class="bottom-nav-item @(isSettingsActive ? "active" : "")"
-       asp-controller="Home" asp-action="Settings">
+       asp-controller="Home" asp-action="Settings"
+       aria-current="@(isSettingsActive ? "page" : null)">
         <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>

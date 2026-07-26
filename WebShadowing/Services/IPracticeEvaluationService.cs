@@ -9,9 +9,20 @@ public sealed record EvaluateShadowingCommand(
     string ContentType,
     string IdempotencyKey);
 
+public sealed record EvaluatePracticeAnswerCommand(
+    long LessonId,
+    long SentenceId,
+    string PracticeTab,
+    string Answer,
+    string IdempotencyKey);
+
 public interface IPracticeEvaluationService
 {
     Task<WebShadowing.Models.ShadowingEvaluationDto> EvaluateAsync(
         EvaluateShadowingCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<WebShadowing.Models.PracticeAnswerEvaluationDto> EvaluateAnswerAsync(
+        EvaluatePracticeAnswerCommand command,
         CancellationToken cancellationToken = default);
 }
