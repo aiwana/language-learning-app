@@ -31,6 +31,17 @@ Khi không có key hoặc OpenAI tạm lỗi, endpoint chấm phát âm trả HT
 
 Hai endpoint AI có rate limit theo tài khoản đăng nhập: chấm phát âm tối đa 10 yêu cầu/phút và từ điển/IPA tối đa 30 yêu cầu/phút.
 
+## Provider chấm phát âm chuyên dụng
+
+Luồng `evaluate-shadowing` ưu tiên provider chuyên dụng (Azure Speech Pronunciation Assessment) và chỉ fallback sang OpenAI khi bật cờ cấu hình.
+
+- `AzureSpeech:ApiKey`, `AzureSpeech:Region`: cấu hình provider chuyên dụng.
+- `PronunciationAssessment:EnableOpenAiFallback`: bật/tắt fallback OpenAI.
+- `PronunciationAssessment:MaxAudioDurationSeconds`: giới hạn thời lượng audio WAV.
+- `PronunciationAssessment:ProviderTimeoutSeconds`: timeout khi gọi provider.
+
+Client cần gửi `Idempotency-Key` trong header khi gọi `POST /api/practice/evaluate-shadowing` để tránh lưu trùng `Practice_Attempts` khi retry.
+
 ## Chạy & kiểm tra
 
 ```bash

@@ -714,9 +714,16 @@ async function evaluateCurrentRecording() {
         formData.append("audio", state.audioBlob, isWav ? "recording.wav" : "recording.webm");
     }
 
+    const idempotencyKey = await createIdempotencyKey(
+        state.lessonData.lessonId,
+        sentence.sentenceId,
+        state.audioBlob
+    );
+
     try {
         const response = await fetch("/api/practice/evaluate-shadowing", {
             method: "POST",
+            headers: { "Idempotency-Key": idempotencyKey },
             body: formData,
             signal: state.evaluationController.signal
         });
@@ -747,6 +754,22 @@ async function evaluateCurrentRecording() {
         showEvaluationError(error.message || "Không chấm được bản thu. Vui lòng thử lại.");
     } finally {
         setScoreLoading(false);
+    }
+}
+
+async function createIdempotencyKey(lessonId, sentenceId, audioBlob) {
+    if (!audioBlob) {
+        return `shadow-${lessonId}-${sentenceId}-${Date.now()}`;
+    }
+
+    try {
+        const buffer = await audioBlob.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, "0")).join("");
+        return `shadow-${lessonId}-${sentenceId}-${hashHex.slice(0, 32)}`;
+    } catch {
+        return `shadow-${lessonId}-${sentenceId}-${Date.now()}`;
     }
 }
 
