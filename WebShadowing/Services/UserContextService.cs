@@ -42,6 +42,11 @@ public class UserContextService : IUserContextService
         return (await GetPreferencesAsync(cancellationToken)).PronunciationTarget;
     }
 
+    public async Task<string> GetAccentAsync(CancellationToken cancellationToken = default)
+    {
+        return (await GetPreferencesAsync(cancellationToken)).Accent;
+    }
+
     private async Task<UserPreferences> GetPreferencesAsync(CancellationToken cancellationToken)
     {
         if (_cachedPreferences is not null)
@@ -54,6 +59,7 @@ public class UserContextService : IUserContextService
         {
             return _cachedPreferences = new UserPreferences(
                 LearningModes.Casual,
+                Accents.EnUs,
                 PronunciationTargets.Comprehension70);
         }
 
@@ -63,12 +69,14 @@ public class UserContextService : IUserContextService
             .Select(user => new
             {
                 user.LearningMode,
+                Accent = user.Accent,
                 PronunciationTarget = (byte?)user.PronunciationTarget
             })
             .FirstOrDefaultAsync(cancellationToken);
 
         return _cachedPreferences = new UserPreferences(
             NormalizeMode(preferences?.LearningMode),
+            NormalizeAccent(preferences?.Accent),
             preferences?.PronunciationTarget ?? PronunciationTargets.Comprehension70);
     }
 
@@ -82,5 +90,14 @@ public class UserContextService : IUserContextService
         };
     }
 
-    private sealed record UserPreferences(string LearningMode, byte PronunciationTarget);
+    private static string NormalizeAccent(string? accent)
+    {
+        return accent?.Trim().ToLowerInvariant() switch
+        {
+            Accents.EnGb => Accents.EnGb,
+            _ => Accents.EnUs
+        };
+    }
+
+    private sealed record UserPreferences(string LearningMode, string Accent, byte PronunciationTarget);
 }

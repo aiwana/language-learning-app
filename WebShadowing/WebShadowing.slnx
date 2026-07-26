@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="WebShadowing.csproj" />
+  <Project Path="..\WebShadowing.UnitTests\WebShadowing.UnitTests.csproj" />
 </Solution>

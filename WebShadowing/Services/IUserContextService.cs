@@ -6,4 +6,5 @@ public interface IUserContextService
     long? GetCurrentUserId();
     Task<string> GetLearningModeAsync(CancellationToken cancellationToken = default);
     Task<byte> GetPronunciationTargetAsync(CancellationToken cancellationToken = default);
+    Task<string> GetAccentAsync(CancellationToken cancellationToken = default);
 }

@@ -1,29 +1,35 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using WebShadowing.Models;
 
 namespace WebShadowing.Services;
 
-public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessmentService
+public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessmentProvider
 {
     private const string Endpoint = "https://api.openai.com/v1/chat/completions";
     private const string UnavailableMessage = "Chưa kết nối AI, vui lòng kiểm tra lại!";
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
+    private readonly PronunciationAssessmentOptions _options;
     private readonly ILogger<OpenAiPronunciationAssessmentService> _logger;
+
+    public string ProviderName => _options.OpenAiProviderName;
 
     public OpenAiPronunciationAssessmentService(
         IHttpClientFactory httpClientFactory,
         IConfiguration configuration,
+        IOptions<PronunciationAssessmentOptions> options,
         ILogger<OpenAiPronunciationAssessmentService> logger)
     {
         _httpClientFactory = httpClientFactory;
         _configuration = configuration;
+        _options = options.Value;
         _logger = logger;
     }
 
-    public async Task<ShadowingEvaluationDto> AssessAsync(
+    public async Task<PronunciationAssessmentResult> AssessAsync(
         PronunciationAssessmentRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -46,7 +52,7 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
                     new
                     {
                         role = "system",
-                        content = "You are an English pronunciation coach. Listen to the learner audio, compare it with the target sentence, and return only valid JSON. Judge pronunciation accuracy, intelligibility, stress, rhythm, and fluency. Do not reward a merely plausible transcript. Feedback must be concise Vietnamese. JSON shape: {\"score\":0,\"transcript\":\"what was actually heard\",\"feedback\":\"Vietnamese feedback\",\"words\":[{\"word\":\"target word\",\"accuracyCode\":\"correct|warning|incorrect\",\"correction\":\"short Vietnamese advice or null\"}]}"
+                        content = "You are an English pronunciation coach. Listen to the learner audio and compare with the target sentence. Return valid JSON only with shape: {\"score\":0,\"accuracyScore\":0,\"fluencyScore\":0,\"completenessScore\":0,\"prosodyScore\":0,\"transcript\":\"what was heard\",\"feedback\":\"Vietnamese feedback\",\"words\":[{\"word\":\"target word\",\"accuracyCode\":\"correct|warning|incorrect\",\"correction\":\"short Vietnamese advice or null\",\"phonemes\":[{\"symbol\":\"phoneme\",\"accuracyCode\":\"correct|warning|incorrect\"}]}]}"
                     },
                     new
                     {
@@ -56,7 +62,7 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
                             new
                             {
                                 type = "text",
-                                text = $"Target sentence: {request.TargetText}\nTarget IPA: {request.TargetIpa ?? "not provided"}\nScore strictly from 0 to 100 and include every target word in order."
+                                text = $"Target sentence: {request.TargetText}\nTarget IPA: {request.TargetIpa ?? "not provided"}\nAccent target: {request.Accent}\nLearning mode: {request.LearningMode}\nProvide score 0..100 and include every target word in order."
                             },
                             new
                             {
@@ -84,6 +90,22 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning("OpenAI pronunciation request failed with status {StatusCode}.", response.StatusCode);
+                if ((int)response.StatusCode == StatusCodes.Status429TooManyRequests)
+                {
+                    throw new PronunciationAssessmentUnavailableException(
+                        "OpenAI hết quota hoặc bị giới hạn tần suất.",
+                        StatusCodes.Status429TooManyRequests,
+                        "pronunciation_quota_exhausted");
+                }
+
+                if ((int)response.StatusCode >= StatusCodes.Status500InternalServerError)
+                {
+                    throw new PronunciationAssessmentUnavailableException(
+                        UnavailableMessage,
+                        StatusCodes.Status503ServiceUnavailable,
+                        "pronunciation_provider_unavailable");
+                }
+
                 throw new PronunciationAssessmentUnavailableException(UnavailableMessage);
             }
 
@@ -96,14 +118,23 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
         {
             throw;
         }
+        catch (TaskCanceledException exception)
+        {
+            _logger.LogWarning(exception, "OpenAI pronunciation assessment timed out.");
+            throw new PronunciationAssessmentUnavailableException(
+                "Provider chấm phát âm hết thời gian xử lý.",
+                StatusCodes.Status504GatewayTimeout,
+                "pronunciation_provider_timeout",
+                exception);
+        }
         catch (Exception exception) when (exception is HttpRequestException or JsonException or TaskCanceledException)
         {
             _logger.LogWarning(exception, "OpenAI pronunciation assessment failed.");
-            throw new PronunciationAssessmentUnavailableException(UnavailableMessage, exception);
+            throw new PronunciationAssessmentUnavailableException(UnavailableMessage, innerException: exception);
         }
     }
 
-    private static ShadowingEvaluationDto ParseAssessment(
+    private PronunciationAssessmentResult ParseAssessment(
         string content,
         PronunciationAssessmentRequest request)
     {
@@ -111,6 +142,10 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
         using var document = JsonDocument.Parse(json);
         var root = document.RootElement;
         var score = Math.Clamp(root.GetProperty("score").GetInt32(), 0, 100);
+        var accuracyScore = TryGetOptionalInt(root, "accuracyScore");
+        var fluencyScore = TryGetOptionalInt(root, "fluencyScore");
+        var completenessScore = TryGetOptionalInt(root, "completenessScore");
+        var prosodyScore = TryGetOptionalInt(root, "prosodyScore");
         var transcript = root.TryGetProperty("transcript", out var transcriptNode)
             ? transcriptNode.GetString() ?? string.Empty
             : string.Empty;
@@ -118,7 +153,7 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
             ? feedbackNode.GetString() ?? string.Empty
             : string.Empty;
 
-        var words = new List<WordFeedbackDto>();
+        var words = new List<PronunciationWordResult>();
         if (root.TryGetProperty("words", out var wordsNode) && wordsNode.ValueKind == JsonValueKind.Array)
         {
             foreach (var item in wordsNode.EnumerateArray())
@@ -126,25 +161,61 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
                 var accuracyCode = item.TryGetProperty("accuracyCode", out var accuracyNode)
                     ? NormalizeAccuracy(accuracyNode.GetString())
                     : "warning";
-                words.Add(new WordFeedbackDto
+
+                var phonemes = new List<PronunciationPhonemeResult>();
+                if (item.TryGetProperty("phonemes", out var phonemeNode) && phonemeNode.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var phoneme in phonemeNode.EnumerateArray())
+                    {
+                        phonemes.Add(new PronunciationPhonemeResult
+                        {
+                            Symbol = phoneme.TryGetProperty("symbol", out var symbolNode)
+                                ? symbolNode.GetString() ?? string.Empty
+                                : string.Empty,
+                            AccuracyCode = phoneme.TryGetProperty("accuracyCode", out var phonemeAccuracyNode)
+                                ? NormalizeAccuracy(phonemeAccuracyNode.GetString())
+                                : "warning"
+                        });
+                    }
+                }
+
+                words.Add(new PronunciationWordResult
                 {
                     Word = item.TryGetProperty("word", out var wordNode) ? wordNode.GetString() ?? string.Empty : string.Empty,
                     AccuracyCode = accuracyCode,
                     Correction = item.TryGetProperty("correction", out var correctionNode) && correctionNode.ValueKind != JsonValueKind.Null
                         ? correctionNode.GetString()
-                        : null
+                        : null,
+                    Phonemes = phonemes
                 });
             }
         }
 
-        return new ShadowingEvaluationDto
+        return new PronunciationAssessmentResult
         {
-            Score = score,
-            Passed = score >= request.PronunciationTarget,
-            PronunciationTarget = request.PronunciationTarget,
+            Provider = ProviderName,
+            OverallScore = score,
+            AccuracyScore = accuracyScore,
+            FluencyScore = fluencyScore,
+            CompletenessScore = completenessScore,
+            ProsodyScore = prosodyScore,
             Transcript = transcript,
             Feedback = string.IsNullOrWhiteSpace(feedback) ? "Hãy nghe lại câu mẫu và chú ý nhịp điệu của cả câu." : feedback,
             Words = words
+        };
+    }
+
+    private static int? TryGetOptionalInt(JsonElement root, string propertyName)
+    {
+        if (!root.TryGetProperty(propertyName, out var property) || property.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
+        {
+            return null;
+        }
+
+        return property.ValueKind switch
+        {
+            JsonValueKind.Number => Math.Clamp((int)Math.Round(property.GetDouble(), MidpointRounding.AwayFromZero), 0, 100),
+            _ => null
         };
     }
 

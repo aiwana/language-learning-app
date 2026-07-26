@@ -21,7 +21,13 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ILessonContentService, LessonContentService>();
 builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache(options => options.SizeLimit = 2_000);
-builder.Services.AddScoped<IPronunciationAssessmentService, OpenAiPronunciationAssessmentService>();
+builder.Services.Configure<PronunciationAssessmentOptions>(
+    builder.Configuration.GetSection(PronunciationAssessmentOptions.SectionName));
+builder.Services.AddScoped<PronunciationScoreProfileService>();
+builder.Services.AddScoped<AzurePronunciationAssessmentService>();
+builder.Services.AddScoped<OpenAiPronunciationAssessmentService>();
+builder.Services.AddScoped<IPronunciationAssessmentService, HybridPronunciationAssessmentService>();
+builder.Services.AddScoped<IPracticeEvaluationService, PracticeEvaluationService>();
 builder.Services.AddSingleton<ILanguageReferenceService, OpenAiLanguageReferenceService>();
 builder.Services.AddRateLimiter(options =>
 {
@@ -111,3 +117,7 @@ static RateLimitPartition<string> BuildAiRateLimiter(HttpContext context, int pe
             AutoReplenishment = true
         });
 }
+
+    public partial class Program
+    {
+    }
