@@ -22,6 +22,10 @@ public class LessonSentence
 
     public string? Translation { get; set; }
 
+    [MaxLength(500)]
+    [Column("ipa")]
+    public string? Ipa { get; set; }
+
     [Column("start_ms")]
     public int? StartMilliseconds { get; set; }
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using WebShadowing.Data;
 using WebShadowing.Models;
 
@@ -12,12 +13,20 @@ public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly VipStubOptions _vipStubOptions;
+    private readonly GamificationOptions _gamificationOptions;
     private readonly PasswordHasher<User> _passwordHasher = new();
 
-    public AuthService(AppDbContext db, IHttpContextAccessor httpContextAccessor)
+    public AuthService(
+        AppDbContext db,
+        IHttpContextAccessor httpContextAccessor,
+        IOptions<VipStubOptions> vipStubOptions,
+        IOptions<GamificationOptions> gamificationOptions)
     {
         _db = db;
         _httpContextAccessor = httpContextAccessor;
+        _vipStubOptions = vipStubOptions.Value;
+        _gamificationOptions = gamificationOptions.Value;
     }
 
     public async Task<AuthResult> RegisterAsync(RegisterViewModel model, CancellationToken cancellationToken = default)
@@ -51,32 +60,39 @@ public class AuthService : IAuthService
         {
             Username = username,
             Email = normalizedEmail,
-            PasswordHash = _passwordHasher.HashPassword(null!, model.Password),
             FullName = model.FullName.Trim(),
             LearningMode = LearningModes.Casual,
             PronunciationTarget = PronunciationTargets.Comprehension70,
             Accent = Accents.EnUs,
             IsVip = false,
+            OnboardingCompleted = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
+        user.PasswordHash = _passwordHasher.HashPassword(user, model.Password);
 
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync(cancellationToken);
-        
-        var statistics = new UserStatistic
+        user.Statistics = new UserStatistic
         {
-            UserId = user.UserId,
             TotalSessions = 0,
             AverageScore = 0,
             StreakDays = 0,
-            Hearts = 5,
+            Hearts = _gamificationOptions.MaxHearts,
             Exp = 0,
             LastPracticeAt = null
         };
 
-        _db.UserStatistics.Add(statistics);
-        await _db.SaveChangesAsync(cancellationToken);
+        await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return AuthResult.Failure("Không thể tạo tài khoản. Email hoặc tên người dùng có thể đã tồn tại.");
+        }
 
         await SignInAsync(user, cancellationToken);
         return AuthResult.Success(user);
@@ -96,7 +112,7 @@ public class AuthService : IAuthService
             return AuthResult.Failure("Email hoặc mật khẩu không đúng.");
         }
 
-        var verificationResult = _passwordHasher.VerifyHashedPassword(null!, user.PasswordHash, model.Password);
+        var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.Password);
         if (verificationResult == PasswordVerificationResult.Failed)
         {
             return AuthResult.Failure("Email hoặc mật khẩu không đúng.");
@@ -115,6 +131,71 @@ public class AuthService : IAuthService
         }
 
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    }
+
+    public async Task<AuthResult> CompleteOnboardingAsync(long userId, CompleteOnboardingViewModel model, CancellationToken cancellationToken = default)
+    {
+        if (model.LearningMode is not (LearningModes.Casual or LearningModes.Academic or LearningModes.Professional))
+        {
+            return AuthResult.Failure("Hình thức học không hợp lệ. Vui lòng chọn: giao tiếp, học thuật hoặc công việc.");
+        }
+
+        if (model.Accent is not (Accents.EnUs or Accents.EnGb))
+        {
+            return AuthResult.Failure("Chuẩn phát âm không hợp lệ. Vui lòng chọn Anh-Mỹ hoặc Anh-Anh.");
+        }
+
+        if (model.PronunciationTarget is not (PronunciationTargets.Fluency50 or PronunciationTargets.Comprehension70 or PronunciationTargets.Accent90))
+        {
+            return AuthResult.Failure("Mục tiêu phát âm không hợp lệ. Vui lòng chọn 50, 70 hoặc 90.");
+        }
+
+        if (model.Plan is not ("free" or "vip"))
+        {
+            return AuthResult.Failure("Gói tài khoản không hợp lệ.");
+        }
+
+        if (model.Plan == "vip" && !_vipStubOptions.Enabled)
+        {
+            return AuthResult.Failure("Kích hoạt VIP thử nghiệm hiện không khả dụng. Vui lòng chọn gói Miễn Phí.");
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == userId, cancellationToken);
+        if (user is null)
+        {
+            return AuthResult.Failure("Không tìm thấy tài khoản.");
+        }
+
+        user.LearningMode        = model.LearningMode;
+        user.Accent              = model.Accent;
+        user.PronunciationTarget = model.PronunciationTarget;
+        // This client-selected entitlement is intentionally isolated behind a
+        // development stub. Production must replace it with trusted payment or
+        // subscription state from the server before enabling VipStub:Enabled.
+        user.IsVip               = _vipStubOptions.Enabled && model.Plan == "vip";
+        user.OnboardingCompleted = true;
+        user.UpdatedAt           = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync(cancellationToken);
+        return AuthResult.Success(user);
+    }
+
+    public Task<UserMeDto?> GetUserAsync(long userId, CancellationToken cancellationToken = default)
+    {
+        return _db.Users
+            .AsNoTracking()
+            .Where(user => user.UserId == userId)
+            .Select(user => new UserMeDto(
+                user.UserId,
+                user.FullName,
+                user.Email,
+                user.LearningMode,
+                user.PronunciationTarget,
+                user.Accent,
+                user.IsVip,
+                user.OnboardingCompleted,
+                user.IsVip && _vipStubOptions.Enabled ? "demo_stub" : "none"))
+            .SingleOrDefaultAsync(cancellationToken);
     }
 
     private async Task SignInAsync(User user, CancellationToken cancellationToken)

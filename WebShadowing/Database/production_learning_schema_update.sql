@@ -27,6 +27,8 @@ IF COL_LENGTH('dbo.Lesson_Sentences', 'start_ms') IS NULL
     ALTER TABLE dbo.Lesson_Sentences ADD start_ms INT NULL;
 IF COL_LENGTH('dbo.Lesson_Sentences', 'end_ms') IS NULL
     ALTER TABLE dbo.Lesson_Sentences ADD end_ms INT NULL;
+IF COL_LENGTH('dbo.Lesson_Sentences', 'ipa') IS NULL
+    ALTER TABLE dbo.Lesson_Sentences ADD ipa NVARCHAR(500) NULL;
 GO
 
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE parent_object_id = OBJECT_ID('dbo.Lesson_Sentences') AND name = 'CK_LessonSentences_Timestamps')
@@ -354,6 +356,40 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Practice_Attempts') AND name = 'IX_PracticeAttempts_User_AttemptedAt')
     CREATE INDEX IX_PracticeAttempts_User_AttemptedAt ON dbo.Practice_Attempts(user_id, attempted_at);
+GO
+
+/* Immutable reward/penalty/exchange audit. Unique sources make retries safe. */
+IF OBJECT_ID('dbo.Gamification_Ledger', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Gamification_Ledger (
+        ledger_id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Gamification_Ledger PRIMARY KEY,
+        user_id BIGINT NOT NULL,
+        attempt_id BIGINT NULL,
+        source_type VARCHAR(30) NOT NULL,
+        source_id NVARCHAR(200) NOT NULL,
+        reason NVARCHAR(100) NOT NULL,
+        exp_delta INT NOT NULL CONSTRAINT DF_GamificationLedger_ExpDelta DEFAULT (0),
+        hearts_delta INT NOT NULL CONSTRAINT DF_GamificationLedger_HeartsDelta DEFAULT (0),
+        streak_delta INT NOT NULL CONSTRAINT DF_GamificationLedger_StreakDelta DEFAULT (0),
+        exp_balance INT NOT NULL,
+        hearts_balance INT NOT NULL,
+        streak_balance INT NOT NULL,
+        is_vip BIT NOT NULL,
+        created_at DATETIME2 NOT NULL CONSTRAINT DF_GamificationLedger_CreatedAt DEFAULT (SYSUTCDATETIME()),
+        CONSTRAINT FK_GamificationLedger_User FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id),
+        CONSTRAINT FK_GamificationLedger_Attempt FOREIGN KEY (attempt_id) REFERENCES dbo.Practice_Attempts(attempt_id),
+        CONSTRAINT UQ_GamificationLedger_User_Source UNIQUE (user_id, source_type, source_id),
+        CONSTRAINT CK_GamificationLedger_SourceType CHECK (source_type IN ('sentence_completion','attempt_penalty','daily_activity','heart_exchange')),
+        CONSTRAINT CK_GamificationLedger_ExpBalance CHECK (exp_balance >= 0),
+        CONSTRAINT CK_GamificationLedger_HeartsBalance CHECK (hearts_balance >= 0),
+        CONSTRAINT CK_GamificationLedger_StreakBalance CHECK (streak_balance >= 0)
+    );
+    CREATE INDEX IX_GamificationLedger_User_CreatedAt ON dbo.Gamification_Ledger(user_id, created_at);
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Gamification_Ledger') AND name = 'IX_GamificationLedger_User_CreatedAt')
+    CREATE INDEX IX_GamificationLedger_User_CreatedAt ON dbo.Gamification_Ledger(user_id, created_at);
 GO
 
 IF OBJECT_ID('dbo.VIP_Subscriptions', 'U') IS NULL

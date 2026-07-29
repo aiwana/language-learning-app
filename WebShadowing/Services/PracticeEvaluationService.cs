@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using WebShadowing.Data;
@@ -8,11 +8,11 @@ namespace WebShadowing.Services;
 
 public sealed class PracticeEvaluationService : IPracticeEvaluationService
 {
-    private static readonly Regex WordNormalizeRegex = new("[^\\p{L}\\p{Nd}']+", RegexOptions.Compiled);
     private readonly AppDbContext _db;
     private readonly ICourseService _courseService;
     private readonly IUserContextService _userContext;
     private readonly IPronunciationAssessmentService _assessmentService;
+    private readonly IGamificationService _gamificationService;
     private readonly PronunciationScoreProfileService _scoreProfileService;
     private readonly PronunciationAssessmentOptions _assessmentOptions;
 
@@ -21,6 +21,7 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
         ICourseService courseService,
         IUserContextService userContext,
         IPronunciationAssessmentService assessmentService,
+        IGamificationService gamificationService,
         PronunciationScoreProfileService scoreProfileService,
         IOptions<PronunciationAssessmentOptions> assessmentOptions)
     {
@@ -28,6 +29,7 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
         _courseService = courseService;
         _userContext = userContext;
         _assessmentService = assessmentService;
+        _gamificationService = gamificationService;
         _scoreProfileService = scoreProfileService;
         _assessmentOptions = assessmentOptions.Value;
     }
@@ -56,9 +58,33 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
 
         var cachedAttempt = await _db.PracticeAttempts
             .AsNoTracking()
+            .Include(attempt => attempt.Sentence)
             .FirstOrDefaultAsync(item => item.UserId == userId.Value && item.IdempotencyKey == idempotencyKey, cancellationToken);
         if (cachedAttempt is not null)
         {
+            var sameSource = cachedAttempt.SentenceId == command.SentenceId
+                && cachedAttempt.Sentence?.LessonId == command.LessonId
+                && cachedAttempt.PracticeTab == PracticeTabs.Shadowing
+                && cachedAttempt.ExerciseType == ExerciseTypes.Pronunciation;
+            if (!sameSource)
+            {
+                throw new PronunciationAssessmentUnavailableException(
+                    "Idempotency-Key đã được sử dụng cho một attempt khác.",
+                    StatusCodes.Status409Conflict,
+                    "idempotency_conflict");
+            }
+
+            var balance = await _gamificationService.GetBalanceAsync(
+                userId.Value,
+                cancellationToken);
+            if (balance is null)
+            {
+                throw new PronunciationAssessmentUnavailableException(
+                    "Không tìm thấy người dùng.",
+                    StatusCodes.Status404NotFound,
+                    "user_not_found");
+            }
+
             var cachedScore = cachedAttempt.Score.HasValue ? (int)Math.Round(cachedAttempt.Score.Value, MidpointRounding.AwayFromZero) : 0;
             return new ShadowingEvaluationDto
             {
@@ -68,7 +94,15 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
                 Provider = cachedAttempt.AssessmentProvider ?? "unknown",
                 Transcript = cachedAttempt.TranscriptText ?? string.Empty,
                 Feedback = cachedAttempt.FeedbackText ?? "",
-                Words = []
+                Words = [],
+                Gamification = new GamificationTransactionDto
+                {
+                    Succeeded = true,
+                    Applied = false,
+                    AlreadyProcessed = true,
+                    TransactionType = "attempt",
+                    Balance = balance
+                }
             };
         }
 
@@ -123,132 +157,181 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
         var score = _scoreProfileService.ComputeOverallScore(learningMode, providerResult);
         var passed = score >= pronunciationTarget;
 
-        await PersistAttemptAsync(
-            userId.Value,
-            sentence.SentenceId,
-            idempotencyKey,
-            pronunciationTarget,
+        var gamification = await _gamificationService.ProcessVerifiedAttemptAsync(
+            new VerifiedPracticeAttempt
+            {
+                UserId = userId.Value,
+                LessonId = command.LessonId,
+                SentenceId = sentence.SentenceId,
+                PracticeTab = PracticeTabs.Shadowing,
+                ExerciseType = ExerciseTypes.Pronunciation,
+                TargetScore = pronunciationTarget,
+                Score = score,
+                Passed = passed,
+                IdempotencyKey = idempotencyKey,
+                AssessmentProvider = providerResult.Provider,
+                ProviderReferenceId = providerResult.ProviderReferenceId,
+                TranscriptText = providerResult.Transcript,
+                FeedbackText = providerResult.Feedback,
+                Words = providerResult.Words
+                    .Select(word => new VerifiedPracticeWord(
+                        word.Word,
+                        word.AccuracyCode))
+                    .ToList()
+            },
+            cancellationToken);
+        EnsureGamificationSucceeded(gamification);
+
+        return MapToDto(
             providerResult,
             score,
             passed,
+            pronunciationTarget,
+            accent,
+            learningMode,
+            gamification);
+    }
+
+    public async Task<PracticeAnswerEvaluationDto> EvaluateAnswerAsync(
+        EvaluatePracticeAnswerCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _userContext.GetCurrentUserId();
+        if (userId is null)
+        {
+            throw new PronunciationAssessmentUnavailableException(
+                "Không xác định được người dùng hiện tại.",
+                StatusCodes.Status401Unauthorized,
+                "unauthorized");
+        }
+
+        var idempotencyKey = (command.IdempotencyKey ?? string.Empty).Trim();
+        if (idempotencyKey.Length == 0 || idempotencyKey.Length > 100)
+        {
+            throw new PronunciationAssessmentUnavailableException(
+                "Thiếu hoặc sai định dạng idempotency key.",
+                StatusCodes.Status400BadRequest,
+                "invalid_idempotency_key");
+        }
+
+        var exerciseType = command.PracticeTab switch
+        {
+            PracticeTabs.Dictation => ExerciseTypes.Dictation,
+            PracticeTabs.IpaMatch => ExerciseTypes.IpaMatch,
+            _ => throw new PronunciationAssessmentUnavailableException(
+                "Chế độ luyện tập không được hỗ trợ.",
+                StatusCodes.Status400BadRequest,
+                "unsupported_practice_tab")
+        };
+        if (string.IsNullOrWhiteSpace(command.Answer)
+            || command.Answer.Length > 4000)
+        {
+            throw new PronunciationAssessmentUnavailableException(
+                "Câu trả lời không hợp lệ.",
+                StatusCodes.Status400BadRequest,
+                "invalid_answer");
+        }
+
+        var learningMode = await _userContext.GetLearningModeAsync(cancellationToken);
+        var pronunciationTarget = await _userContext.GetPronunciationTargetAsync(cancellationToken);
+        var lessonResult = await _courseService.GetLessonAsync(
+            command.LessonId,
+            learningMode,
+            pronunciationTarget,
             cancellationToken);
-
-        return MapToDto(providerResult, score, passed, pronunciationTarget, accent, learningMode);
-    }
-
-    private async Task PersistAttemptAsync(
-        long userId,
-        long sentenceId,
-        string idempotencyKey,
-        byte pronunciationTarget,
-        PronunciationAssessmentResult providerResult,
-        int score,
-        bool passed,
-        CancellationToken cancellationToken)
-    {
-        var now = DateTime.UtcNow;
-        _db.PracticeAttempts.Add(new PracticeAttempt
+        if (lessonResult.Status == LessonLookupStatus.Forbidden)
         {
-            UserId = userId,
-            SentenceId = sentenceId,
-            PracticeTab = PracticeTabs.Shadowing,
-            ExerciseType = ExerciseTypes.Pronunciation,
-            TargetScore = pronunciationTarget,
-            Score = score,
-            Result = passed ? AttemptResults.Passed : AttemptResults.Failed,
-            AssessmentProvider = providerResult.Provider,
-            ProviderReferenceId = providerResult.ProviderReferenceId,
-            TranscriptText = providerResult.Transcript,
-            FeedbackText = providerResult.Feedback,
-            IdempotencyKey = idempotencyKey,
-            AttemptedAt = now
-        });
-
-        await UpdateWordErrorStatisticsAsync(userId, sentenceId, providerResult.Words, now, cancellationToken);
-
-        try
-        {
-            await _db.SaveChangesAsync(cancellationToken);
+            throw new PronunciationAssessmentUnavailableException(
+                "Bài học không thuộc chế độ luyện hiện tại.",
+                StatusCodes.Status403Forbidden,
+                "lesson_mode_forbidden");
         }
-        catch (DbUpdateException)
+
+        var sentence = lessonResult.Lesson?.Sentences
+            .SingleOrDefault(item => item.SentenceId == command.SentenceId);
+        if (sentence is null)
         {
-            // Concurrent retry can race this insert. Surface the already-persisted attempt as idempotent success.
-            var existing = await _db.PracticeAttempts
+            throw new PronunciationAssessmentUnavailableException(
+                "Câu luyện không thuộc bài học.",
+                StatusCodes.Status400BadRequest,
+                "invalid_sentence");
+        }
+
+        var expectedAnswer = command.PracticeTab == PracticeTabs.Dictation
+            ? sentence.Text
+            : sentence.Ipa;
+        if (string.IsNullOrWhiteSpace(expectedAnswer))
+        {
+            throw new PronunciationAssessmentUnavailableException(
+                "Câu này chưa có dữ liệu IPA để chấm.",
+                StatusCodes.Status409Conflict,
+                "ipa_not_available");
+        }
+
+        var normalizedActual = command.PracticeTab == PracticeTabs.Dictation
+            ? NormalizeDictation(command.Answer)
+            : NormalizeIpa(command.Answer);
+        var normalizedExpected = command.PracticeTab == PracticeTabs.Dictation
+            ? NormalizeDictation(expectedAnswer)
+            : NormalizeIpa(expectedAnswer);
+        var passed = normalizedActual.Length > 0
+            && string.Equals(
+                normalizedActual,
+                normalizedExpected,
+                StringComparison.Ordinal);
+        var score = passed ? 100 : 0;
+        var feedback = passed
+            ? "Câu trả lời chính xác."
+            : command.PracticeTab == PracticeTabs.Dictation
+                ? "Nội dung nghe chép chưa chính xác."
+                : "Phiên âm IPA chưa chính xác.";
+
+        var gamification = await _gamificationService.ProcessVerifiedAttemptAsync(
+            new VerifiedPracticeAttempt
+            {
+                UserId = userId.Value,
+                LessonId = command.LessonId,
+                SentenceId = sentence.SentenceId,
+                PracticeTab = command.PracticeTab,
+                ExerciseType = exerciseType,
+                TargetScore = 100,
+                Score = score,
+                Passed = passed,
+                IdempotencyKey = idempotencyKey,
+                AssessmentProvider = "server-answer-validator",
+                TranscriptText = command.Answer.Trim(),
+                FeedbackText = feedback
+            },
+            cancellationToken);
+        EnsureGamificationSucceeded(gamification);
+
+        if (gamification.AlreadyProcessed)
+        {
+            var persistedAttempt = await _db.PracticeAttempts
                 .AsNoTracking()
-                .FirstOrDefaultAsync(item => item.UserId == userId && item.IdempotencyKey == idempotencyKey, cancellationToken);
-            if (existing is null)
-            {
-                throw;
-            }
+                .SingleAsync(
+                    attempt => attempt.UserId == userId.Value
+                        && attempt.IdempotencyKey == idempotencyKey,
+                    cancellationToken);
+            score = persistedAttempt.Score.HasValue
+                ? (int)Math.Round(
+                    persistedAttempt.Score.Value,
+                    MidpointRounding.AwayFromZero)
+                : 0;
+            passed = string.Equals(
+                persistedAttempt.Result,
+                AttemptResults.Passed,
+                StringComparison.OrdinalIgnoreCase);
+            feedback = persistedAttempt.FeedbackText ?? feedback;
         }
-    }
 
-    private async Task UpdateWordErrorStatisticsAsync(
-        long userId,
-        long sentenceId,
-        IReadOnlyList<PronunciationWordResult> words,
-        DateTime attemptedAt,
-        CancellationToken cancellationToken)
-    {
-        if (words.Count == 0)
+        return new PracticeAnswerEvaluationDto
         {
-            return;
-        }
-
-        var grouped = words
-            .Select(item => new { item.Word, item.AccuracyCode, Normalized = NormalizeWord(item.Word) })
-            .Where(item => !string.IsNullOrWhiteSpace(item.Normalized))
-            .GroupBy(item => item.Normalized!, StringComparer.Ordinal)
-            .Select(group => new
-            {
-                Normalized = group.Key,
-                Display = group.Select(item => item.Word).FirstOrDefault(item => !string.IsNullOrWhiteSpace(item)) ?? group.Key,
-                HasError = group.Any(item => item.AccuracyCode is "incorrect" or "warning")
-            })
-            .ToList();
-
-        if (grouped.Count == 0)
-        {
-            return;
-        }
-
-        var normalizedWords = grouped.Select(item => item.Normalized).ToList();
-        var currentStats = await _db.WordErrorStatistics
-            .Where(item => item.UserId == userId && normalizedWords.Contains(item.NormalizedWord))
-            .ToDictionaryAsync(item => item.NormalizedWord, StringComparer.Ordinal, cancellationToken);
-
-        foreach (var item in grouped)
-        {
-            if (!currentStats.TryGetValue(item.Normalized, out var stat))
-            {
-                stat = new WordErrorStatistic
-                {
-                    UserId = userId,
-                    NormalizedWord = item.Normalized,
-                    DisplayWord = item.Display,
-                    ConsecutiveErrorCount = 0,
-                    TotalErrorCount = 0
-                };
-                _db.WordErrorStatistics.Add(stat);
-                currentStats[item.Normalized] = stat;
-            }
-
-            stat.DisplayWord = item.Display;
-            stat.LastAttemptedAt = attemptedAt;
-            stat.LastSentenceId = sentenceId;
-            stat.UpdatedAt = attemptedAt;
-
-            if (item.HasError)
-            {
-                stat.ConsecutiveErrorCount += 1;
-                stat.TotalErrorCount += 1;
-                stat.LastErrorAt = attemptedAt;
-            }
-            else
-            {
-                stat.ConsecutiveErrorCount = 0;
-            }
-        }
+            Score = Math.Clamp(score, 0, 100),
+            Passed = passed,
+            Feedback = feedback,
+            Gamification = gamification
+        };
     }
 
     private static ShadowingEvaluationDto MapToDto(
@@ -257,7 +340,8 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
         bool passed,
         byte pronunciationTarget,
         string accent,
-        string learningMode)
+        string learningMode,
+        GamificationTransactionDto gamification)
     {
         return new ShadowingEvaluationDto
         {
@@ -273,6 +357,7 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
             ProsodyScore = result.ProsodyScore,
             Transcript = result.Transcript,
             Feedback = result.Feedback,
+            Gamification = gamification,
             Words = result.Words.Select(item => new WordFeedbackDto
             {
                 Word = item.Word,
@@ -285,6 +370,65 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
                 }).ToList()
             }).ToList()
         };
+    }
+
+    private static void EnsureGamificationSucceeded(
+        GamificationTransactionDto transaction)
+    {
+        if (transaction.Succeeded)
+        {
+            return;
+        }
+
+        var statusCode = transaction.RejectionCode switch
+        {
+            "user_not_found" => StatusCodes.Status404NotFound,
+            "idempotency_conflict" => StatusCodes.Status409Conflict,
+            _ => StatusCodes.Status400BadRequest
+        };
+        throw new PronunciationAssessmentUnavailableException(
+            transaction.Message ?? "Không thể cập nhật kết quả luyện tập.",
+            statusCode,
+            transaction.RejectionCode ?? "gamification_rejected");
+    }
+
+    private static string NormalizeDictation(string value)
+    {
+        var builder = new StringBuilder(value.Length);
+        var pendingSpace = false;
+        foreach (var character in value.Normalize(NormalizationForm.FormKC)
+                     .ToLowerInvariant())
+        {
+            if (char.IsLetterOrDigit(character) || character == '\'')
+            {
+                if (pendingSpace && builder.Length > 0)
+                {
+                    builder.Append(' ');
+                }
+                builder.Append(character);
+                pendingSpace = false;
+            }
+            else
+            {
+                pendingSpace = true;
+            }
+        }
+        return builder.ToString();
+    }
+
+    private static string NormalizeIpa(string value)
+    {
+        var builder = new StringBuilder(value.Length);
+        foreach (var character in value.Normalize(NormalizationForm.FormKC)
+                     .ToLowerInvariant())
+        {
+            if (!char.IsWhiteSpace(character)
+                && character is not '/' and not '[' and not ']')
+            {
+                builder.Append(character);
+            }
+        }
+        return builder.ToString();
     }
 
     private static void ValidateAudio(byte[] audio, string audioFormat, string contentType, int maxAudioDurationSeconds)
@@ -358,15 +502,4 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
         return dataSize / (double)byteRate;
     }
 
-    private static string? NormalizeWord(string word)
-    {
-        if (string.IsNullOrWhiteSpace(word))
-        {
-            return null;
-        }
-
-        var lowered = word.Trim().ToLowerInvariant();
-        var normalized = WordNormalizeRegex.Replace(lowered, string.Empty);
-        return string.IsNullOrWhiteSpace(normalized) ? null : normalized;
-    }
 }

@@ -1,53 +1,36 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebShadowing.Data;
-using WebShadowing.Models;
+using WebShadowing.Services;
 
 namespace WebShadowing.ViewComponents;
 
 public class UserNavStatsViewComponent : ViewComponent
 {
-    private const string IsVipCacheKey = "UserNavStats.IsVip";
-    private readonly AppDbContext _db;
+    private readonly IUserStatsService _statsService;
+    private readonly IUserContextService _userContext;
 
-    public UserNavStatsViewComponent(AppDbContext db)
+    public UserNavStatsViewComponent(IUserStatsService statsService, IUserContextService userContext)
     {
-        _db = db;
+        _statsService = statsService;
+        _userContext = userContext;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(string variant = "full")
+    public async Task<IViewComponentResult> InvokeAsync(string variant = "default")
     {
-        var isVip = await GetCurrentUserVipStatusAsync();
-        var preview = NavDefaults.PreviewNavStats;
-        var model = new UserNavStatsViewModel
+        if (!_userContext.IsAuthenticated)
         {
-            Streak = preview.Streak,
-            Hearts = preview.Hearts,
-            Exp = preview.Exp,
-            IsVip = isVip
-        };
-
-        return View(variant == "mobileHeart" ? "MobileHeart" : "Default", model);
-    }
-
-    private async Task<bool> GetCurrentUserVipStatusAsync()
-    {
-        if (HttpContext.Items.TryGetValue(IsVipCacheKey, out var cachedValue)
-            && cachedValue is bool cachedIsVip)
-        {
-            return cachedIsVip;
+            return Content(string.Empty);
         }
 
-        var userIdValue = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isVip = long.TryParse(userIdValue, out var userId)
-            && await _db.Users
-                .AsNoTracking()
-                .Where(user => user.UserId == userId)
-                .Select(user => user.IsVip)
-                .FirstOrDefaultAsync();
+        var model = await _statsService.GetNavStatsAsync();
+        if (model is null)
+        {
+            return Content(string.Empty);
+        }
 
-        HttpContext.Items[IsVipCacheKey] = isVip;
-        return isVip;
+        return View(
+            string.Equals(variant, "mobile", StringComparison.OrdinalIgnoreCase)
+                ? "Mobile"
+                : "Default",
+            model);
     }
 }

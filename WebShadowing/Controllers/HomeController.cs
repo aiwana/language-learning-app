@@ -11,6 +11,7 @@ public class HomeController : Controller
 {
     private readonly ICourseService _courseService;
     private readonly IUserContextService _userContext;
+    private readonly IAuthService _authService;
     private readonly IHostEnvironment _env;
     private readonly IConfiguration _configuration;
     private readonly ILogger<HomeController> _logger;
@@ -18,12 +19,14 @@ public class HomeController : Controller
     public HomeController(
         ICourseService courseService,
         IUserContextService userContext,
+        IAuthService authService,
         IHostEnvironment env,
         IConfiguration configuration,
         ILogger<HomeController> logger)
     {
         _courseService = courseService;
         _userContext = userContext;
+        _authService = authService;
         _env = env;
         _configuration = configuration;
         _logger = logger;
@@ -107,10 +110,58 @@ public class HomeController : Controller
     }
 
     [AllowAnonymous]
-    public IActionResult Authen(string? step)
+    public async Task<IActionResult> Authen(
+        string? step,
+        string? learningMode,
+        string? accent,
+        string? returnUrl,
+        CancellationToken cancellationToken)
     {
-        ViewData["ActiveStep"] = string.IsNullOrWhiteSpace(step) ? "login" : step;
-        return View(new AuthPageViewModel());
+        var safeReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : null;
+        var model = new AuthPageViewModel();
+        model.Login.ReturnUrl = safeReturnUrl;
+        model.Register.ReturnUrl = safeReturnUrl;
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userId = _userContext.GetCurrentUserId();
+            var profile = userId is null
+                ? null
+                : await _authService.GetUserAsync(userId.Value, cancellationToken);
+
+            if (profile?.OnboardingCompleted == true)
+            {
+                return safeReturnUrl is not null
+                    ? LocalRedirect(safeReturnUrl)
+                    : RedirectToAction(nameof(Index));
+            }
+
+            if (profile is null)
+            {
+                await _authService.LogoutAsync(cancellationToken);
+                model.ActiveStep = "login";
+            }
+            else
+            {
+                model.ActiveStep = string.Equals(step, "goal", StringComparison.OrdinalIgnoreCase)
+                    ? "goal"
+                    : "level";
+                model.Onboarding.LearningMode = NormalizeOnboardingMode(learningMode, profile.LearningMode);
+                model.Onboarding.Accent = NormalizeAccent(accent, profile.Accent);
+                model.Onboarding.PronunciationTarget = profile.PronunciationTarget;
+                model.Onboarding.Plan = profile.IsVip ? "vip" : "free";
+            }
+        }
+        else
+        {
+            model.ActiveStep = string.Equals(step, "register", StringComparison.OrdinalIgnoreCase)
+                ? "register"
+                : "login";
+        }
+
+        ViewData["ActiveStep"] = model.ActiveStep;
+        ViewData["ReturnUrl"] = safeReturnUrl;
+        return View(model);
     }
 
     [AllowAnonymous]
@@ -132,6 +183,27 @@ public class HomeController : Controller
         LearningModes.Professional => LearningModes.Professional,
         _ => LearningModes.Casual
     };
+
+    private static string NormalizeOnboardingMode(string? requestedMode, string storedMode)
+    {
+        return requestedMode?.Trim().ToLowerInvariant() switch
+        {
+            LearningModes.Casual => LearningModes.Casual,
+            LearningModes.Academic => LearningModes.Academic,
+            LearningModes.Professional => LearningModes.Professional,
+            _ => NormalizeMode(storedMode)
+        };
+    }
+
+    private static string NormalizeAccent(string? requestedAccent, string storedAccent)
+    {
+        return requestedAccent?.Trim().ToLowerInvariant() switch
+        {
+            Accents.EnUs => Accents.EnUs,
+            Accents.EnGb => Accents.EnGb,
+            _ => storedAccent == Accents.EnGb ? Accents.EnGb : Accents.EnUs
+        };
+    }
 
     private static string GetModeLabel(string mode) => mode switch
     {

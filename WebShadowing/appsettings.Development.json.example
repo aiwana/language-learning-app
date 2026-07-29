@@ -5,7 +5,7 @@
   "OpenAI": {
     "AudioModel": "gpt-audio",
     "TextModel": "gpt-4o-mini",
-    "ApiKey": "sk-proj-secret"
+    "ApiKey": ""
   },
   "AzureSpeech": {
     "ApiKey": "",
@@ -17,6 +17,17 @@
     "ProviderTimeoutSeconds": 20,
     "AzureProviderName": "azure-speech",
     "OpenAiProviderName": "openai-fallback"
+  },
+  "VipStub": {
+    "Enabled": true
+  },
+  "Gamification": {
+    "SentenceCompletionExp": 20,
+    "FailedAttemptHeartCost": 1,
+    "HeartExchangeExpCost": 100,
+    "HeartExchangeAmount": 1,
+    "MaxHearts": 5,
+    "BusinessTimeZone": "Asia/Ho_Chi_Minh"
   },
   "Logging": {
     "LogLevel": {

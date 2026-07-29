@@ -1,11 +1,45 @@
+@using Microsoft.Extensions.Options
+@using WebShadowing.Models
+@using WebShadowing.Services
+@inject IUserStatsService UserStatsService
+@inject IOptions<GamificationOptions> GamificationOptions
 @{
     ViewData["Title"] = "Tiến trình & Thẻ nhớ";
+    var stats = await UserStatsService.GetNavStatsAsync();
+    var exchangeCost = GamificationOptions.Value.HeartExchangeExpCost;
+    var exchangeAmount = GamificationOptions.Value.HeartExchangeAmount;
 }
 
 <div class="animate-slide-up py-2">
     <div class="surface-card py-4 px-5 py-md-5 px-md-6">
         <p class="section-label section-label-indigo mb-1">Tiến trình</p>
         <h1 class="h3 fw-extrabold mb-2">Tiến trình &amp; Thẻ nhớ</h1>
-        <p class="text-body-muted small mb-0">Coming soon — nội dung đầy đủ sẽ có ở milestone M2.</p>
+        <p class="text-body-muted small mb-4">Số dư được đồng bộ từ kết quả luyện tập trên server.</p>
+
+        @if (stats is not null)
+        {
+            <div class="d-flex flex-wrap gap-3 align-items-center" data-progress-gamification>
+                <div class="stat-box streak-box" aria-label="Chuỗi học hiện tại">
+                    <span class="stat-value" data-gamification-stat="streak">@stats.Streak</span>
+                    <span class="stat-unit">ngày</span>
+                </div>
+                <div class="stat-box heart-box" aria-label="Số tim hiện tại">
+                    <span class="stat-value" data-gamification-stat="hearts">@(stats.IsVip ? "∞" : stats.Hearts)</span>
+                    <span class="stat-unit">tim</span>
+                </div>
+                <div class="stat-box exp-box" aria-label="Số EXP hiện tại">
+                    <span class="stat-value" data-gamification-stat="exp">@stats.Exp</span>
+                    <span class="stat-unit">EXP</span>
+                </div>
+                <button type="button"
+                        class="btn btn-outline-primary rounded-pill fw-bold"
+                        data-exchange-heart
+                        data-max-hearts="@GamificationOptions.Value.MaxHearts"
+                        @(stats.IsVip || stats.Hearts >= GamificationOptions.Value.MaxHearts ? "disabled" : null)>
+                    Đổi @exchangeCost EXP lấy @exchangeAmount tim
+                </button>
+                <span class="small text-body-muted" role="status" aria-live="polite" data-exchange-status></span>
+            </div>
+        }
     </div>
 </div>

@@ -41,17 +41,20 @@ public class AuthPageViewModel
 {
     public LoginViewModel Login { get; set; } = new();
     public RegisterViewModel Register { get; set; } = new();
+    public CompleteOnboardingViewModel Onboarding { get; set; } = new();
     public string ActiveStep { get; set; } = "login";
 }
 
-public class OnboardingSelectionViewModel
+public class CompleteOnboardingViewModel
 {
-    [Required]
+    [Required(ErrorMessage = "Vui lòng chọn hình thức học.")]
     public string LearningMode { get; set; } = LearningModes.Casual;
 
-    [Required]
+    [Required(ErrorMessage = "Vui lòng chọn chuẩn phát âm.")]
     public string Accent { get; set; } = Accents.EnUs;
 
+    [Required(ErrorMessage = "Vui lòng chọn mục tiêu phát âm.")]
+    [Range(1, 100, ErrorMessage = "Mục tiêu không hợp lệ.")]
     public byte PronunciationTarget { get; set; } = PronunciationTargets.Comprehension70;
 
     [Required]

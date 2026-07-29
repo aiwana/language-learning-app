@@ -231,6 +231,7 @@ h3 {
 .app-navbar {
   background-color: var(--color-surface) !important;
   border-bottom: 1px solid var(--color-border) !important;
+  min-height: 60px;
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
@@ -369,7 +370,11 @@ h3 {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+.nav-desktop-tools {
+  white-space: nowrap;
 }
 
 .nav-tools-divider {
@@ -389,7 +394,7 @@ h3 {
   width: 100%;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   .app-navbar-inner {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -416,23 +421,6 @@ h3 {
     grid-row: 1;
     justify-self: end;
     min-width: 0;
-  }
-}
-
-.nav-mobile-heart {
-  margin-left: auto;
-  flex-shrink: 0;
-  display: none !important;
-}
-
-body.nav-logged-in .nav-mobile-heart {
-  display: flex !important;
-}
-
-@media (min-width: 768px) {
-  .nav-mobile-heart,
-  body.nav-logged-in .nav-mobile-heart {
-    display: none !important;
   }
 }
 
@@ -503,7 +491,7 @@ body.nav-logged-in .nav-logged-in-only.nav-login-btn {
   white-space: nowrap;
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 991.98px) {
   .app-navbar-inner {
     flex-wrap: nowrap;
     gap: 0.5rem;
@@ -514,6 +502,68 @@ body.nav-logged-in .nav-logged-in-only.nav-login-btn {
     min-width: 0;
     flex: 1 1 auto;
   }
+}
+
+.mobile-gamification-bar {
+  width: 100%;
+  padding: 0 1rem 0.45rem;
+}
+
+.mobile-gamification-link {
+  width: min(100%, 460px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  color: #475569;
+  text-decoration: none;
+}
+
+.mobile-gamification-item {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.76rem;
+  line-height: 1;
+}
+
+.mobile-gamification-item strong { color: #334155; }
+.mobile-gamification-item small { font-size: 0.58rem; font-weight: 800; }
+
+.mobile-gamification-plan {
+  padding: 0.28rem 0.48rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
+.mobile-gamification-plan.is-vip {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.dark .mobile-gamification-item {
+  border-color: #334155;
+  background: #0f172a;
+  color: #cbd5e1;
+}
+
+.dark .mobile-gamification-item strong { color: #f8fafc; }
+.dark .mobile-gamification-plan { background: #1e293b; color: #94a3b8; }
+.dark .mobile-gamification-plan.is-vip { background: rgba(6, 95, 70, 0.45); color: #6ee7b7; }
+
+@media (max-width: 390px) {
+  .mobile-gamification-link { gap: 0.3rem; }
+  .mobile-gamification-item { padding-inline: 0.4rem; }
+  .mobile-gamification-item small { display: none; }
 }
 
 /* ===== Bottom navigation (mobile) ===== */
@@ -586,9 +636,13 @@ body.nav-logged-in .nav-logged-in-only.nav-login-btn {
   text-align: center;
 }
 
-@media (max-width: 767.98px) {
+.bottom-nav-label > span {
+  display: block;
+}
+
+@media (max-width: 991.98px) {
   .has-bottom-nav .app-main {
-    padding-bottom: 72px;
+    padding-bottom: 82px;
   }
 
   .has-bottom-nav .app-footer {
@@ -596,9 +650,141 @@ body.nav-logged-in .nav-logged-in-only.nav-login-btn {
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   .settings-mobile-tools {
     display: none !important;
+  }
+}
+
+.settings-mobile-tools {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.settings-mobile-tools h2 {
+  margin: 1.25rem 0 0.35rem;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.settings-mobile-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 74px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settings-mobile-copy {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.settings-mobile-copy > span:last-child {
+  display: grid;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.settings-mobile-copy strong {
+  color: var(--color-text);
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+
+.settings-mobile-copy small {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.settings-mobile-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  color: #7e22ce;
+  background: rgba(152, 16, 250, 0.09);
+}
+
+.settings-mobile-icon--danger {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.settings-mobile-icon svg,
+.settings-mobile-action svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.settings-mobile-action {
+  min-height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.7rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.settings-mobile-action > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.settings-mobile-action:hover {
+  border-color: rgba(152, 16, 250, 0.42);
+  color: #7e22ce;
+}
+
+.settings-mobile-action:active {
+  transform: translateY(1px);
+}
+
+.settings-mobile-action--danger {
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.24);
+  background: rgba(254, 242, 242, 0.9);
+}
+
+.settings-mobile-action--danger:hover {
+  color: #991b1b;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.dark .settings-mobile-action--danger {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(127, 29, 29, 0.18);
+}
+
+@media (max-width: 420px) {
+  .settings-mobile-row {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0.85rem 0;
+  }
+
+  .settings-mobile-row form,
+  .settings-mobile-action {
+    width: 100%;
   }
 }
 

@@ -87,6 +87,43 @@ public sealed class PracticeController : ControllerBase
         }
     }
 
+    [HttpPost("evaluate-answer")]
+    public async Task<IActionResult> EvaluateAnswer(
+        [FromBody] PracticeAnswerRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var idempotencyKey = Request.Headers["Idempotency-Key"].ToString();
+        if (string.IsNullOrWhiteSpace(idempotencyKey))
+        {
+            return BadRequest(new ApiErrorDto
+            {
+                ErrorCode = "invalid_idempotency_key",
+                Message = "Thiếu Idempotency-Key trong request header."
+            });
+        }
+
+        try
+        {
+            var result = await _practiceEvaluationService.EvaluateAnswerAsync(
+                new EvaluatePracticeAnswerCommand(
+                    request.LessonId,
+                    request.SentenceId,
+                    request.PracticeTab,
+                    request.Answer,
+                    idempotencyKey),
+                cancellationToken);
+            return Ok(result);
+        }
+        catch (PronunciationAssessmentUnavailableException exception)
+        {
+            return StatusCode(exception.StatusCode, new ApiErrorDto
+            {
+                ErrorCode = exception.ErrorCode,
+                Message = exception.Message
+            });
+        }
+    }
+
     private static string GetAudioFormat(IFormFile audio)
     {
         var extension = Path.GetExtension(audio.FileName).TrimStart('.').ToLowerInvariant();

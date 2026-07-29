@@ -24,6 +24,7 @@ public class AppDbContext : DbContext
     public DbSet<UserLessonProgress> UserLessonProgress => Set<UserLessonProgress>();
     public DbSet<UserSentenceProgress> UserSentenceProgress => Set<UserSentenceProgress>();
     public DbSet<PracticeAttempt> PracticeAttempts => Set<PracticeAttempt>();
+    public DbSet<GamificationLedgerEntry> GamificationLedger => Set<GamificationLedgerEntry>();
     public DbSet<WordErrorStatistic> WordErrorStatistics => Set<WordErrorStatistic>();
     public DbSet<VocabularyItem> VocabularyItems => Set<VocabularyItem>();
     public DbSet<FavoriteSentence> FavoriteSentences => Set<FavoriteSentence>();
@@ -262,6 +263,23 @@ public class AppDbContext : DbContext
             entity.HasOne(a => a.Sentence).WithMany().HasForeignKey(a => a.SentenceId)
                 .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(a => a.SavedSegment).WithMany().HasForeignKey(a => a.SavedSegmentId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<GamificationLedgerEntry>(entity =>
+        {
+            entity.HasIndex(entry => new { entry.UserId, entry.SourceType, entry.SourceId }).IsUnique();
+            entity.HasIndex(entry => new { entry.UserId, entry.CreatedAt });
+            entity.ToTable("Gamification_Ledger", table =>
+            {
+                table.HasCheckConstraint("CK_GamificationLedger_SourceType", "source_type IN ('sentence_completion','attempt_penalty','daily_activity','heart_exchange')");
+                table.HasCheckConstraint("CK_GamificationLedger_ExpBalance", "exp_balance >= 0");
+                table.HasCheckConstraint("CK_GamificationLedger_HeartsBalance", "hearts_balance >= 0");
+                table.HasCheckConstraint("CK_GamificationLedger_StreakBalance", "streak_balance >= 0");
+            });
+            entity.HasOne(entry => entry.User).WithMany().HasForeignKey(entry => entry.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(entry => entry.Attempt).WithMany().HasForeignKey(entry => entry.AttemptId)
                 .OnDelete(DeleteBehavior.NoAction);
         });
 

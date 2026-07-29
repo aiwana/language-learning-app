@@ -2,10 +2,10 @@
 @{
     ViewData["Title"] = "Đăng nhập / Đăng ký";
     var activeStep = (ViewData["ActiveStep"]?.ToString() ?? "login").ToLowerInvariant();
-    var selectedMode = Context.Request.Query["learningMode"].ToString();
-    if (string.IsNullOrWhiteSpace(selectedMode)) selectedMode = LearningModes.Casual;
-    var selectedAccent = Context.Request.Query["accent"].ToString();
-    if (selectedAccent is not Accents.EnUs and not Accents.EnGb) selectedAccent = Accents.EnUs;
+    var selectedMode = Model.Onboarding.LearningMode;
+    var selectedAccent = Model.Onboarding.Accent;
+    var selectedTarget = Model.Onboarding.PronunciationTarget;
+    var returnUrl = ViewData["ReturnUrl"]?.ToString();
     var isOnboarding = activeStep is "level" or "goal";
     var authError = TempData["AuthError"] as string;
 }
@@ -41,6 +41,7 @@
                 </div>
                 <form asp-controller="Home" asp-action="Authen" method="get" class="choice-form" data-choice-form>
                     <input type="hidden" name="step" value="goal" />
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
                     <div class="choice-list" role="radiogroup" aria-label="Mục đích học">
                         <label class="choice-card choice-card--mint">
                             <input type="radio" name="learningMode" value="@LearningModes.Casual" checked="@(selectedMode == LearningModes.Casual ? "checked" : null)" />
@@ -115,24 +116,24 @@
                     <input type="hidden" name="accent" value="@selectedAccent" />
                     <div class="goal-list" role="radiogroup" aria-label="Mục tiêu phát âm">
                         <label class="goal-card">
-                            <input type="radio" name="PronunciationTarget" value="50" />
+                            <input type="radio" name="PronunciationTarget" value="50" checked="@(selectedTarget == 50 ? "checked" : null)" />
                             <span class="goal-copy"><small>Casual speaking</small><strong>Luyện giao tiếp phản xạ trôi chảy</strong><span>Chấp nhận sai lệch phát âm nhỏ, ưu tiên tốc độ nói nhanh và thói quen ngắt nghỉ tự nhiên.</span></span>
                             <span class="goal-score">50%+</span>
                         </label>
                         <label class="goal-card">
-                            <input type="radio" name="PronunciationTarget" value="70" checked />
+                            <input type="radio" name="PronunciationTarget" value="70" checked="@(selectedTarget == 70 ? "checked" : null)" />
                             <span class="goal-copy"><small>Standard clarity</small><strong>Phát âm rõ ràng, người nghe hiểu</strong><span>Đọc đúng đa số từ, đủ âm cuối quan trọng và giao tiếp tự tin, trôi chảy.</span></span>
                             <span class="goal-score">70%+</span>
                         </label>
                         <label class="goal-card">
-                            <input type="radio" name="PronunciationTarget" value="90" />
+                            <input type="radio" name="PronunciationTarget" value="90" checked="@(selectedTarget == 90 ? "checked" : null)" />
                             <span class="goal-copy"><small>Near-native mastery</small><strong>Phát âm chuẩn xác bản xứ</strong><span>Tiêu chuẩn khắt khe, kiểm tra từng nét cao độ, trọng âm, nguyên âm đôi và nuốt âm đặc trưng.</span></span>
                             <span class="goal-score">90%+</span>
                         </label>
                     </div>
                     <aside class="goal-note"><span aria-hidden="true">✦</span><p><strong>Lưu ý:</strong> Cấu hình mức độ phát âm có thể thay đổi bất cứ lúc nào trong phần Cài đặt tài khoản.</p></aside>
                     <div class="goal-actions">
-                        <a asp-controller="Home" asp-action="Authen" asp-route-step="level" asp-route-learningMode="@selectedMode" asp-route-accent="@selectedAccent" class="auth-back">← Quay lại</a>
+                        <a asp-controller="Home" asp-action="Authen" asp-route-step="level" asp-route-learningMode="@selectedMode" asp-route-accent="@selectedAccent" asp-route-returnUrl="@returnUrl" class="auth-back">← Quay lại</a>
                         <button class="auth-primary" type="button" data-show-premium>Xem quyền lợi Premium <span aria-hidden="true">→</span></button>
                     </div>
                 </form>
@@ -164,11 +165,11 @@
                     </div>
                     <p class="premium-disclaimer">Bạn có thể bắt đầu học ngay. Gói VIP mở quyền truy cập nội dung VIP; gói Miễn Phí tiếp tục với nội dung thường.</p>
 
-                    <form asp-controller="Account" asp-action="CompleteOnboarding" method="post" class="premium-actions" data-plan-actions>
+                    <form asp-controller="Account" asp-action="CompleteOnboarding" method="post" class="premium-actions" data-plan-actions data-onboarding-endpoint="@Url.Content("~/api/user/onboarding")" data-return-url="@returnUrl">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="LearningMode" value="@selectedMode" />
                         <input type="hidden" name="Accent" value="@selectedAccent" />
-                        <input type="hidden" name="PronunciationTarget" value="70" data-plan-target />
+                        <input type="hidden" name="PronunciationTarget" value="@selectedTarget" data-plan-target />
                         <input type="hidden" name="Plan" value="free" data-plan-value />
                         <button class="premium-back" type="button" data-hide-premium>← Quay lại</button>
                         <button class="premium-free-button" type="submit" value="free">Dùng gói Miễn Phí</button>
@@ -280,9 +281,9 @@ else
                 </div>
                 <p class="auth-switch">
                     @if (activeStep == "register")
-                    { <text>Đã có tài khoản? <a asp-controller="Home" asp-action="Authen" asp-route-step="login">Đăng nhập</a></text> }
+                    { <text>Đã có tài khoản? <a asp-controller="Home" asp-action="Authen" asp-route-step="login" asp-route-returnUrl="@returnUrl">Đăng nhập</a></text> }
                     else
-                    { <text>Chưa có tài khoản? <a asp-controller="Home" asp-action="Authen" asp-route-step="register">Đăng ký ngay</a></text> }
+                    { <text>Chưa có tài khoản? <a asp-controller="Home" asp-action="Authen" asp-route-step="register" asp-route-returnUrl="@returnUrl">Đăng ký ngay</a></text> }
                 </p>
                 <p class="auth-legal">Bằng cách tiếp tục, bạn đồng ý với <a asp-controller="Home" asp-action="Privacy">chính sách quyền riêng tư</a>.</p>
             </div>
@@ -332,14 +333,60 @@ else
             setPremiumVisible(false);
         });
 
-        planForm?.addEventListener('submit', function (event) {
+        planForm?.addEventListener('submit', async function (event) {
+            if (!window.fetch) return;
+
+            event.preventDefault();
             if (planValue && event.submitter) planValue.value = event.submitter.value;
-            planForm.querySelectorAll('button[type="submit"]').forEach(function (button) {
-                button.disabled = true;
-            });
+
+            const submitButtons = planForm.querySelectorAll('button[type="submit"]');
+            submitButtons.forEach(function (button) { button.disabled = true; });
             if (status) {
                 status.className = 'onboarding-status is-visible';
                 status.textContent = 'Đang lưu lựa chọn và mở khóa học…';
+            }
+
+            const token = planForm.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const request = {
+                learningMode: planForm.querySelector('[name="LearningMode"]')?.value,
+                accent: planForm.querySelector('[name="Accent"]')?.value,
+                pronunciationTarget: Number(planTarget?.value),
+                plan: planValue?.value || 'free'
+            };
+
+            try {
+                const response = await fetch(planForm.dataset.onboardingEndpoint, {
+                    method: 'PUT',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token || ''
+                    },
+                    body: JSON.stringify(request)
+                });
+                const payload = await response.json().catch(function () { return {}; });
+
+                if (!response.ok) {
+                    const validationMessage = payload.errors
+                        ? Object.values(payload.errors).flat().join(' ')
+                        : null;
+                    throw new Error(payload.message || validationMessage || 'Không thể lưu lựa chọn. Vui lòng thử lại.');
+                }
+
+                if (!payload.user?.onboardingCompleted) {
+                    throw new Error('Dữ liệu onboarding chưa được xác nhận từ máy chủ. Vui lòng thử lại.');
+                }
+
+                const returnUrl = planForm.dataset.returnUrl;
+                window.location.assign(returnUrl || payload.redirectUrl || '/');
+            } catch (error) {
+                submitButtons.forEach(function (button) { button.disabled = false; });
+                if (status) {
+                    status.className = 'onboarding-status is-visible is-error';
+                    status.textContent = error instanceof Error
+                        ? error.message
+                        : 'Không thể lưu lựa chọn. Vui lòng thử lại.';
+                }
             }
         });
     </script>

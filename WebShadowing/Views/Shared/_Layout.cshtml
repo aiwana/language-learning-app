@@ -19,7 +19,7 @@
     }
 
     <header>
-        <nav class="navbar navbar-expand-md app-navbar mb-3 py-2">
+        <nav class="navbar navbar-expand-lg app-navbar mb-3 py-2">
             <div class="container-fluid px-4 app-navbar-inner">
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
                     <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-2 flex-shrink-0" aria-hidden="true">
@@ -55,11 +55,7 @@
                     </span>
                 </a>
 
-                <div class="nav-mobile-heart d-md-none">
-                    @await Component.InvokeAsync("UserNavStats", new { variant = "mobileHeart" })
-                </div>
-
-                <ul class="navbar-nav custom-nav-center app-nav-tabs d-none d-md-flex mb-0">
+                <ul class="navbar-nav custom-nav-center app-nav-tabs d-none d-lg-flex mb-0">
                     <li class="nav-item">
                         <a class="nav-link custom-tab @(isCoursesActive ? "active" : "")" asp-controller="Home" asp-action="Index">Khóa học</a>
                     </li>
@@ -71,7 +67,7 @@
                     </li>
                 </ul>
 
-                <div class="d-none d-md-flex align-items-center custom-nav-right gap-1 nav-desktop-tools">
+                <div class="d-none d-lg-flex align-items-center custom-nav-right gap-1 nav-desktop-tools">
                     <div class="d-flex align-items-center gap-2 user-nav-stats nav-logged-in-only">
                         @await Component.InvokeAsync("UserNavStats")
                     </div>
@@ -108,6 +104,12 @@
                         </form>
                 </div>
             </div>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="mobile-gamification-bar d-lg-none">
+                    @await Component.InvokeAsync("UserNavStats", new { variant = "mobile" })
+                </div>
+            }
         </nav>
     </header>
 
@@ -117,7 +119,7 @@
         </main>
     </div>
 
-    <footer class="app-footer py-3 mt-auto d-none d-md-block">
+    <footer class="app-footer py-3 mt-auto d-none d-lg-block">
         <div class="container text-center small">
             &copy; 2026 - ShadowSpeak AI -
             <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Privacy</a>
