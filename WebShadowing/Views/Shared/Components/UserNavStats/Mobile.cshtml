@@ -1,0 +1,22 @@
+@model WebShadowing.Models.UserNavStatsViewModel
+
+<a class="mobile-gamification-link"
+   asp-controller="Home"
+   asp-action="Stats"
+   aria-label="Mở tiến trình và số dư gamification">
+    <span class="mobile-gamification-item" title="Streak">
+        <span aria-hidden="true">🔥</span>
+        <strong data-gamification-stat="streak">@Model.Streak</strong>
+    </span>
+    <span class="mobile-gamification-item" title="Tim">
+        <span aria-hidden="true">♥</span>
+        <strong data-gamification-stat="hearts">@(Model.IsVip ? "∞" : Model.Hearts)</strong>
+    </span>
+    <span class="mobile-gamification-item" title="EXP">
+        <span aria-hidden="true">★</span>
+        <strong data-gamification-stat="exp">@Model.Exp</strong>
+        <small>EXP</small>
+    </span>
+    <span class="mobile-gamification-plan @(Model.IsVip ? "is-vip" : "")"
+          data-gamification-vip>@(Model.IsVip ? "VIP" : "FREE")</span>
+</a>

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace WebShadowing.Models;
 
 public sealed class ShadowingEvaluationDto
@@ -15,6 +17,7 @@ public sealed class ShadowingEvaluationDto
     public string Transcript { get; set; } = string.Empty;
     public string Feedback { get; set; } = string.Empty;
     public IReadOnlyList<WordFeedbackDto> Words { get; set; } = [];
+    public GamificationTransactionDto? Gamification { get; set; }
 }
 
 public sealed class WordFeedbackDto
@@ -35,6 +38,32 @@ public sealed class ApiErrorDto
 {
     public string ErrorCode { get; set; } = "unknown_error";
     public string Message { get; set; } = string.Empty;
+}
+
+public sealed class PracticeAnswerRequestDto
+{
+    public long LessonId { get; set; }
+    public long SentenceId { get; set; }
+
+    [Required]
+    [RegularExpression(
+        "^(dictation|ipa-match)$",
+        ErrorMessage = "PracticeTab chỉ hỗ trợ dictation hoặc ipa-match.")]
+    public string PracticeTab { get; set; } = string.Empty;
+
+    [Required, StringLength(4000)]
+    public string Answer { get; set; } = string.Empty;
+
+    [Range(0, 39)]
+    public int? TargetIndex { get; set; }
+}
+
+public sealed class PracticeAnswerEvaluationDto
+{
+    public int Score { get; init; }
+    public bool Passed { get; init; }
+    public string Feedback { get; init; } = string.Empty;
+    public GamificationTransactionDto Gamification { get; init; } = new();
 }
 
 public sealed class WordMeaningRequestDto
@@ -61,3 +90,11 @@ public sealed class WordIpaDto
     public string Word { get; set; } = string.Empty;
     public string Ipa { get; set; } = string.Empty;
 }
+
+public sealed class SentenceIpaRequestDto
+{
+    [Range(1, long.MaxValue)]
+    public long SentenceId { get; set; }
+}
+
+public sealed record SentenceIpaDto(long SentenceId, string Ipa);

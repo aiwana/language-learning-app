@@ -1,4 +1,6 @@
 using System.Text.Json;
+// Chức năng: đọc câu/timeline từ DB hoặc transcript JSON mà không tự ý ghi dữ liệu import vào DB.
+// Phụ trách nội dung/transcript: Hải Anh. Minh review mapping và tính toàn vẹn dữ liệu.
 using Microsoft.EntityFrameworkCore;
 using WebShadowing.Data;
 using WebShadowing.Models;
@@ -34,7 +36,8 @@ public sealed class LessonContentService : ILessonContentService
                     SentenceId = sentence.SentenceId,
                     Order = sentence.SentenceOrder,
                     Text = sentence.Text,
-                    Translation = sentence.Translation
+                    Translation = sentence.Translation,
+                    Ipa = sentence.Ipa
                 })
                 .ToListAsync(cancellationToken)
             : preloadedDbSentences
@@ -55,7 +58,8 @@ public sealed class LessonContentService : ILessonContentService
         SentenceId = sentence.SentenceId,
         Order = sentence.SentenceOrder,
         Text = sentence.Text,
-        Translation = sentence.Translation
+        Translation = sentence.Translation,
+        Ipa = sentence.Ipa
     };
 
     public async Task<bool> HasSentencesAsync(
@@ -93,7 +97,7 @@ public sealed class LessonContentService : ILessonContentService
             .Select(material => material.ContentUrl)
             .FirstOrDefault();
 
-        var path = ResolveWebRootPath(transcriptUrl);
+        var path = ResolveTranscriptPath(transcriptUrl);
         if (path is null || !File.Exists(path))
         {
             return [];
@@ -182,13 +186,33 @@ public sealed class LessonContentService : ILessonContentService
                     Order = transcript.Order,
                     Text = transcript.Text,
                     Translation = transcript.Translation ?? dbMatch?.Translation,
-                    Ipa = transcript.Ipa,
+                    Ipa = transcript.Ipa ?? dbMatch?.Ipa,
                     StartTime = transcript.StartTime,
                     EndTime = transcript.EndTime
                 };
             })
             .OrderBy(sentence => sentence.Order)
             .ToList();
+    }
+
+    private string? ResolveTranscriptPath(string? contentUrl)
+    {
+        var path = ResolveWebRootPath(contentUrl);
+        if (path is null || File.Exists(path))
+        {
+            return path;
+        }
+
+        if (Path.GetExtension(path).Equals(".txt", StringComparison.OrdinalIgnoreCase))
+        {
+            var jsonPath = Path.ChangeExtension(path, ".json");
+            if (File.Exists(jsonPath))
+            {
+                return jsonPath;
+            }
+        }
+
+        return path;
     }
 
     private string? ResolveWebRootPath(string? contentUrl)

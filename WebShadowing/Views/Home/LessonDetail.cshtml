@@ -89,33 +89,34 @@
                 <small>VIP</small>
             </button>
             <button type="button"
-                    class="lesson-mode-tab is-coming-soon"
+                    id="dictation-tab"
+                    class="lesson-mode-tab"
                     role="tab"
                     aria-selected="false"
-                    aria-disabled="true"
+                    aria-controls="answer-tab-panel"
                     data-tab="dictation"
                     onclick="switchTab('dictation')">
                 <i data-lucide="headphones"></i>
                 <span>Nghe chép</span>
-                <small>Sắp ra mắt</small>
             </button>
             <button type="button"
-                    class="lesson-mode-tab is-coming-soon"
+                    id="ipa-match-tab"
+                    class="lesson-mode-tab"
                     role="tab"
                     aria-selected="false"
-                    aria-disabled="true"
+                    aria-controls="answer-tab-panel"
                     data-tab="ipa-match"
                     onclick="switchTab('ipa-match')">
                 <i data-lucide="spell-check-2"></i>
                 <span>Ghép IPA</span>
-                <small>Sắp ra mắt</small>
             </button>
         </nav>
 
         <section id="shadowing-tab-panel"
                  class="lesson-top-grid"
                  role="tabpanel"
-                 aria-labelledby="shadowing-tab">
+                 aria-labelledby="shadowing-tab"
+                 data-shadowing-content>
             <div class="lesson-left-stack">
                 <div class="lesson-media-stage">
                     <div id="youtube-player-wrap" class="d-none lesson-media-card lesson-primary-media">
@@ -254,6 +255,64 @@
                               aria-label="Nhận xét chi tiết của AI">@(!pronunciationAiConfigured ? "Chưa kết nối AI, vui lòng kiểm tra lại!" : string.Empty)</textarea>
                 </div>
             </aside>
+        </section>
+
+        <section id="answer-tab-panel"
+                 class="lesson-answer-panel d-none"
+                 role="tabpanel"
+                 aria-live="polite">
+            <article class="lesson-panel lesson-answer-card">
+                <div class="lesson-panel-head">
+                    <div>
+                        <span id="answer-mode-kicker" class="lesson-panel-kicker lesson-panel-kicker-violet">Nghe chép</span>
+                        <h2 id="answer-mode-title">Nhập câu bạn nghe được</h2>
+                    </div>
+                    <i data-lucide="keyboard"></i>
+                </div>
+
+                <p id="answer-mode-instruction" class="lesson-answer-instruction"></p>
+                <div id="answer-target" class="lesson-answer-target"></div>
+
+                <div class="lesson-action-row">
+                    <button id="answer-play-btn"
+                            type="button"
+                            class="lesson-icon-button lesson-icon-button-blue"
+                            onclick="playCurrentSentenceAudio()">
+                        <i data-lucide="volume-2"></i>
+                        <span>Nghe câu</span>
+                    </button>
+                </div>
+
+                <label class="lesson-answer-label" for="practice-answer-input">Câu trả lời</label>
+                <textarea id="practice-answer-input"
+                          class="lesson-answer-input"
+                          rows="3"
+                          maxlength="4000"
+                          autocomplete="off"
+                          spellcheck="false"></textarea>
+
+                <div class="lesson-answer-actions">
+                    <button id="submit-practice-answer"
+                            type="button"
+                            class="lesson-record-button"
+                            onclick="submitPracticeAnswer()">
+                        <i data-lucide="check-circle-2"></i>
+                        <span>Kiểm tra</span>
+                    </button>
+                    <button id="next-practice-answer"
+                            type="button"
+                            class="lesson-next-button d-none"
+                            onclick="advanceAnswerSentence()">
+                        <span>Câu tiếp theo</span>
+                        <i data-lucide="arrow-right"></i>
+                    </button>
+                </div>
+
+                <p id="practice-answer-status"
+                   class="lesson-answer-status"
+                   role="status"
+                   aria-live="polite"></p>
+            </article>
         </section>
 
         <section class="lesson-subtitles-section" aria-label="Phụ đề" data-shadowing-content>
