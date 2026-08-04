@@ -1,0 +1,119 @@
+@model AdminUserSearchResult
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+    var totalPages = Math.Max(1, (int)Math.Ceiling(Model.TotalCount / (double)Model.PageSize));
+}
+
+<section class="admin-page">
+    <header class="admin-page-header">
+        <div>
+            <h1>Người dùng</h1>
+            <p class="admin-page-sub">@Model.TotalCount tài khoản · tìm kiếm, ẩn đăng nhập, VIP</p>
+        </div>
+    </header>
+
+    <form method="get" class="admin-filters" asp-area="Admin" asp-controller="Users" asp-action="Index">
+        <input type="search" name="q" value="@ViewBag.Query" class="form-control" placeholder="Email, username, họ tên" />
+        <select name="role" class="form-select">
+            <option value="">Mọi vai trò</option>
+            @if (ViewBag.Role == UserRoles.User) { <option value="@UserRoles.User" selected>user</option> } else { <option value="@UserRoles.User">user</option> }
+            @if (ViewBag.Role == UserRoles.Admin) { <option value="@UserRoles.Admin" selected>admin</option> } else { <option value="@UserRoles.Admin">admin</option> }
+        </select>
+        <select name="active" class="form-select">
+            <option value="">Active / Disabled</option>
+            @if (ViewBag.Active == "1") { <option value="1" selected>Đang hoạt động</option> } else { <option value="1">Đang hoạt động</option> }
+            @if (ViewBag.Active == "0") { <option value="0" selected>Đã ẩn</option> } else { <option value="0">Đã ẩn</option> }
+        </select>
+        <select name="vip" class="form-select">
+            <option value="">VIP / Free</option>
+            @if (ViewBag.Vip == "1") { <option value="1" selected>VIP</option> } else { <option value="1">VIP</option> }
+            @if (ViewBag.Vip == "0") { <option value="0" selected>Free</option> } else { <option value="0">Free</option> }
+        </select>
+        <button type="submit" class="btn btn-primary">Lọc</button>
+    </form>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Người dùng</th>
+                    <th>Vai trò</th>
+                    <th>Mode</th>
+                    <th>VIP</th>
+                    <th>Trạng thái</th>
+                    <th>Lần luyện gần nhất</th>
+                    <th>Tabs gần đây</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Items.Count == 0)
+            {
+                <tr>
+                    <td colspan="8" class="admin-empty">Không có tài khoản phù hợp.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var user in Model.Items)
+                {
+                    <tr class="@(user.IsActive ? "" : "is-disabled")">
+                        <td>
+                            <div class="admin-user-cell">
+                                <strong>@user.FullName</strong>
+                                <span>@user.Email</span>
+                                <span class="admin-muted">@@@user.Username</span>
+                            </div>
+                        </td>
+                        <td><span class="admin-badge">@user.Role</span></td>
+                        <td>@user.LearningMode</td>
+                        <td>@(user.IsVip ? "VIP" : "Free")</td>
+                        <td>
+                            @if (user.IsActive)
+                            {
+                                <span class="admin-status ok">Active</span>
+                            }
+                            else
+                            {
+                                <span class="admin-status bad">Disabled</span>
+                            }
+                        </td>
+                        <td>@(user.LastPracticeAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                        <td>
+                            <div class="admin-chips">
+                                @foreach (var tab in user.RecentPracticeTabs)
+                                {
+                                    <span class="admin-chip">@tab</span>
+                                }
+                                @if (user.RecentPracticeTabs.Count == 0)
+                                {
+                                    <span class="admin-muted">—</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary" asp-area="Admin" asp-controller="Users" asp-action="Details" asp-route-id="@user.UserId">Chi tiết</a>
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <nav class="admin-pager" aria-label="Phân trang">
+            @for (var p = 1; p <= totalPages; p++)
+            {
+                <a class="admin-page-link @(p == Model.Page ? "active" : "")"
+                   asp-area="Admin" asp-controller="Users" asp-action="Index"
+                   asp-route-page="@p"
+                   asp-route-q="@ViewBag.Query"
+                   asp-route-role="@ViewBag.Role"
+                   asp-route-active="@ViewBag.Active"
+                   asp-route-vip="@ViewBag.Vip">@p</a>
+            }
+        </nav>
+    }
+</section>

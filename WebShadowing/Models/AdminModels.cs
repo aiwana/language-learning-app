@@ -15,10 +15,10 @@ public sealed class AdminAuditLog
     [Column("target_user_id")]
     public long TargetUserId { get; set; }
 
-    [Required, MaxLength(40)]
+    [Required, MaxLength(40), Column("action")]
     public string Action { get; set; } = string.Empty;
 
-    [MaxLength(1000)]
+    [MaxLength(1000), Column("detail")]
     public string? Detail { get; set; }
 
     [Column("created_at")]

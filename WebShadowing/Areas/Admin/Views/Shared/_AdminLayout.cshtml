@@ -1,0 +1,31 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = $"{ViewData["Title"]} - Admin";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-shell">
+    <div class="admin-frame">
+        <aside class="admin-sidebar">
+            <span class="admin-brand">ShadowSpeak Admin</span>
+            <nav class="admin-nav">
+                <a class="admin-nav-link active" asp-area="Admin" asp-controller="Users" asp-action="Index">Người dùng</a>
+            </nav>
+            <a class="admin-back" asp-area="" asp-controller="Home" asp-action="Index">← Về ứng dụng</a>
+        </aside>
+        <div class="admin-main">
+            @if (TempData["AdminSuccess"] is string success)
+            {
+                <div class="alert alert-success admin-alert" role="status">@success</div>
+            }
+            @if (TempData["AdminError"] is string error)
+            {
+                <div class="alert alert-danger admin-alert" role="alert">@error</div>
+            }
+            @RenderBody()
+        </div>
+    </div>
+</div>

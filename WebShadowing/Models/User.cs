@@ -51,6 +51,7 @@ public class User
 
     [Required]
     [MaxLength(20)]
+    [Column("role")]
     public string Role { get; set; } = UserRoles.User;
 
     [Column("is_active")]
