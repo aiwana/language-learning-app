@@ -49,6 +49,23 @@ public class User
     [Column("onboarding_completed")]
     public bool OnboardingCompleted { get; set; }
 
+    [Required]
+    [MaxLength(20)]
+    public string Role { get; set; } = UserRoles.User;
+
+    [Column("is_active")]
+    public bool IsActive { get; set; } = true;
+
+    [Column("disabled_at")]
+    public DateTime? DisabledAt { get; set; }
+
+    [MaxLength(500)]
+    [Column("disabled_reason")]
+    public string? DisabledReason { get; set; }
+
+    [Column("disabled_by_user_id")]
+    public long? DisabledByUserId { get; set; }
+
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 
@@ -64,4 +81,7 @@ public class User
     public ICollection<PracticeSession> PracticeSessions { get; set; } = new List<PracticeSession>();
 
     public UserStatistic? Statistics { get; set; }
+
+    [ForeignKey(nameof(DisabledByUserId))]
+    public User? DisabledByUser { get; set; }
 }

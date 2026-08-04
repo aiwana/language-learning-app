@@ -220,6 +220,30 @@ public sealed class VocabularyItem
     [Column("source_sentence_id")]
     public long? SourceSentenceId { get; set; }
 
+    [Required, MaxLength(30), Column("source_type")]
+    public string SourceType { get; set; } = VocabularySourceTypes.LessonSentence;
+
+    [Column("source_lesson_id")]
+    public long? SourceLessonId { get; set; }
+
+    [MaxLength(255), Column("source_lesson_title")]
+    public string? SourceLessonTitle { get; set; }
+
+    [Column("source_sentence_text")]
+    public string? SourceSentenceText { get; set; }
+
+    [MaxLength(20), Column("source_learning_mode")]
+    public string? SourceLearningMode { get; set; }
+
+    [Required, MaxLength(20), Column("review_status")]
+    public string ReviewStatus { get; set; } = VocabularyReviewStatuses.Active;
+
+    [Column("last_reviewed_at")]
+    public DateTime? LastReviewedAt { get; set; }
+
+    [Column("review_count")]
+    public int ReviewCount { get; set; }
+
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -243,13 +267,38 @@ public sealed class FavoriteSentence
     public long UserId { get; set; }
 
     [Column("sentence_id")]
-    public long SentenceId { get; set; }
+    public long? SentenceId { get; set; }
+
+    [Column("saved_segment_id")]
+    public long? SavedSegmentId { get; set; }
+
+    [Required, MaxLength(30), Column("source_type")]
+    public string SourceType { get; set; } = FavoriteSourceTypes.LessonSentence;
+
+    [Required, MaxLength(255), Column("source_key")]
+    public string SourceKey { get; set; } = string.Empty;
+
+    [Column("lesson_id")]
+    public long? LessonId { get; set; }
+
+    [MaxLength(255), Column("lesson_title")]
+    public string? LessonTitle { get; set; }
+
+    [Required, Column("text_snapshot")]
+    public string TextSnapshot { get; set; } = string.Empty;
+
+    [Column("translation_snapshot")]
+    public string? TranslationSnapshot { get; set; }
+
+    [MaxLength(20), Column("learning_mode")]
+    public string? LearningMode { get; set; }
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public User User { get; set; } = null!;
-    public LessonSentence Sentence { get; set; } = null!;
+    public LessonSentence? Sentence { get; set; }
+    public SavedAiLessonSegment? SavedSegment { get; set; }
 }
 
 [Table("User_Settings")]
@@ -390,6 +439,12 @@ public sealed class SavedAiLessonSegment
 
     [Column("end_ms")]
     public int? EndMilliseconds { get; set; }
+
+    [MaxLength(100), Column("ipa")]
+    public string? Ipa { get; set; }
+
+    [Column("audio_url")]
+    public string? AudioUrl { get; set; }
 
     public SavedAiLesson SavedLesson { get; set; } = null!;
 }

@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+// Chức năng: truy vấn thư viện/course/lesson theo learning mode và nguồn nội dung.
+// Phụ trách nội dung bài học trong DB: Hải Anh. Minh review EF/query/authorization.
 using WebShadowing.Data;
 using WebShadowing.Models;
 
@@ -7,11 +9,13 @@ namespace WebShadowing.Services;
 public sealed class CourseService : ICourseService
 {
     private readonly AppDbContext _db;
+    private readonly IWebHostEnvironment _env;
     private readonly ILessonContentService _lessonContentService;
 
-    public CourseService(AppDbContext db, ILessonContentService lessonContentService)
+    public CourseService(AppDbContext db, IWebHostEnvironment env, ILessonContentService lessonContentService)
     {
         _db = db;
+        _env = env;
         _lessonContentService = lessonContentService;
     }
 
@@ -220,9 +224,6 @@ public sealed class CourseService : ICourseService
         foreach (var lesson in lessons.OrderBy(lesson => lesson.LessonOrder))
         {
             var materials = lesson.Materials.ToList();
-            var hasPlayableMaterial = materials.Any(m =>
-                m.MaterialType == MaterialTypes.Video || m.MaterialType == MaterialTypes.Audio);
-
             // O(1) HashSet lookup — avoids a per-lesson AnyAsync (N+1 fix)
             var hasSentences = lessonIdsWithDbSentences.Contains(lesson.LessonId);
             if (!hasSentences)
@@ -238,7 +239,7 @@ public sealed class CourseService : ICourseService
                 LessonOrder = lesson.LessonOrder,
                 Duration = lesson.Duration,
                 Source = LessonSources.Curated,
-                HasContent = hasPlayableMaterial && hasSentences,
+                HasContent = hasSentences,
                 MaterialTypes = materials
                     .Select(material => material.MaterialType)
                     .Distinct()
@@ -271,7 +272,7 @@ public sealed class CourseService : ICourseService
         return [.. result];
     }
 
-    private static LessonMediaDto BuildMedia(IEnumerable<LessonMaterial> materials)
+    private LessonMediaDto BuildMedia(IEnumerable<LessonMaterial> materials)
     {
         var materialList = materials.ToList();
 
@@ -280,7 +281,7 @@ public sealed class CourseService : ICourseService
             .Select(material => material.ContentUrl)
             .FirstOrDefault();
 
-        audioUrl ??= InferKnownAudioUrl(materialList);
+        audioUrl ??= InferCurriculumAudioUrl(materialList);
 
         var videoUrl = materialList
             .Where(material => material.MaterialType == MaterialTypes.Video)
@@ -341,14 +342,57 @@ public sealed class CourseService : ICourseService
             && url.Contains("dummy", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string? InferKnownAudioUrl(IEnumerable<LessonMaterial> materials)
+    private string? InferCurriculumAudioUrl(IEnumerable<LessonMaterial> materials)
     {
-        var hasUnit1Transcript = materials.Any(material =>
+        var transcriptUrl = materials
+            .Where(material =>
             material.MaterialType == MaterialTypes.Transcript
-            && material.ContentUrl.Contains("/media/curriculum/grade-6/unit-1/", StringComparison.OrdinalIgnoreCase));
+                && material.ContentUrl.Contains("/media/curriculum/", StringComparison.OrdinalIgnoreCase))
+            .Select(material => material.ContentUrl)
+            .FirstOrDefault();
 
-        return hasUnit1Transcript
-            ? "/media/curriculum/grade-6/unit-1/unit-1-getting-started-ex-1.wav"
-            : null;
+        if (string.IsNullOrWhiteSpace(transcriptUrl) || string.IsNullOrWhiteSpace(_env.WebRootPath))
+        {
+            return null;
+        }
+
+        var transcriptRelativePath = transcriptUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+        var transcriptPath = Path.GetFullPath(Path.Combine(_env.WebRootPath, transcriptRelativePath));
+        var webRootPath = Path.GetFullPath(_env.WebRootPath);
+        if (!transcriptPath.StartsWith(webRootPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var transcriptDirectory = Path.GetDirectoryName(transcriptPath);
+        if (string.IsNullOrWhiteSpace(transcriptDirectory) || !Directory.Exists(transcriptDirectory))
+        {
+            return null;
+        }
+
+        var audioFile = Directory
+            .EnumerateFiles(transcriptDirectory)
+            .Where(IsSupportedAudioFile)
+            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault();
+
+        if (audioFile is null)
+        {
+            return null;
+        }
+
+        var audioRelativePath = Path.GetRelativePath(_env.WebRootPath, audioFile)
+            .Replace(Path.DirectorySeparatorChar, '/');
+        return "/" + audioRelativePath;
+    }
+
+    private static bool IsSupportedAudioFile(string path)
+    {
+        var extension = Path.GetExtension(path);
+        return extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase)
+            || extension.Equals(".wav", StringComparison.OrdinalIgnoreCase)
+            || extension.Equals(".m4a", StringComparison.OrdinalIgnoreCase)
+            || extension.Equals(".ogg", StringComparison.OrdinalIgnoreCase)
+            || extension.Equals(".webm", StringComparison.OrdinalIgnoreCase);
     }
 }

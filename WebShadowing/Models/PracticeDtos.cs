@@ -53,6 +53,9 @@ public sealed class PracticeAnswerRequestDto
 
     [Required, StringLength(4000)]
     public string Answer { get; set; } = string.Empty;
+
+    [Range(0, 39)]
+    public int? TargetIndex { get; set; }
 }
 
 public sealed class PracticeAnswerEvaluationDto
@@ -61,6 +64,39 @@ public sealed class PracticeAnswerEvaluationDto
     public bool Passed { get; init; }
     public string Feedback { get; init; } = string.Empty;
     public GamificationTransactionDto Gamification { get; init; } = new();
+}
+
+public sealed class IpaMatchQuestionRequestDto
+{
+    [Range(1, long.MaxValue)]
+    public long LessonId { get; set; }
+
+    [Range(1, long.MaxValue)]
+    public long SentenceId { get; set; }
+}
+
+public sealed class IpaMatchQuestionDto
+{
+    public string QuestionToken { get; init; } = string.Empty;
+    public string Accent { get; init; } = Accents.EnUs;
+    public string PromptWord { get; init; } = string.Empty;
+    public IReadOnlyList<IpaMatchOptionDto> Options { get; init; } = [];
+    public DateTime ExpiresAtUtc { get; init; }
+}
+
+public sealed class IpaMatchOptionDto
+{
+    public string OptionId { get; init; } = string.Empty;
+    public string Ipa { get; init; } = string.Empty;
+}
+
+public sealed class IpaMatchSubmitRequestDto
+{
+    [Required, StringLength(1000)]
+    public string QuestionToken { get; set; } = string.Empty;
+
+    [Required, StringLength(100)]
+    public string OptionId { get; set; } = string.Empty;
 }
 
 public sealed class WordMeaningRequestDto
@@ -87,3 +123,11 @@ public sealed class WordIpaDto
     public string Word { get; set; } = string.Empty;
     public string Ipa { get; set; } = string.Empty;
 }
+
+public sealed class SentenceIpaRequestDto
+{
+    [Range(1, long.MaxValue)]
+    public long SentenceId { get; set; }
+}
+
+public sealed record SentenceIpaDto(long SentenceId, string Ipa);

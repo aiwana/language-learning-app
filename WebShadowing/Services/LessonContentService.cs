@@ -1,4 +1,6 @@
 using System.Text.Json;
+// Chức năng: đọc câu/timeline từ DB hoặc transcript JSON mà không tự ý ghi dữ liệu import vào DB.
+// Phụ trách nội dung/transcript: Hải Anh. Minh review mapping và tính toàn vẹn dữ liệu.
 using Microsoft.EntityFrameworkCore;
 using WebShadowing.Data;
 using WebShadowing.Models;
@@ -95,7 +97,7 @@ public sealed class LessonContentService : ILessonContentService
             .Select(material => material.ContentUrl)
             .FirstOrDefault();
 
-        var path = ResolveWebRootPath(transcriptUrl);
+        var path = ResolveTranscriptPath(transcriptUrl);
         if (path is null || !File.Exists(path))
         {
             return [];
@@ -191,6 +193,26 @@ public sealed class LessonContentService : ILessonContentService
             })
             .OrderBy(sentence => sentence.Order)
             .ToList();
+    }
+
+    private string? ResolveTranscriptPath(string? contentUrl)
+    {
+        var path = ResolveWebRootPath(contentUrl);
+        if (path is null || File.Exists(path))
+        {
+            return path;
+        }
+
+        if (Path.GetExtension(path).Equals(".txt", StringComparison.OrdinalIgnoreCase))
+        {
+            var jsonPath = Path.ChangeExtension(path, ".json");
+            if (File.Exists(jsonPath))
+            {
+                return jsonPath;
+            }
+        }
+
+        return path;
     }
 
     private string? ResolveWebRootPath(string? contentUrl)

@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+// Chức năng: nguồn mapping EF Core cho toàn bộ database và ràng buộc quan hệ/index.
+// Phụ trách chính: Minh. Hải Anh phối hợp seed bài học và kiểm thử migration/schema.
+// Mọi thay đổi model phải có schema update và test nâng cấp dữ liệu cũ tương ứng.
 using WebShadowing.Models;
 
 namespace WebShadowing.Data;
@@ -34,22 +37,13 @@ public class AppDbContext : DbContext
     public DbSet<SavedAiLessonSegment> SavedAiLessonSegments => Set<SavedAiLessonSegment>();
     public DbSet<VipSubscription> VipSubscriptions => Set<VipSubscription>();
     public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
+    public DbSet<AiLessonPreview> AiLessonPreviews => Set<AiLessonPreview>();
     public DbSet<AiDialogueSession> AiDialogueSessions => Set<AiDialogueSession>();
     public DbSet<AiDialogueTurn> AiDialogueTurns => Set<AiDialogueTurn>();
+    public DbSet<AdminAuditLog> AdminAuditLogs => Set<AdminAuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AiDialogueSession>(entity =>
-        {
-            entity.HasIndex(item => new { item.UserId, item.LastActivityAt });
-            entity.HasOne(item => item.User).WithMany().HasForeignKey(item => item.UserId).OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(item => item.Lesson).WithMany().HasForeignKey(item => item.LessonId).OnDelete(DeleteBehavior.SetNull);
-        });
-        modelBuilder.Entity<AiDialogueTurn>(entity =>
-        {
-            entity.HasIndex(item => new { item.DialogueSessionId, item.CreatedAt });
-            entity.HasOne(item => item.Session).WithMany(item => item.Turns).HasForeignKey(item => item.DialogueSessionId).OnDelete(DeleteBehavior.Cascade);
-        });
         modelBuilder.Entity<UserCourse>(entity =>
         {
             entity.HasKey(uc => new { uc.UserId, uc.CourseId });
@@ -206,13 +200,37 @@ public class AppDbContext : DbContext
             entity.Property(u => u.Accent).HasDefaultValue(Accents.EnUs);
             entity.Property(u => u.IsVip).HasDefaultValue(false);
             entity.Property(u => u.OnboardingCompleted).HasDefaultValue(false);
+            entity.Property(u => u.Role).HasDefaultValue(UserRoles.User);
+            entity.Property(u => u.IsActive).HasDefaultValue(true);
             entity.Property(u => u.RowVersion).IsRowVersion();
+            entity.HasIndex(u => new { u.Role, u.IsActive });
+            entity.HasOne(u => u.DisabledByUser)
+                .WithMany()
+                .HasForeignKey(u => u.DisabledByUserId)
+                .OnDelete(DeleteBehavior.NoAction);
             entity.ToTable("Users", table =>
             {
                 table.HasCheckConstraint("CK_Users_LearningMode", "learning_mode IN ('casual','academic','professional')");
                 table.HasCheckConstraint("CK_Users_PronunciationTarget", "pronunciation_target IN (50,70,90)");
                 table.HasCheckConstraint("CK_Users_Accent", "accent IN ('en-us','en-gb')");
+                table.HasCheckConstraint("CK_Users_Role", "role IN ('user','admin')");
             });
+        });
+
+        modelBuilder.Entity<AdminAuditLog>(entity =>
+        {
+            entity.HasIndex(a => new { a.TargetUserId, a.CreatedAt });
+            entity.HasIndex(a => new { a.ActorUserId, a.CreatedAt });
+            entity.ToTable("Admin_Audit_Log", table =>
+            {
+                table.HasCheckConstraint(
+                    "CK_AdminAuditLog_Action",
+                    "action IN ('disable_user','enable_user','grant_vip','revoke_vip','set_role')");
+            });
+            entity.HasOne(a => a.Actor).WithMany().HasForeignKey(a => a.ActorUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(a => a.Target).WithMany().HasForeignKey(a => a.TargetUserId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<UserLessonProgress>(entity =>
@@ -315,6 +333,14 @@ public class AppDbContext : DbContext
         {
             entity.HasIndex(v => new { v.UserId, v.NormalizedWord, v.LanguageCode }).IsUnique();
             entity.Property(v => v.RowVersion).IsRowVersion();
+            entity.Property(v => v.ReviewStatus).HasDefaultValue(VocabularyReviewStatuses.Active);
+            entity.Property(v => v.ReviewCount).HasDefaultValue(0);
+            entity.ToTable("Vocabulary_Items", table =>
+            {
+                table.HasCheckConstraint("CK_VocabularyItems_SourceType", "source_type IN ('lesson_sentence','ai_snapshot')");
+                table.HasCheckConstraint("CK_VocabularyItems_ReviewStatus", "review_status IN ('active','mastered')");
+                table.HasCheckConstraint("CK_VocabularyItems_ReviewCount", "review_count >= 0");
+            });
             entity.HasOne(v => v.User).WithMany().HasForeignKey(v => v.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(v => v.SourceSentence).WithMany().HasForeignKey(v => v.SourceSentenceId)
@@ -323,10 +349,17 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<FavoriteSentence>(entity =>
         {
-            entity.HasIndex(f => new { f.UserId, f.SentenceId }).IsUnique();
+            entity.HasIndex(f => new { f.UserId, f.SourceType, f.SourceKey }).IsUnique();
+            entity.ToTable("Favorite_Sentences", table =>
+            {
+                table.HasCheckConstraint("CK_FavoriteSentences_SourceType", "source_type IN ('lesson_sentence','ai_snapshot')");
+                table.HasCheckConstraint("CK_FavoriteSentences_Source", "(CASE WHEN sentence_id IS NULL THEN 0 ELSE 1 END + CASE WHEN saved_segment_id IS NULL THEN 0 ELSE 1 END) <= 1");
+            });
             entity.HasOne(f => f.User).WithMany().HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(f => f.Sentence).WithMany().HasForeignKey(f => f.SentenceId)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(f => f.SavedSegment).WithMany().HasForeignKey(f => f.SavedSegmentId)
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
@@ -417,6 +450,41 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(p => p.Subscription).WithMany(s => s.PaymentTransactions)
                 .HasForeignKey(p => p.SubscriptionId).OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<AiLessonPreview>(entity =>
+        {
+            entity.HasIndex(p => new { p.UserId, p.ExpiresAt });
+            entity.ToTable("AI_Lesson_Previews", table =>
+                table.HasCheckConstraint("CK_AiLessonPreviews_LearningMode", "learning_mode IN ('casual','academic','professional')"));
+            entity.HasOne(p => p.User).WithMany().HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(p => p.SavedLesson).WithMany().HasForeignKey(p => p.SavedLessonId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<AiDialogueSession>(entity =>
+        {
+            entity.HasIndex(s => new { s.UserId, s.LastActivityAt });
+            entity.ToTable("AI_Dialogue_Sessions", table =>
+            {
+                table.HasCheckConstraint("CK_AiDialogueSessions_Mode", "learning_mode IN ('casual','academic','professional')");
+                table.HasCheckConstraint("CK_AiDialogueSessions_Status", "status IN ('active','completed','expired')");
+                table.HasCheckConstraint("CK_AiDialogueSessions_TurnCount", "turn_count >= 0");
+            });
+            entity.HasOne(s => s.User).WithMany().HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(s => s.Lesson).WithMany().HasForeignKey(s => s.LessonId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<AiDialogueTurn>(entity =>
+        {
+            entity.HasIndex(t => new { t.DialogueSessionId, t.CreatedAt });
+            entity.ToTable("AI_Dialogue_Turns", table =>
+                table.HasCheckConstraint("CK_AiDialogueTurns_Role", "role IN ('user','assistant')"));
+            entity.HasOne(t => t.Session).WithMany(s => s.Turns)
+                .HasForeignKey(t => t.DialogueSessionId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

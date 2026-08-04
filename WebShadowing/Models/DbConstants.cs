@@ -94,6 +94,30 @@ public static class ThemePreferences
     public const string Dark = "dark";
 }
 
+public static class VocabularyReviewStatuses
+{
+    public const string Active = "active";
+    public const string Mastered = "mastered";
+}
+
+public static class VocabularySourceTypes
+{
+    public const string LessonSentence = "lesson_sentence";
+    public const string AiSnapshot = "ai_snapshot";
+}
+
+public static class FavoriteSourceTypes
+{
+    public const string LessonSentence = "lesson_sentence";
+    public const string AiSnapshot = "ai_snapshot";
+}
+
+public static class PaymentProviders
+{
+    public const string Momo = "momo";
+    public const string ZaloPay = "zalopay";
+}
+
 public static class ModeChangeActors
 {
     public const string User = "user";
@@ -131,4 +155,19 @@ public static class PaymentTypes
     public const string Purchase = "purchase";
     public const string Renewal = "renewal";
     public const string Refund = "refund";
+}
+
+public static class UserRoles
+{
+    public const string User = "user";
+    public const string Admin = "admin";
+}
+
+public static class AdminAuditActions
+{
+    public const string DisableUser = "disable_user";
+    public const string EnableUser = "enable_user";
+    public const string GrantVip = "grant_vip";
+    public const string RevokeVip = "revoke_vip";
+    public const string SetRole = "set_role";
 }

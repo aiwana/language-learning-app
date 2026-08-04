@@ -24,11 +24,18 @@ builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache(options => options.SizeLimit = 2_000);
 builder.Services.Configure<PronunciationAssessmentOptions>(
     builder.Configuration.GetSection(PronunciationAssessmentOptions.SectionName));
+builder.Services.AddOptions<VocabularyOptions>()
+    .Bind(builder.Configuration.GetSection(VocabularyOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.AddScoped<PronunciationScoreProfileService>();
 builder.Services.AddScoped<AzurePronunciationAssessmentService>();
 builder.Services.AddScoped<OpenAiPronunciationAssessmentService>();
 builder.Services.AddScoped<IPronunciationAssessmentService, HybridPronunciationAssessmentService>();
 builder.Services.AddScoped<IPracticeEvaluationService, PracticeEvaluationService>();
+builder.Services.AddScoped<IIpaMatchService, IpaMatchService>();
+builder.Services.AddScoped<IVocabularyNotebookService, VocabularyNotebookService>();
+builder.Services.AddScoped<IFavoriteSentenceService, FavoriteSentenceService>();
 builder.Services.AddSingleton<ILanguageReferenceService, OpenAiLanguageReferenceService>();
 builder.Services.AddRateLimiter(options =>
 {

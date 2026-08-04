@@ -14,11 +14,14 @@ public sealed class PracticeController : ControllerBase
 {
     private const long MaxAudioBytes = 10 * 1024 * 1024;
     private readonly IPracticeEvaluationService _practiceEvaluationService;
+    private readonly IIpaMatchService _ipaMatchService;
 
     public PracticeController(
-        IPracticeEvaluationService practiceEvaluationService)
+        IPracticeEvaluationService practiceEvaluationService,
+        IIpaMatchService ipaMatchService)
     {
         _practiceEvaluationService = practiceEvaluationService;
+        _ipaMatchService = ipaMatchService;
     }
 
     [HttpPost("evaluate-shadowing")]
@@ -111,6 +114,55 @@ public sealed class PracticeController : ControllerBase
                     request.PracticeTab,
                     request.Answer,
                     idempotencyKey),
+                cancellationToken);
+            return Ok(result);
+        }
+        catch (PronunciationAssessmentUnavailableException exception)
+        {
+            return StatusCode(exception.StatusCode, new ApiErrorDto
+            {
+                ErrorCode = exception.ErrorCode,
+                Message = exception.Message
+            });
+        }
+    }
+
+    [HttpGet("ipa-question")]
+    [EnableRateLimiting("language-reference-ai")]
+    public async Task<IActionResult> GetIpaQuestion(
+        [FromQuery] IpaMatchQuestionRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _ipaMatchService.GetQuestionAsync(
+                new GetIpaMatchQuestionCommand(
+                    request.LessonId,
+                    request.SentenceId),
+                cancellationToken);
+            return Ok(result);
+        }
+        catch (PronunciationAssessmentUnavailableException exception)
+        {
+            return StatusCode(exception.StatusCode, new ApiErrorDto
+            {
+                ErrorCode = exception.ErrorCode,
+                Message = exception.Message
+            });
+        }
+    }
+
+    [HttpPost("ipa-submit")]
+    public async Task<IActionResult> SubmitIpaAnswer(
+        [FromBody] IpaMatchSubmitRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _ipaMatchService.SubmitAnswerAsync(
+                new SubmitIpaMatchAnswerCommand(
+                    request.QuestionToken,
+                    request.OptionId),
                 cancellationToken);
             return Ok(result);
         }

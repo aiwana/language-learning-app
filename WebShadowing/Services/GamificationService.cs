@@ -15,16 +15,22 @@ public sealed class GamificationService : IGamificationService
 
     private readonly AppDbContext _db;
     private readonly GamificationOptions _options;
+    private readonly VocabularyOptions _vocabularyOptions;
+    private readonly ILanguageReferenceService _languageReferenceService;
     private readonly TimeProvider _timeProvider;
     private readonly TimeZoneInfo _businessTimeZone;
 
     public GamificationService(
         AppDbContext db,
         IOptions<GamificationOptions> options,
+        IOptions<VocabularyOptions> vocabularyOptions,
+        ILanguageReferenceService languageReferenceService,
         TimeProvider timeProvider)
     {
         _db = db;
         _options = options.Value;
+        _vocabularyOptions = vocabularyOptions.Value;
+        _languageReferenceService = languageReferenceService;
         _timeProvider = timeProvider;
         _businessTimeZone = ResolveTimeZone(_options.BusinessTimeZone);
     }
@@ -79,13 +85,15 @@ public sealed class GamificationService : IGamificationService
                     balance);
         }
 
-        var sentenceExists = await _db.LessonSentences
+        var sentence = await _db.LessonSentences
             .AsNoTracking()
-            .AnyAsync(
-                sentence => sentence.SentenceId == command.SentenceId
-                    && sentence.LessonId == command.LessonId,
+            .Include(item => item.Lesson)
+                .ThenInclude(item => item.Course)
+            .SingleOrDefaultAsync(
+                item => item.SentenceId == command.SentenceId
+                    && item.LessonId == command.LessonId,
                 cancellationToken);
-        if (!sentenceExists)
+        if (sentence is null)
         {
             return Rejected(
                 "attempt",
@@ -112,10 +120,17 @@ public sealed class GamificationService : IGamificationService
             AttemptedAt = nowUtc
         };
         _db.PracticeAttempts.Add(practiceAttempt);
-        await UpdateWordErrorStatisticsAsync(
+        var wordStatistics = await UpdateWordErrorStatisticsAsync(
             command.UserId,
             command.SentenceId,
             command.Words,
+            nowUtc,
+            cancellationToken);
+        await UpsertVocabularyItemsAsync(
+            command.UserId,
+            user.Accent,
+            sentence,
+            wordStatistics,
             nowUtc,
             cancellationToken);
 
@@ -352,7 +367,7 @@ public sealed class GamificationService : IGamificationService
                 && entry.SourceId == sourceId,
             cancellationToken);
 
-    private async Task UpdateWordErrorStatisticsAsync(
+    private async Task<IReadOnlyList<WordErrorUpdate>> UpdateWordErrorStatisticsAsync(
         long userId,
         long sentenceId,
         IReadOnlyList<VerifiedPracticeWord> words,
@@ -361,7 +376,7 @@ public sealed class GamificationService : IGamificationService
     {
         if (words.Count == 0)
         {
-            return;
+            return [];
         }
 
         var grouped = words
@@ -385,7 +400,7 @@ public sealed class GamificationService : IGamificationService
 
         if (grouped.Count == 0)
         {
-            return;
+            return [];
         }
 
         var normalizedWords = grouped.Select(item => item.Normalized).ToList();
@@ -398,6 +413,7 @@ public sealed class GamificationService : IGamificationService
                 StringComparer.Ordinal,
                 cancellationToken);
 
+        var updates = new List<WordErrorUpdate>(grouped.Count);
         foreach (var item in grouped)
         {
             if (!currentStats.TryGetValue(item.Normalized, out var statistic))
@@ -416,6 +432,7 @@ public sealed class GamificationService : IGamificationService
             statistic.LastAttemptedAt = attemptedAt;
             statistic.LastSentenceId = sentenceId;
             statistic.UpdatedAt = attemptedAt;
+            var previousConsecutiveCount = statistic.ConsecutiveErrorCount;
 
             if (item.HasError)
             {
@@ -427,6 +444,83 @@ public sealed class GamificationService : IGamificationService
             {
                 statistic.ConsecutiveErrorCount = 0;
             }
+
+            updates.Add(new WordErrorUpdate(
+                item.Normalized,
+                item.Display,
+                item.HasError,
+                previousConsecutiveCount,
+                statistic.ConsecutiveErrorCount));
+        }
+
+        return updates;
+    }
+
+    private async Task UpsertVocabularyItemsAsync(
+        long userId,
+        string accent,
+        LessonSentence sentence,
+        IReadOnlyList<WordErrorUpdate> wordStatistics,
+        DateTime nowUtc,
+        CancellationToken cancellationToken)
+    {
+        var candidates = wordStatistics
+            .Where(item => item.HasError && item.CurrentConsecutiveCount > _vocabularyOptions.WordErrorThreshold)
+            .ToList();
+        if (candidates.Count == 0)
+        {
+            return;
+        }
+
+        var existingItems = await _db.VocabularyItems
+            .Where(item => item.UserId == userId
+                && item.LanguageCode == "en"
+                && candidates.Select(candidate => candidate.NormalizedWord).Contains(item.NormalizedWord))
+            .ToDictionaryAsync(item => item.NormalizedWord, StringComparer.Ordinal, cancellationToken);
+
+        var ipaEntries = await _languageReferenceService.GetIpaBatchAsync(
+            candidates.Select(item => item.DisplayWord).ToList(),
+            accent,
+            cancellationToken);
+        var ipaByWord = ipaEntries
+            .Where(item => !string.IsNullOrWhiteSpace(item.Word))
+            .GroupBy(item => NormalizeWord(item.Word) ?? string.Empty, StringComparer.Ordinal)
+            .Where(group => group.Key.Length > 0)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(item => item.Ipa).FirstOrDefault(ipa => !string.IsNullOrWhiteSpace(ipa)),
+                StringComparer.Ordinal);
+
+        foreach (var candidate in candidates)
+        {
+            var meaning = await _languageReferenceService.GetMeaningAsync(
+                candidate.DisplayWord,
+                sentence.Text,
+                cancellationToken);
+
+            if (!existingItems.TryGetValue(candidate.NormalizedWord, out var item))
+            {
+                item = new VocabularyItem
+                {
+                    UserId = userId,
+                    NormalizedWord = candidate.NormalizedWord,
+                    LanguageCode = "en"
+                };
+                _db.VocabularyItems.Add(item);
+                existingItems[candidate.NormalizedWord] = item;
+            }
+
+            item.DisplayWord = candidate.DisplayWord;
+            item.Ipa = FirstNonEmpty(meaning.Ipa, ipaByWord.GetValueOrDefault(candidate.NormalizedWord), item.Ipa);
+            item.Meaning = FirstNonEmpty(meaning.Meaning, item.Meaning);
+            item.ExampleSentence = sentence.Text;
+            item.SourceSentenceId = sentence.SentenceId;
+            item.SourceType = VocabularySourceTypes.LessonSentence;
+            item.SourceLessonId = sentence.LessonId;
+            item.SourceLessonTitle = sentence.Lesson.Title;
+            item.SourceSentenceText = sentence.Text;
+            item.SourceLearningMode = sentence.Lesson.Course.LearningMode;
+            item.UpdatedAt = nowUtc;
         }
     }
 
@@ -540,6 +634,9 @@ public sealed class GamificationService : IGamificationService
         return string.IsNullOrWhiteSpace(normalized) ? null : normalized;
     }
 
+    private static string? FirstNonEmpty(params string?[] values) =>
+        values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+
     private static bool ConsumesHeart(string practiceTab, string exerciseType) =>
         practiceTab is PracticeTabs.Shadowing or PracticeTabs.Dictation or PracticeTabs.IpaMatch
         || exerciseType is ExerciseTypes.Shadowing or ExerciseTypes.Pronunciation
@@ -610,4 +707,11 @@ public sealed class GamificationService : IGamificationService
             return TimeZoneInfo.FindSystemTimeZoneById(fallback);
         }
     }
+
+    private sealed record WordErrorUpdate(
+        string NormalizedWord,
+        string DisplayWord,
+        bool HasError,
+        int PreviousConsecutiveCount,
+        int CurrentConsecutiveCount);
 }

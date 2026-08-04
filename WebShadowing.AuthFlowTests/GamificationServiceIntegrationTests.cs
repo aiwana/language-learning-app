@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using WebShadowing.Data;
 using WebShadowing.Models;
 using WebShadowing.Services;
@@ -9,6 +10,102 @@ namespace WebShadowing.AuthFlowTests;
 
 public sealed class GamificationServiceIntegrationTests
 {
+    [ConfiguredSqlServerFact]
+    public async Task FourthConsecutiveFailure_AutoSavesVocabularyOnce_AndCorrectAttemptResetsStreak()
+    {
+        using var factory = new AuthFlowApplicationFactory(configureServices: services =>
+        {
+            services.RemoveAll<ILanguageReferenceService>();
+            services.AddSingleton<ILanguageReferenceService>(new StubLanguageReferenceService());
+        });
+        var seeded = await SeedAsync(factory.Services);
+
+        for (var index = 1; index <= 4; index++)
+        {
+            await using var scope = factory.Services.CreateAsyncScope();
+            var service = scope.ServiceProvider.GetRequiredService<IGamificationService>();
+            var result = await service.ProcessVerifiedAttemptAsync(new VerifiedPracticeAttempt
+            {
+                UserId = seeded.UserId,
+                LessonId = seeded.LessonId,
+                SentenceId = seeded.SentenceId,
+                PracticeTab = PracticeTabs.Shadowing,
+                ExerciseType = ExerciseTypes.Pronunciation,
+                TargetScore = 70,
+                Score = 40,
+                Passed = false,
+                IdempotencyKey = $"autosave-{index}",
+                AssessmentProvider = "integration-test",
+                Words = [new VerifiedPracticeWord("forgotten", "incorrect")]
+            });
+            Assert.True(result.Succeeded);
+        }
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var service = scope.ServiceProvider.GetRequiredService<IGamificationService>();
+            var retry = await service.ProcessVerifiedAttemptAsync(new VerifiedPracticeAttempt
+            {
+                UserId = seeded.UserId,
+                LessonId = seeded.LessonId,
+                SentenceId = seeded.SentenceId,
+                PracticeTab = PracticeTabs.Shadowing,
+                ExerciseType = ExerciseTypes.Pronunciation,
+                TargetScore = 70,
+                Score = 40,
+                Passed = false,
+                IdempotencyKey = "autosave-4",
+                AssessmentProvider = "integration-test",
+                Words = [new VerifiedPracticeWord("forgotten", "incorrect")]
+            });
+            Assert.True(retry.AlreadyProcessed);
+        }
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var stat = await db.WordErrorStatistics.SingleAsync(item => item.UserId == seeded.UserId && item.NormalizedWord == "forgotten");
+            var vocabulary = await db.VocabularyItems.Where(item => item.UserId == seeded.UserId && item.NormalizedWord == "forgotten").ToListAsync();
+
+            Assert.Equal(4, stat.ConsecutiveErrorCount);
+            Assert.Equal(4, stat.TotalErrorCount);
+            Assert.Single(vocabulary);
+            Assert.Equal("Forgotten means you did not remember it.", vocabulary[0].Meaning);
+            Assert.Equal(VocabularySourceTypes.LessonSentence, vocabulary[0].SourceType);
+        }
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var service = scope.ServiceProvider.GetRequiredService<IGamificationService>();
+            var reset = await service.ProcessVerifiedAttemptAsync(new VerifiedPracticeAttempt
+            {
+                UserId = seeded.UserId,
+                LessonId = seeded.LessonId,
+                SentenceId = seeded.SentenceId,
+                PracticeTab = PracticeTabs.Shadowing,
+                ExerciseType = ExerciseTypes.Pronunciation,
+                TargetScore = 70,
+                Score = 95,
+                Passed = true,
+                IdempotencyKey = "autosave-reset",
+                AssessmentProvider = "integration-test",
+                Words = [new VerifiedPracticeWord("forgotten", "correct")]
+            });
+            Assert.True(reset.Succeeded);
+        }
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var stat = await db.WordErrorStatistics.SingleAsync(item => item.UserId == seeded.UserId && item.NormalizedWord == "forgotten");
+            var vocabulary = await db.VocabularyItems.SingleAsync(item => item.UserId == seeded.UserId && item.NormalizedWord == "forgotten");
+
+            Assert.Equal(0, stat.ConsecutiveErrorCount);
+            Assert.Equal(4, stat.TotalErrorCount);
+            Assert.Equal("forgotten", vocabulary.DisplayWord.ToLowerInvariant());
+        }
+    }
+
     [ConfiguredSqlServerFact]
     public async Task RewardPenaltyVipRetryExchangeAndConcurrency_AreConsistent()
     {
@@ -195,6 +292,25 @@ public sealed class GamificationServiceIntegrationTests
         await db.SaveChangesAsync();
         return (user.UserId, course.Lessons.Single().LessonId, course.Lessons.Single().Sentences.Single().SentenceId);
     }
+}
+
+internal sealed class StubLanguageReferenceService : ILanguageReferenceService
+{
+    public Task<WordMeaningDto> GetMeaningAsync(string word, string? context, CancellationToken cancellationToken = default) =>
+        Task.FromResult(new WordMeaningDto
+        {
+            Word = word,
+            Ipa = "/fərˈɡɑːtn/",
+            Meaning = $"{char.ToUpperInvariant(word[0])}{word[1..].ToLowerInvariant()} means you did not remember it.",
+            Provider = "stub"
+        });
+
+    public Task<IReadOnlyList<WordIpaDto>> GetIpaBatchAsync(IReadOnlyList<string> words, string accent, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<WordIpaDto>>(words.Select(word => new WordIpaDto
+        {
+            Word = word,
+            Ipa = "/fərˈɡɑːtn/"
+        }).ToList());
 }
 
 internal sealed class ConfiguredSqlServerFactAttribute : FactAttribute

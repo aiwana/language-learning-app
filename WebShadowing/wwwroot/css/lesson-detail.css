@@ -503,6 +503,144 @@
 .lesson-practice-card,
 .lesson-ai-side-card { min-height: 520px; height: 100%; }
 
+.lesson-answer-panel {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.lesson-answer-card {
+  min-height: 420px;
+}
+
+.lesson-answer-instruction {
+  margin: 0 0 1rem;
+  color: var(--lesson-muted);
+  line-height: 1.65;
+}
+
+.lesson-answer-target {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.1rem;
+  border: 1px solid #ddd6fe;
+  border-radius: 14px;
+  background: #f5f3ff;
+  color: #312e81;
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.lesson-answer-question {
+  margin: 1rem 0 0.85rem;
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.lesson-answer-options {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.lesson-answer-option-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.lesson-answer-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.15rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: center;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.lesson-answer-option:hover {
+  transform: translateY(-1px);
+  border-color: #93c5fd;
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.12);
+}
+
+.lesson-answer-option.is-selected {
+  border-color: #6366f1;
+  background: #eef2ff;
+  color: #312e81;
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.18);
+}
+
+.lesson-answer-label {
+  display: block;
+  margin: 1.25rem 0 0.45rem;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.lesson-answer-input {
+  width: 100%;
+  resize: vertical;
+  min-height: 110px;
+  padding: 0.9rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  line-height: 1.6;
+  outline: none;
+}
+
+.lesson-answer-input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.13);
+}
+
+.lesson-answer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.lesson-answer-status {
+  min-height: 1.6rem;
+  margin: 1rem 0 0;
+  color: var(--lesson-muted);
+  font-weight: 700;
+}
+
+.lesson-answer-status.is-success { color: #047857; }
+.lesson-answer-status.is-error { color: #dc2626; }
+
+.dark .lesson-answer-target {
+  border-color: rgba(167, 139, 250, 0.35);
+  background: rgba(76, 29, 149, 0.2);
+  color: #ddd6fe;
+}
+
+.dark .lesson-answer-label { color: #cbd5e1; }
+
+.dark .lesson-answer-input {
+  border-color: #475569;
+  background: #0f172a;
+  color: #f8fafc;
+}
+
 .lesson-practice-card {
   border-color: rgba(129, 140, 248, 0.3);
   background:
@@ -778,6 +916,19 @@
 .lesson-next-button:hover { transform: translateY(-1px); }
 .lesson-icon-button:disabled { opacity: 0.5; cursor: not-allowed; }
 .lesson-icon-button-blue { border-color: #bfdbfe; background: #eff6ff; color: #1d4ed8; }
+.lesson-icon-button-favorite { border-color: #fbcfe8; background: #fff1f7; color: #be185d; }
+.lesson-icon-button-favorite.is-active { border-color: #f472b6; background: #fce7f3; color: #9d174d; box-shadow: 0 8px 18px rgba(190, 24, 93, 0.12); }
+
+.lesson-inline-status {
+  min-height: 1.2rem;
+  margin: 0.55rem 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.lesson-inline-status.is-error { color: #be123c; }
+.lesson-inline-status.is-success { color: #166534; }
 
 .lesson-recorder-box {
   display: grid;
@@ -1197,6 +1348,11 @@
   color: #bfdbfe;
 }
 .dark .lesson-icon-button-blue:hover:not(:disabled) { background: #374151; }
+.dark .lesson-icon-button-favorite { border-color: rgba(244, 114, 182, 0.4); background: rgba(157, 23, 77, 0.2); color: #f9a8d4; }
+.dark .lesson-icon-button-favorite.is-active { background: rgba(190, 24, 93, 0.28); color: #fbcfe8; }
+.dark .lesson-inline-status { color: #cbd5e1; }
+.dark .lesson-inline-status.is-error { color: #fda4af; }
+.dark .lesson-inline-status.is-success { color: #86efac; }
 
 .dark .lesson-rec-status {
   border-color: #374151;
