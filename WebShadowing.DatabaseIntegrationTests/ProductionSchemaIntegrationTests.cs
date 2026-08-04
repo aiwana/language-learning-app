@@ -212,6 +212,14 @@ public sealed class ProductionSchemaIntegrationTests
         db.Database.SqlQueryRaw<int>(sql).SingleAsync();
 
     private static Task DowngradeToLegacySchemaAsync(AppDbContext db) => db.Database.ExecuteSqlRawAsync("""
+        DECLARE @dropUserSavedLessonFks NVARCHAR(MAX) = N'';
+        SELECT @dropUserSavedLessonFks = @dropUserSavedLessonFks +
+            N'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) + N'.' +
+            QUOTENAME(OBJECT_NAME(parent_object_id)) + N' DROP CONSTRAINT ' + QUOTENAME(name) + N';'
+        FROM sys.foreign_keys
+        WHERE referenced_object_id = OBJECT_ID(N'dbo.User_Saved_Lessons');
+        IF LEN(@dropUserSavedLessonFks) > 0 EXEC sp_executesql @dropUserSavedLessonFks;
+
         DROP TABLE IF EXISTS dbo.Payment_Transactions;
         DROP TABLE IF EXISTS dbo.Gamification_Ledger;
         DROP TABLE IF EXISTS dbo.VIP_Subscriptions;
