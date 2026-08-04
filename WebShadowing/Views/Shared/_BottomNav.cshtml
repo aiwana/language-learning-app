@@ -1,13 +1,14 @@
 @{
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-    var isCoursesActive = action is "Index" or "LessonDetail";
-    var isStatsActive = action == "Stats";
-    var isSettingsActive = action == "Settings";
+    var isAdminArea = string.Equals(ViewContext.RouteData.Values["area"]?.ToString(), "Admin", StringComparison.OrdinalIgnoreCase);
+    var isCoursesActive = !isAdminArea && action is "Index" or "LessonDetail";
+    var isStatsActive = !isAdminArea && action == "Stats";
+    var isSettingsActive = !isAdminArea && action == "Settings";
 }
 
 <nav class="bottom-nav d-lg-none" aria-label="Điều hướng chính trên thiết bị di động">
     <a class="bottom-nav-item @(isCoursesActive ? "active" : "")"
-       asp-controller="Home" asp-action="Index"
+       asp-area="" asp-controller="Home" asp-action="Index"
        aria-current="@(isCoursesActive ? "page" : null)">
         <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -17,7 +18,7 @@
     </a>
 
     <a class="bottom-nav-item @(isStatsActive ? "active" : "")"
-       asp-controller="Home" asp-action="Stats"
+       asp-area="" asp-controller="Home" asp-action="Stats"
        aria-current="@(isStatsActive ? "page" : null)">
         <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3 3v18h18"/>
@@ -29,7 +30,7 @@
     </a>
 
     <a class="bottom-nav-item @(isSettingsActive ? "active" : "")"
-       asp-controller="Home" asp-action="Settings"
+       asp-area="" asp-controller="Home" asp-action="Settings"
        aria-current="@(isSettingsActive ? "page" : null)">
         <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>

@@ -52,6 +52,20 @@
   });
 })();
 
+window.showAppToast = function (message, type) {
+  document.querySelector('.app-toast')?.remove();
+  const toast = document.createElement('div');
+  toast.className = `app-toast${type === 'error' ? ' is-error' : ''}`;
+  toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  requestAnimationFrame(function () { toast.classList.add('is-visible'); });
+  setTimeout(function () {
+    toast.classList.remove('is-visible');
+    setTimeout(function () { toast.remove(); }, 220);
+  }, 3200);
+};
+
 (function () {
   function createIdempotencyKey(prefix) {
     const id = window.crypto && window.crypto.randomUUID

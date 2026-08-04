@@ -4,22 +4,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ShadowSpeak AI</title>
+    <meta name="description" content="ShadowSpeak AI giúp luyện phát âm, shadowing, nghe chép, IPA và hội thoại tiếng Anh theo mục tiêu cá nhân." />
     <script src="~/js/theme-init.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebShadowing.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="d-flex flex-column min-vh-100 has-bottom-nav @(User.Identity?.IsAuthenticated == true ? "nav-logged-in" : "") @(ViewContext.RouteData.Values["action"]?.ToString() == "Authen" ? "auth-shell-body" : "")" data-bs-no-jquery>
+    <a class="visually-hidden-focusable skip-link" href="#main-content">Bỏ qua điều hướng</a>
     @{ 
         var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-        var isCoursesActive = action is "Index" or "LessonDetail";
-        var isStatsActive = action == "Stats";
-        var isSettingsActive = action == "Settings";
+        // Khu vực Admin dùng chung layout này nên phải loại trừ theo area:
+        // action ở /Admin/Users cũng tên "Index" và sẽ làm sáng nhầm tab Khóa học.
+        var isAdminArea = string.Equals(ViewContext.RouteData.Values["area"]?.ToString(), "Admin", StringComparison.OrdinalIgnoreCase);
+        var isCoursesActive = !isAdminArea && action is "Index" or "LessonDetail";
+        var isStatsActive = !isAdminArea && action == "Stats";
+        var isSettingsActive = !isAdminArea && action == "Settings";
     }
 
-    <header>
-        <nav class="navbar navbar-expand-lg app-navbar mb-3 py-2">
+    <header class="app-shell-header">
+        <nav class="navbar navbar-expand-lg app-navbar py-2">
             <div class="container-fluid px-4 app-navbar-inner">
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
                     <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-2 flex-shrink-0" aria-hidden="true">
@@ -57,14 +63,20 @@
 
                 <ul class="navbar-nav custom-nav-center app-nav-tabs d-none d-lg-flex mb-0">
                     <li class="nav-item">
-                        <a class="nav-link custom-tab @(isCoursesActive ? "active" : "")" asp-controller="Home" asp-action="Index">Khóa học</a>
+                        <a class="nav-link custom-tab @(isCoursesActive ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Khóa học</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link custom-tab @(isStatsActive ? "active" : "")" asp-controller="Home" asp-action="Stats">Tiến trình &amp; Thẻ nhớ</a>
+                        <a class="nav-link custom-tab @(isStatsActive ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Stats">Tiến trình &amp; Thẻ nhớ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link custom-tab @(isSettingsActive ? "active" : "")" asp-controller="Home" asp-action="Settings">Tài khoản</a>
+                        <a class="nav-link custom-tab @(isSettingsActive ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Settings">Tài khoản</a>
                     </li>
+                    @if (User.IsInRole(UserRoles.Admin))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link custom-tab @(isAdminArea ? "active" : "")" asp-area="Admin" asp-controller="Users" asp-action="Index">Admin</a>
+                        </li>
+                    }
                 </ul>
 
                 <div class="d-none d-lg-flex align-items-center custom-nav-right gap-1 nav-desktop-tools">
@@ -91,8 +103,8 @@
                             </svg>
                         </button>
 
-                        <a class="btn btn-sm btn-outline-primary nav-login-btn nav-guest-only" asp-controller="Home" asp-action="Authen">Đăng nhập</a>
-                        <form class="nav-logged-in-only" asp-controller="Account" asp-action="Logout" method="post">
+                        <a class="btn btn-sm btn-outline-primary nav-login-btn nav-guest-only" asp-area="" asp-controller="Home" asp-action="Authen">Đăng nhập</a>
+                        <form class="nav-logged-in-only" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-link p-0 shadow-none btn-logout btn-logout--compact" title="Đăng xuất" aria-label="Đăng xuất">
                                 <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -104,17 +116,11 @@
                         </form>
                 </div>
             </div>
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <div class="mobile-gamification-bar d-lg-none">
-                    @await Component.InvokeAsync("UserNavStats", new { variant = "mobile" })
-                </div>
-            }
         </nav>
     </header>
 
     <div class="container flex-grow-1">
-        <main role="main" class="app-main pb-3">
+        <main id="main-content" role="main" class="app-main pb-3" tabindex="-1">
             @RenderBody()
         </main>
     </div>
@@ -122,7 +128,9 @@
     <footer class="app-footer py-3 mt-auto d-none d-lg-block">
         <div class="container text-center small">
             &copy; 2026 - ShadowSpeak AI -
-            <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Privacy</a>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Quyền riêng tư</a>
+            <span aria-hidden="true">·</span>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy" asp-fragment="terms" class="text-decoration-none">Điều khoản</a>
         </div>
     </footer>
 
