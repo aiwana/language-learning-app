@@ -179,7 +179,8 @@ public sealed class PracticeEvaluationServiceTests
     private static PracticeEvaluationService CreateService(
         AppDbContext db,
         IPronunciationAssessmentService assessmentService,
-        IOptions<PronunciationAssessmentOptions>? options = null)
+        IOptions<PronunciationAssessmentOptions>? options = null,
+        IGamificationService? gamificationService = null)
     {
         var effectiveOptions = options ?? Options.Create(new PronunciationAssessmentOptions());
         var profileService = new PronunciationScoreProfileService(effectiveOptions);
@@ -188,6 +189,7 @@ public sealed class PracticeEvaluationServiceTests
             new FakeCourseService(),
             new FakeUserContextService(),
             assessmentService,
+            gamificationService ?? new FakeGamificationService(db),
             profileService,
             effectiveOptions);
     }
@@ -197,7 +199,53 @@ public sealed class PracticeEvaluationServiceTests
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString("N"))
             .Options;
-        return new AppDbContext(options);
+        var db = new AppDbContext(options);
+        SeedPracticeData(db);
+        return db;
+    }
+
+    private static void SeedPracticeData(AppDbContext db)
+    {
+        db.Users.Add(new User
+        {
+            UserId = 7,
+            Username = "tester",
+            Email = "tester@example.com",
+            PasswordHash = "hash",
+            FullName = "Test User",
+            LearningMode = LearningModes.Casual,
+            Accent = Accents.EnUs,
+            PronunciationTarget = PronunciationTargets.Comprehension70
+        });
+
+        db.Courses.Add(new Course
+        {
+            CourseId = 1,
+            Title = "Mock Course",
+            Level = "Beginner",
+            LearningMode = LearningModes.Casual,
+            CourseType = CourseTypes.Curriculum
+        });
+
+        db.Lessons.Add(new Lesson
+        {
+            LessonId = 11,
+            CourseId = 1,
+            Title = "Mock Lesson",
+            LessonOrder = 1,
+            Duration = 60
+        });
+
+        db.LessonSentences.Add(new LessonSentence
+        {
+            SentenceId = 101,
+            LessonId = 11,
+            SentenceOrder = 1,
+            Text = "hello",
+            Ipa = "/həˈloʊ/"
+        });
+
+        db.SaveChanges();
     }
 
     private static byte[] BuildWavBytes(int durationSeconds)
@@ -274,6 +322,116 @@ public sealed class PracticeEvaluationServiceTests
         public Task<string> GetLearningModeAsync(CancellationToken cancellationToken = default) => Task.FromResult(LearningModes.Casual);
         public Task<byte> GetPronunciationTargetAsync(CancellationToken cancellationToken = default) => Task.FromResult(PronunciationTargets.Comprehension70);
         public Task<string> GetAccentAsync(CancellationToken cancellationToken = default) => Task.FromResult(Accents.EnUs);
+    }
+
+    private sealed class FakeGamificationService : IGamificationService
+    {
+        private readonly AppDbContext _db;
+
+        public FakeGamificationService(AppDbContext db)
+        {
+            _db = db;
+        }
+
+        public Task<GamificationTransactionDto> ProcessVerifiedAttemptAsync(VerifiedPracticeAttempt attempt, CancellationToken cancellationToken = default)
+        {
+            var existingAttempt = _db.PracticeAttempts.SingleOrDefault(item =>
+                item.UserId == attempt.UserId && item.IdempotencyKey == attempt.IdempotencyKey);
+            if (existingAttempt is not null)
+            {
+                return Task.FromResult(new GamificationTransactionDto
+                {
+                    Succeeded = true,
+                    Applied = false,
+                    AlreadyProcessed = true,
+                    TransactionType = "attempt",
+                    Balance = new GamificationBalanceDto()
+                });
+            }
+
+            var practiceAttempt = new PracticeAttempt
+            {
+                UserId = attempt.UserId,
+                SentenceId = attempt.SentenceId,
+                PracticeTab = attempt.PracticeTab,
+                ExerciseType = attempt.ExerciseType,
+                TargetScore = attempt.TargetScore,
+                Score = attempt.Score,
+                Result = attempt.Passed ? AttemptResults.Passed : AttemptResults.Failed,
+                AssessmentProvider = attempt.AssessmentProvider,
+                ProviderReferenceId = attempt.ProviderReferenceId,
+                TranscriptText = attempt.TranscriptText,
+                FeedbackText = attempt.FeedbackText,
+                IdempotencyKey = attempt.IdempotencyKey,
+                AttemptedAt = DateTime.UtcNow
+            };
+            _db.PracticeAttempts.Add(practiceAttempt);
+
+            foreach (var word in attempt.Words)
+            {
+                var normalizedWord = NormalizeWord(word.Word);
+                if (normalizedWord.Length == 0)
+                {
+                    continue;
+                }
+
+                var statistic = _db.WordErrorStatistics.SingleOrDefault(item =>
+                    item.UserId == attempt.UserId && item.NormalizedWord == normalizedWord);
+                if (statistic is null)
+                {
+                    statistic = new WordErrorStatistic
+                    {
+                        UserId = attempt.UserId,
+                        NormalizedWord = normalizedWord,
+                        DisplayWord = word.Word
+                    };
+                    _db.WordErrorStatistics.Add(statistic);
+                }
+
+                statistic.LastAttemptedAt = DateTime.UtcNow;
+                if (string.Equals(word.AccuracyCode, "correct", StringComparison.OrdinalIgnoreCase))
+                {
+                    statistic.ConsecutiveErrorCount = 0;
+                }
+                else
+                {
+                    statistic.ConsecutiveErrorCount++;
+                    statistic.TotalErrorCount++;
+                    statistic.LastErrorAt = DateTime.UtcNow;
+                    statistic.LastSentenceId = attempt.SentenceId;
+                }
+            }
+
+            _db.SaveChanges();
+
+            return Task.FromResult(new GamificationTransactionDto
+            {
+                Succeeded = true,
+                Applied = true,
+                TransactionType = "attempt",
+                Balance = new GamificationBalanceDto()
+            });
+        }
+
+        public Task<GamificationTransactionDto> ExchangeHeartAsync(long userId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Task.FromResult(new GamificationTransactionDto
+            {
+                Succeeded = true,
+                Applied = true,
+                TransactionType = "heart_exchange",
+                Balance = new GamificationBalanceDto()
+            });
+
+        public Task<GamificationBalanceDto?> GetBalanceAsync(long userId, CancellationToken cancellationToken = default) =>
+            Task.FromResult<GamificationBalanceDto?>(new GamificationBalanceDto());
+
+        private static string NormalizeWord(string value)
+        {
+            return new string(value
+                .ToLowerInvariant()
+                .Where(character => char.IsLetter(character) || character == '-' || character == '\'')
+                .ToArray());
+        }
     }
 
     private sealed class FakeAssessmentService : IPronunciationAssessmentService
