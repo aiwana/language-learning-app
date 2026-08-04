@@ -14,6 +14,7 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
     private readonly IPronunciationAssessmentService _assessmentService;
     private readonly IGamificationService _gamificationService;
     private readonly PronunciationScoreProfileService _scoreProfileService;
+    private readonly DictationScoringService _dictationScoringService;
     private readonly PronunciationAssessmentOptions _assessmentOptions;
 
     public PracticeEvaluationService(
@@ -23,6 +24,7 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
         IPronunciationAssessmentService assessmentService,
         IGamificationService gamificationService,
         PronunciationScoreProfileService scoreProfileService,
+        DictationScoringService dictationScoringService,
         IOptions<PronunciationAssessmentOptions> assessmentOptions)
     {
         _db = db;
@@ -31,6 +33,7 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
         _assessmentService = assessmentService;
         _gamificationService = gamificationService;
         _scoreProfileService = scoreProfileService;
+        _dictationScoringService = dictationScoringService;
         _assessmentOptions = assessmentOptions.Value;
     }
 
@@ -268,23 +271,46 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
                 "ipa_not_available");
         }
 
-        var normalizedActual = command.PracticeTab == PracticeTabs.Dictation
-            ? NormalizeDictation(command.Answer)
-            : NormalizeIpa(command.Answer);
-        var normalizedExpected = command.PracticeTab == PracticeTabs.Dictation
-            ? NormalizeDictation(expectedAnswer)
-            : NormalizeIpa(expectedAnswer);
-        var passed = normalizedActual.Length > 0
-            && string.Equals(
-                normalizedActual,
-                normalizedExpected,
-                StringComparison.Ordinal);
-        var score = passed ? 100 : 0;
-        var feedback = passed
-            ? "Câu trả lời chính xác."
-            : command.PracticeTab == PracticeTabs.Dictation
-                ? "Nội dung nghe chép chưa chính xác."
+        var normalizedActual = string.Empty;
+        var normalizedExpected = string.Empty;
+        var score = 0;
+        var passed = false;
+        var feedback = string.Empty;
+        IReadOnlyList<DictationTokenFeedbackDto> tokens = [];
+        IReadOnlyList<WordFeedbackDto> words = [];
+
+        if (command.PracticeTab == PracticeTabs.Dictation)
+        {
+            var dictationResult = _dictationScoringService.Evaluate(expectedAnswer, command.Answer);
+            normalizedActual = dictationResult.NormalizedAnswer;
+            normalizedExpected = dictationResult.NormalizedExpected;
+            score = dictationResult.Score;
+            passed = score >= pronunciationTarget;
+            feedback = passed
+                ? $"Đạt {score}% trên ngưỡng {pronunciationTarget}%. Câu tiếp theo đã mở."
+                : $"Đạt {score}% trên ngưỡng {pronunciationTarget}%. Hãy nghe lại và sửa các từ bị lệch.";
+            tokens = dictationResult.Tokens;
+            words = dictationResult.Tokens.Select(token => new WordFeedbackDto
+            {
+                Word = token.Actual ?? token.Expected ?? string.Empty,
+                AccuracyCode = token.Status == "correct" ? "correct" : token.Status == "insertion" ? "warning" : "incorrect",
+                Correction = token.Status == "correct" ? null : token.Expected
+            }).ToList();
+        }
+        else
+        {
+            normalizedActual = NormalizeIpa(command.Answer);
+            normalizedExpected = NormalizeIpa(expectedAnswer);
+            passed = normalizedActual.Length > 0
+                && string.Equals(
+                    normalizedActual,
+                    normalizedExpected,
+                    StringComparison.Ordinal);
+            score = passed ? 100 : 0;
+            feedback = passed
+                ? "Câu trả lời chính xác."
                 : "Phiên âm IPA chưa chính xác.";
+        }
 
         var gamification = await _gamificationService.ProcessVerifiedAttemptAsync(
             new VerifiedPracticeAttempt
@@ -294,13 +320,14 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
                 SentenceId = sentence.SentenceId,
                 PracticeTab = command.PracticeTab,
                 ExerciseType = exerciseType,
-                TargetScore = 100,
+                TargetScore = pronunciationTarget,
                 Score = score,
                 Passed = passed,
                 IdempotencyKey = idempotencyKey,
                 AssessmentProvider = "server-answer-validator",
                 TranscriptText = command.Answer.Trim(),
-                FeedbackText = feedback
+                FeedbackText = feedback,
+                Words = words.Select(word => new VerifiedPracticeWord(word.Word, word.AccuracyCode)).ToList()
             },
             cancellationToken);
         EnsureGamificationSucceeded(gamification);
@@ -329,7 +356,13 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
         {
             Score = Math.Clamp(score, 0, 100),
             Passed = passed,
+            Threshold = pronunciationTarget,
             Feedback = feedback,
+            ReferenceText = expectedAnswer,
+            NormalizedReference = normalizedExpected,
+            NormalizedAnswer = normalizedActual,
+            Words = words,
+            Tokens = tokens,
             Gamification = gamification
         };
     }
@@ -390,30 +423,6 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
             transaction.Message ?? "Không thể cập nhật kết quả luyện tập.",
             statusCode,
             transaction.RejectionCode ?? "gamification_rejected");
-    }
-
-    private static string NormalizeDictation(string value)
-    {
-        var builder = new StringBuilder(value.Length);
-        var pendingSpace = false;
-        foreach (var character in value.Normalize(NormalizationForm.FormKC)
-                     .ToLowerInvariant())
-        {
-            if (char.IsLetterOrDigit(character) || character == '\'')
-            {
-                if (pendingSpace && builder.Length > 0)
-                {
-                    builder.Append(' ');
-                }
-                builder.Append(character);
-                pendingSpace = false;
-            }
-            else
-            {
-                pendingSpace = true;
-            }
-        }
-        return builder.ToString();
     }
 
     private static string NormalizeIpa(string value)

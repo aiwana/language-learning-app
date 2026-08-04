@@ -81,10 +81,21 @@ public sealed class LessonDetailDto
     public IReadOnlyList<LessonMaterialDto> Materials { get; set; } = [];
     public LessonMediaDto Media { get; set; } = new();
     public IReadOnlyList<LessonSentenceDto> Sentences { get; set; } = [];
+    public IReadOnlyList<LessonPracticeProgressDto> PracticeProgress { get; set; } = [];
     public byte PronunciationTarget { get; set; } = PronunciationTargets.Comprehension70;
     public Guid? AiPreviewId { get; set; }
     public long? SavedAiLessonId { get; set; }
     public bool IsSavedAiLesson { get; set; }
+}
+
+public sealed class LessonPracticeProgressDto
+{
+    public string PracticeTab { get; set; } = PracticeTabs.Shadowing;
+    public string Status { get; set; } = ProgressStatuses.NotStarted;
+    public long? CurrentSentenceId { get; set; }
+    public long? ResumeSentenceId { get; set; }
+    public int CompletedSentenceCount { get; set; }
+    public decimal ProgressPercent { get; set; }
 }
 
 public sealed class LessonCourseDto

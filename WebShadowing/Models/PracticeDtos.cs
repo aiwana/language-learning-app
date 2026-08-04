@@ -62,8 +62,22 @@ public sealed class PracticeAnswerEvaluationDto
 {
     public int Score { get; init; }
     public bool Passed { get; init; }
+    public int Threshold { get; init; }
     public string Feedback { get; init; } = string.Empty;
+    public string? ReferenceText { get; init; }
+    public string? NormalizedReference { get; init; }
+    public string? NormalizedAnswer { get; init; }
+    public IReadOnlyList<WordFeedbackDto> Words { get; init; } = [];
+    public IReadOnlyList<DictationTokenFeedbackDto> Tokens { get; init; } = [];
     public GamificationTransactionDto Gamification { get; init; } = new();
+}
+
+public sealed record DictationTokenFeedbackDto
+{
+    public int Index { get; init; }
+    public string Status { get; init; } = "correct";
+    public string? Actual { get; init; }
+    public string? Expected { get; init; }
 }
 
 public sealed class IpaMatchQuestionRequestDto

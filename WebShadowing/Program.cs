@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ILessonContentService, LessonContentService>();
+builder.Services.AddScoped<DictationScoringService>();
 builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache(options => options.SizeLimit = 2_000);
 builder.Services.Configure<PronunciationAssessmentOptions>(

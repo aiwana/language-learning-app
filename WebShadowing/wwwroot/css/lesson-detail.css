@@ -253,6 +253,52 @@
   margin-top: 0.75rem;
 }
 
+.lesson-answer-diff {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.lesson-answer-diff-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.lesson-answer-diff-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.lesson-answer-diff-item.is-correct {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.lesson-answer-diff-item.is-substitution,
+.lesson-answer-diff-item.is-insertion,
+.lesson-answer-diff-item.is-deletion {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.lesson-answer-diff-summary {
+  margin: 0;
+  color: var(--lesson-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
 .lesson-answer-option-grid {
   display: grid;
   gap: 0.65rem;
