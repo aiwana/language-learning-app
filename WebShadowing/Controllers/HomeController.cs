@@ -103,6 +103,9 @@ public class HomeController : Controller
         ViewBag.LessonTitle = lessonResult.Lesson.Title;
         ViewBag.PronunciationAiConfigured = !string.IsNullOrWhiteSpace(
             _configuration["OPENAI_API_KEY"] ?? _configuration["OpenAI:ApiKey"]);
+        var currentUserId = _userContext.GetCurrentUserId();
+        var currentUser = currentUserId is null ? null : await _authService.GetUserAsync(currentUserId.Value, cancellationToken);
+        ViewBag.IsVip = currentUser?.IsVip == true;
         ViewBag.InitialLessonJson = JsonSerializer.Serialize(
             lessonResult.Lesson,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));

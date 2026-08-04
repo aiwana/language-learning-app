@@ -35,6 +35,7 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddPolicy("pronunciation-ai", context => BuildAiRateLimiter(context, permitLimit: 10));
     options.AddPolicy("language-reference-ai", context => BuildAiRateLimiter(context, permitLimit: 30));
+    options.AddPolicy("ai-dialogue", context => BuildAiRateLimiter(context, permitLimit: 12));
 });
 
 builder.Services.AddDataProtection()
@@ -76,6 +77,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IUserStatsService, UserStatsService>();
 builder.Services.AddScoped<IGamificationService, GamificationService>();
+builder.Services.AddScoped<IOpenAiApiClient, OpenAiApiClient>();
+builder.Services.AddScoped<ITtsAudioService, TtsAudioService>();
+builder.Services.AddScoped<IAiDialogueService, AiDialogueService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddOptions<GamificationOptions>()
     .Bind(builder.Configuration.GetSection(GamificationOptions.SectionName))
@@ -90,6 +94,10 @@ builder.Services.Configure<VipStubOptions>(options =>
         $"{VipStubOptions.SectionName}:Enabled")
         ?? builder.Environment.IsDevelopment();
 });
+builder.Services.AddOptions<AiDialogueOptions>()
+    .Bind(builder.Configuration.GetSection(AiDialogueOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 var app = builder.Build();
 

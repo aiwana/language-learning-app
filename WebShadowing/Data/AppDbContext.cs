@@ -34,9 +34,22 @@ public class AppDbContext : DbContext
     public DbSet<SavedAiLessonSegment> SavedAiLessonSegments => Set<SavedAiLessonSegment>();
     public DbSet<VipSubscription> VipSubscriptions => Set<VipSubscription>();
     public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
+    public DbSet<AiDialogueSession> AiDialogueSessions => Set<AiDialogueSession>();
+    public DbSet<AiDialogueTurn> AiDialogueTurns => Set<AiDialogueTurn>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AiDialogueSession>(entity =>
+        {
+            entity.HasIndex(item => new { item.UserId, item.LastActivityAt });
+            entity.HasOne(item => item.User).WithMany().HasForeignKey(item => item.UserId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(item => item.Lesson).WithMany().HasForeignKey(item => item.LessonId).OnDelete(DeleteBehavior.SetNull);
+        });
+        modelBuilder.Entity<AiDialogueTurn>(entity =>
+        {
+            entity.HasIndex(item => new { item.DialogueSessionId, item.CreatedAt });
+            entity.HasOne(item => item.Session).WithMany(item => item.Turns).HasForeignKey(item => item.DialogueSessionId).OnDelete(DeleteBehavior.Cascade);
+        });
         modelBuilder.Entity<UserCourse>(entity =>
         {
             entity.HasKey(uc => new { uc.UserId, uc.CourseId });
