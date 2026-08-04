@@ -82,9 +82,19 @@ public sealed record VocabularyItemDto(
     string ReviewStatus,
     DateTime? LastReviewedAt,
     int ReviewCount,
-    long? SourceSentenceId);
+    long? SourceSentenceId,
+    VocabularySourceContextDto? SourceContext);
 
 public sealed record VocabularyPageDto(IReadOnlyList<VocabularyItemDto> Items, int Total, int Page, int PageSize);
+
+public sealed record VocabularySourceContextDto(
+    string SourceType,
+    long? LessonId,
+    string? LessonTitle,
+    long? SentenceId,
+    string? SentenceText,
+    string? LearningMode,
+    DateTime SavedAt);
 
 public sealed class AddVocabularyRequestDto
 {
@@ -102,12 +112,54 @@ public sealed record FavoriteSentenceDto(
     string LessonTitle,
     string Text,
     string? Translation,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string SourceType,
+    string SourceKey,
+    FavoriteSentenceContextDto? SourceContext);
+
+public sealed record FavoriteSentenceContextDto(
+    string SourceType,
+    string SourceKey,
+    long? LessonId,
+    string? LessonTitle,
+    long? SentenceId,
+    long? SavedSegmentId,
+    string Text,
+    string? Translation,
+    string? LearningMode,
+    DateTime SavedAt);
 
 public sealed class AddFavoriteRequestDto
 {
-    [Range(1, long.MaxValue)] public long SentenceId { get; set; }
+    public long? SentenceId { get; set; }
+    public long? SavedSegmentId { get; set; }
+    [StringLength(255)] public string? SourceKey { get; set; }
+    [StringLength(255)] public string? SourceLabel { get; set; }
+    [StringLength(255)] public string? LessonTitle { get; set; }
+    [Required, StringLength(4000)] public string Text { get; set; } = string.Empty;
+    [StringLength(4000)] public string? Translation { get; set; }
+    [StringLength(20)] public string? LearningMode { get; set; }
 }
+
+public sealed class FavoriteSentenceStatusRequestDto
+{
+    public long? SentenceId { get; set; }
+    public long? SavedSegmentId { get; set; }
+    [StringLength(4000)] public string? Text { get; set; }
+    [StringLength(4000)] public string? Translation { get; set; }
+    [StringLength(20)] public string? LearningMode { get; set; }
+}
+
+public sealed record FavoriteSentenceMutationDto(
+    bool Saved,
+    bool AlreadySaved,
+    FavoriteSentenceDto Item);
+
+public sealed record FavoriteSentenceStatusDto(
+    bool IsFavorite,
+    long? FavoriteSentenceId,
+    string SourceType,
+    string SourceKey);
 
 public sealed record UserProfileDto(
     long UserId,

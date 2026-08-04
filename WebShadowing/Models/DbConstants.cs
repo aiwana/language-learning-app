@@ -100,6 +100,18 @@ public static class VocabularyReviewStatuses
     public const string Mastered = "mastered";
 }
 
+public static class VocabularySourceTypes
+{
+    public const string LessonSentence = "lesson_sentence";
+    public const string AiSnapshot = "ai_snapshot";
+}
+
+public static class FavoriteSourceTypes
+{
+    public const string LessonSentence = "lesson_sentence";
+    public const string AiSnapshot = "ai_snapshot";
+}
+
 public static class PaymentProviders
 {
     public const string Momo = "momo";

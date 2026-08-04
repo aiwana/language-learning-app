@@ -624,6 +624,19 @@
 .lesson-next-button:hover { transform: translateY(-1px); }
 .lesson-icon-button:disabled { opacity: 0.5; cursor: not-allowed; }
 .lesson-icon-button-blue { border-color: #bfdbfe; background: #eff6ff; color: #1d4ed8; }
+.lesson-icon-button-favorite { border-color: #fbcfe8; background: #fff1f7; color: #be185d; }
+.lesson-icon-button-favorite.is-active { border-color: #f472b6; background: #fce7f3; color: #9d174d; box-shadow: 0 8px 18px rgba(190, 24, 93, 0.12); }
+
+.lesson-inline-status {
+  min-height: 1.2rem;
+  margin: 0.55rem 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.lesson-inline-status.is-error { color: #be123c; }
+.lesson-inline-status.is-success { color: #166534; }
 
 .lesson-recorder-box {
   display: grid;
@@ -1025,6 +1038,11 @@
   color: #bfdbfe;
 }
 .dark .lesson-icon-button-blue:hover:not(:disabled) { background: #374151; }
+.dark .lesson-icon-button-favorite { border-color: rgba(244, 114, 182, 0.4); background: rgba(157, 23, 77, 0.2); color: #f9a8d4; }
+.dark .lesson-icon-button-favorite.is-active { background: rgba(190, 24, 93, 0.28); color: #fbcfe8; }
+.dark .lesson-inline-status { color: #cbd5e1; }
+.dark .lesson-inline-status.is-error { color: #fda4af; }
+.dark .lesson-inline-status.is-success { color: #86efac; }
 
 .dark .lesson-rec-status {
   border-color: #374151;
