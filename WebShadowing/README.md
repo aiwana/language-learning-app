@@ -1,4 +1,4 @@
-# WebShadowing — Backend (Issue #4)
+﻿# WebShadowing — Backend (Issue #4)
 
 EF Core map schema từ:
 
@@ -58,7 +58,23 @@ dotnet run
 sqlcmd -S localhost -d master -E -i Designs/Database/DatabaseCreation.sql
 sqlcmd -S localhost -d EnglishShadowingDB -E -i Designs/Database/Schema_v0p1_extension.sql
 sqlcmd -S localhost -d EnglishShadowingDB -E -i Database/production_learning_schema_update.sql
+sqlcmd -S localhost -d EnglishShadowingDB -E -i Database/project_completion_schema_update.sql
+sqlcmd -S localhost -d EnglishShadowingDB -E -i Database/admin_schema_update.sql
+sqlcmd -S localhost -d EnglishShadowingDB -E -i Designs/Database/Seed_video_bank_sources.sql
 ```
+
+### Admin panel
+
+Sau khi chạy `Database/admin_schema_update.sql`, promote 1 tài khoản:
+
+```sql
+UPDATE dbo.Users
+SET role = 'admin', updated_at = SYSUTCDATETIME()
+WHERE email = N'your-admin@example.com';
+```
+
+Đăng nhập bằng tài khoản đó → link **Admin** trên navbar → `/Admin/Users`.
+Admin có thể xem/tìm user, ẩn đăng nhập (`is_active=0`), grant/revoke VIP, và xem usage theo practice tab 30 ngày.
 
 ## SQL Server integration tests
 
@@ -70,3 +86,30 @@ dotnet test ..\WebShadowing.AuthFlowTests\WebShadowing.AuthFlowTests.csproj
 ```
 
 The configured login needs permission to create and drop databases. Never point the test variable at credentials that should not have that permission; the supplied database name is intentionally ignored as a safety measure.
+
+## Real video-bank import with yt-dlp
+
+Do not run yt-dlp inside a student-facing web request. Use the internal importer
+in `tools/video-import` to fetch real metadata/captions, create
+`transcript.json`, then map those files in `Designs/Database/Seed_video_bank_sources.sql`.
+
+```powershell
+python -m pip install -U yt-dlp
+python tools/video-import/import_video.py "https://www.youtube.com/watch?v=VIDEO_ID" `
+  --slug "my-real-lesson" `
+  --lesson-id 123
+```
+
+Với danh sách video seed sẵn, chạy batch:
+
+```powershell
+python tools/video-import/import_batch.py --continue-on-error --only-missing
+```
+
+`Designs/Database/Seed_video_bank_sources.sql` đã gắn sẵn các transcript
+JSON đã import vào `Lesson_Material`, nên không cần chạy thêm SQL gộp từ
+`tools/video-import`.
+
+The app keeps the original video URL and plays it through the existing
+YouTube/IFrame flow. Keep `source_review_status = 'pending'` until the
+source/license has been reviewed.
