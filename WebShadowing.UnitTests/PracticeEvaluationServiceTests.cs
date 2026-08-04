@@ -176,21 +176,48 @@ public sealed class PracticeEvaluationServiceTests
         Assert.Single(await db.PracticeAttempts.ToListAsync());
     }
 
+    [Fact]
+    public async Task EvaluateAnswerAsync_UsesDictationWordAccuracyAndReturnsDiff()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(
+            db,
+            new FakeAssessmentService(new PronunciationAssessmentResult()),
+            sentenceText: "Don't stop believing in twenty one");
+
+        var result = await service.EvaluateAnswerAsync(new EvaluatePracticeAnswerCommand(
+            LessonId: 11,
+            SentenceId: 101,
+            PracticeTab: PracticeTabs.Dictation,
+            Answer: "dont stop believe in 21",
+            IdempotencyKey: "dictation-1"));
+
+        Assert.Equal(80, result.Score);
+        Assert.True(result.Passed);
+        Assert.Equal(70, result.Threshold);
+        Assert.Equal("dont stop believe in 21", result.NormalizedAnswer);
+        Assert.Equal("dont stop believing in 21", result.NormalizedReference);
+        Assert.NotEmpty(result.Tokens);
+        Assert.Contains(result.Tokens, token => token.Status == "substitution");
+    }
+
     private static PracticeEvaluationService CreateService(
         AppDbContext db,
         IPronunciationAssessmentService assessmentService,
         IOptions<PronunciationAssessmentOptions>? options = null,
-        IGamificationService? gamificationService = null)
+        IGamificationService? gamificationService = null,
+        string sentenceText = "hello")
     {
         var effectiveOptions = options ?? Options.Create(new PronunciationAssessmentOptions());
         var profileService = new PronunciationScoreProfileService(effectiveOptions);
         return new PracticeEvaluationService(
             db,
-            new FakeCourseService(),
+            new FakeCourseService(sentenceText),
             new FakeUserContextService(),
             assessmentService,
             gamificationService ?? new FakeGamificationService(db),
             profileService,
+            new DictationScoringService(),
             effectiveOptions);
     }
 
@@ -285,6 +312,13 @@ public sealed class PracticeEvaluationServiceTests
 
     private sealed class FakeCourseService : ICourseService
     {
+        private readonly string _sentenceText;
+
+        public FakeCourseService(string sentenceText = "hello")
+        {
+            _sentenceText = sentenceText;
+        }
+
         public Task<LibraryResponseDto> GetLibraryAsync(string learningMode, CancellationToken cancellationToken = default) =>
             throw new NotImplementedException();
 
@@ -305,7 +339,7 @@ public sealed class PracticeEvaluationServiceTests
                     new LessonSentenceDto
                     {
                         SentenceId = 101,
-                        Text = "hello",
+                        Text = _sentenceText,
                         Ipa = "/həˈloʊ/",
                         Order = 1
                     }

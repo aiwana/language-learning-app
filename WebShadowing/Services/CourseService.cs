@@ -11,12 +11,18 @@ public sealed class CourseService : ICourseService
     private readonly AppDbContext _db;
     private readonly IWebHostEnvironment _env;
     private readonly ILessonContentService _lessonContentService;
+    private readonly IUserContextService _userContext;
 
-    public CourseService(AppDbContext db, IWebHostEnvironment env, ILessonContentService lessonContentService)
+    public CourseService(
+        AppDbContext db,
+        IWebHostEnvironment env,
+        ILessonContentService lessonContentService,
+        IUserContextService userContext)
     {
         _db = db;
         _env = env;
         _lessonContentService = lessonContentService;
+        _userContext = userContext;
     }
 
     public async Task<LibraryResponseDto> GetLibraryAsync(
@@ -174,6 +180,8 @@ public sealed class CourseService : ICourseService
             cancellationToken,
             lesson.Sentences.ToList());
 
+        var practiceProgress = await BuildPracticeProgressAsync(lesson, cancellationToken);
+
         return LessonLookupResult.Found(new LessonDetailDto
         {
             LessonId = lesson.LessonId,
@@ -193,8 +201,100 @@ public sealed class CourseService : ICourseService
             Materials = materials,
             Media = BuildMedia(lesson.Materials),
             Sentences = sentences,
+            PracticeProgress = practiceProgress,
             PronunciationTarget = pronunciationTarget
         });
+    }
+
+    private async Task<IReadOnlyList<LessonPracticeProgressDto>> BuildPracticeProgressAsync(
+        Lesson lesson,
+        CancellationToken cancellationToken)
+    {
+        var userId = _userContext.GetCurrentUserId();
+        if (userId is null || lesson.Sentences.Count == 0)
+        {
+            return [];
+        }
+
+        var sentenceIds = lesson.Sentences.Select(sentence => sentence.SentenceId).ToArray();
+        var lessonProgressRows = await _db.UserLessonProgress
+            .AsNoTracking()
+            .Where(progress => progress.UserId == userId.Value && progress.LessonId == lesson.LessonId)
+            .ToListAsync(cancellationToken);
+
+        if (lessonProgressRows.Count == 0)
+        {
+            return [];
+        }
+
+        var sentenceProgressRows = await _db.UserSentenceProgress
+            .AsNoTracking()
+            .Where(progress => progress.UserId == userId.Value && sentenceIds.Contains(progress.SentenceId))
+            .ToListAsync(cancellationToken);
+
+        var sentencesByOrder = lesson.Sentences
+            .OrderBy(sentence => sentence.SentenceOrder)
+            .ToList();
+
+        return lessonProgressRows
+            .Select(progress => new LessonPracticeProgressDto
+            {
+                PracticeTab = progress.PracticeTab,
+                Status = progress.Status,
+                CurrentSentenceId = progress.CurrentSentenceId,
+                ResumeSentenceId = ResolveResumeSentenceId(progress, sentenceProgressRows, sentencesByOrder),
+                CompletedSentenceCount = progress.CompletedSentenceCount,
+                ProgressPercent = progress.ProgressPercent
+            })
+            .ToList();
+    }
+
+    private static long? ResolveResumeSentenceId(
+        UserLessonProgress progress,
+        IReadOnlyList<UserSentenceProgress> sentenceProgressRows,
+        IReadOnlyList<LessonSentence> sentences)
+    {
+        if (sentences.Count == 0)
+        {
+            return null;
+        }
+
+        var currentSentenceId = progress.CurrentSentenceId ?? sentences[0].SentenceId;
+        var currentIndex = -1;
+        for (var index = 0; index < sentences.Count; index++)
+        {
+            if (sentences[index].SentenceId == currentSentenceId)
+            {
+                currentIndex = index;
+                break;
+            }
+        }
+
+        if (currentIndex < 0)
+        {
+            return sentences[0].SentenceId;
+        }
+
+        var completedSentenceIds = sentenceProgressRows
+            .Where(item => item.PracticeTab == progress.PracticeTab
+                && item.Status == ProgressStatuses.Completed)
+            .Select(item => item.SentenceId)
+            .ToHashSet();
+
+        if (!completedSentenceIds.Contains(currentSentenceId))
+        {
+            return currentSentenceId;
+        }
+
+        for (var index = currentIndex + 1; index < sentences.Count; index++)
+        {
+            if (!completedSentenceIds.Contains(sentences[index].SentenceId))
+            {
+                return sentences[index].SentenceId;
+            }
+        }
+
+        return sentences[^1].SentenceId;
     }
 
     private async Task<List<Course>> GetCoursesForModeAsync(

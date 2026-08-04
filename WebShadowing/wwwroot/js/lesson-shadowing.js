@@ -43,6 +43,7 @@ const state = {
     ipaQuestionController: null,
     ipaQuestion: null,
     selectedIpaOptionId: null,
+    practiceProgress: new Map(),
     favoriteSentenceId: null,
     favoriteSaved: false,
     favoriteBusy: false,
@@ -98,6 +99,7 @@ function initDom() {
     dom.answerNextBtn = document.getElementById("next-practice-answer");
     dom.answerStatus = document.getElementById("practice-answer-status");
     dom.answerOptions = document.getElementById("answer-options");
+    dom.answerDiff = document.getElementById("practice-answer-diff");
     dom.favoriteSentenceBtn = document.getElementById("favorite-sentence-btn");
     dom.favoriteSentenceLabel = document.getElementById("favorite-sentence-label");
     dom.favoriteSentenceStatus = document.getElementById("favorite-sentence-status");
@@ -155,6 +157,9 @@ function switchTab(tabName) {
 
     if (!isShadowing) {
         resetRecordingState({ resetScore: false });
+        if (tabName === "dictation") {
+            restorePracticeProgress(tabName);
+        }
         renderAnswerPrompt();
         if (tabName === "dictation") {
             dom.answerInput?.focus();
@@ -195,6 +200,8 @@ function renderAnswerPrompt() {
     dom.answerOptions?.classList.toggle("d-none", isDictation);
     dom.answerPlayBtn?.classList.toggle("d-none", !isDictation);
     dom.answerOptions?.replaceChildren();
+    dom.answerDiff?.replaceChildren();
+    dom.answerDiff?.classList.add("d-none");
     dom.answerNextBtn?.classList.add("d-none");
     if (dom.answerStatus) {
         dom.answerStatus.className = "lesson-answer-status";
@@ -362,6 +369,9 @@ async function submitPracticeAnswer() {
             dom.answerStatus.textContent = payload.feedback
                 || (payload.passed ? "Chính xác!" : "Chưa chính xác, hãy thử lại.");
         }
+        if (isDictation) {
+            renderDictationDiff(payload);
+        }
         dom.answerNextBtn?.classList.toggle("d-none", !payload.passed);
         if (payload.passed) {
             state.unlockedIndex = Math.max(
@@ -381,6 +391,45 @@ async function submitPracticeAnswer() {
                 : false;
         }
     }
+}
+
+function renderDictationDiff(payload) {
+    if (!dom.answerDiff) {
+        return;
+    }
+
+    const tokens = Array.isArray(payload.tokens) ? payload.tokens : [];
+    const summary = document.createElement("p");
+    summary.className = "lesson-answer-diff-summary";
+    summary.textContent = `Điểm ${payload.score ?? 0}% / ngưỡng ${payload.threshold ?? state.pronunciationTarget}%`;
+
+    const list = document.createElement("div");
+    list.className = "lesson-answer-diff-list";
+
+    tokens.forEach(token => {
+        const item = document.createElement("span");
+        const status = ["correct", "substitution", "insertion", "deletion"].includes(token.status)
+            ? token.status
+            : "substitution";
+        item.className = `lesson-answer-diff-item is-${status}`;
+
+        const actual = token.actual?.trim();
+        const expected = token.expected?.trim();
+        if (status === "correct") {
+            item.textContent = actual || expected || "";
+        } else if (status === "deletion") {
+            item.textContent = `-${expected || ""}`;
+        } else if (status === "insertion") {
+            item.textContent = `+${actual || ""}`;
+        } else {
+            item.textContent = `${actual || ""} → ${expected || ""}`;
+        }
+
+        list.appendChild(item);
+    });
+
+    dom.answerDiff.replaceChildren(summary, list);
+    dom.answerDiff.classList.remove("d-none");
 }
 
 function advanceAnswerSentence() {
@@ -418,8 +467,30 @@ function initLesson(lesson) {
         return;
     }
 
+    state.practiceProgress = new Map((lesson.practiceProgress ?? []).map(item => [item.practiceTab, item]));
     renderSubtitleList();
     selectSentence(0);
+}
+
+function restorePracticeProgress(tabName) {
+    const progress = state.practiceProgress.get(tabName);
+    if (!progress?.resumeSentenceId) {
+        return;
+    }
+
+    const index = state.sentences.findIndex(sentence => sentence.sentenceId === progress.resumeSentenceId);
+    if (index < 0) {
+        return;
+    }
+
+    state.unlockedIndex = Math.max(state.unlockedIndex, index);
+    for (let i = 0; i < Math.min(progress.completedSentenceCount ?? 0, index); i++) {
+        state.completedIndexes.add(i);
+    }
+
+    if (index !== state.currentIndex) {
+        selectSentence(index);
+    }
 }
 
 // =====================================================================
