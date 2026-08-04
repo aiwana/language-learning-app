@@ -1,0 +1,906 @@
+[
+  {
+    "sentence_order": 1,
+    "start_time": 0.0,
+    "end_time": 7.0,
+    "text": "Transcriber: Translate TED",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 2,
+    "start_time": 0.141,
+    "end_time": 1.452,
+    "text": "I was not one of those kids",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 3,
+    "start_time": 1.476,
+    "end_time": 4.649,
+    "text": "that knew exactly what they wanted to do when they were growing up.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 4,
+    "start_time": 4.673,
+    "end_time": 6.307,
+    "text": "In the last 15 years of my career,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 5,
+    "start_time": 6.331,
+    "end_time": 9.105,
+    "text": "I've been an English teacher, attorney, video game creator",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 6,
+    "start_time": 9.129,
+    "end_time": 10.717,
+    "text": "and now, a toilet paper salesman,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 7,
+    "start_time": 10.741,
+    "end_time": 13.06,
+    "text": "selling millions of rolls of toilet paper a year.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 8,
+    "start_time": 13.084,
+    "end_time": 15.501,
+    "text": "[The Way We Work]",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 9,
+    "start_time": 16.428,
+    "end_time": 19.739,
+    "text": "Life is about finding the intersection of what you really, really love",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 10,
+    "start_time": 19.763,
+    "end_time": 21.68,
+    "text": "with what you're really, really good at.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 11,
+    "start_time": 21.704,
+    "end_time": 24.546,
+    "text": "As simple as it sounds, it's really not that easy to find.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 12,
+    "start_time": 24.57,
+    "end_time": 26.575,
+    "text": "After a brief stint as an English teacher,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 13,
+    "start_time": 26.599,
+    "end_time": 29.134,
+    "text": "I went to law school and ended up becoming an attorney",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 14,
+    "start_time": 29.158,
+    "end_time": 31.073,
+    "text": "at a big law firm here in New York City.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 15,
+    "start_time": 31.097,
+    "end_time": 33.498,
+    "text": "Like most Americans, for the next two, three years,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 16,
+    "start_time": 33.522,
+    "end_time": 35.486,
+    "text": "I was holding on to my job for dear life,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 17,
+    "start_time": 35.51,
+    "end_time": 38.818,
+    "text": "working really late hours at a job that I thought maybe I was good at",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 18,
+    "start_time": 38.842,
+    "end_time": 40.851,
+    "text": "but certainly not one that I really loved.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 19,
+    "start_time": 40.875,
+    "end_time": 42.278,
+    "text": "I then came upon the epiphany",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 20,
+    "start_time": 42.302,
+    "end_time": 45.128,
+    "text": "that it takes years if not tens of thousands of hours",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 21,
+    "start_time": 45.152,
+    "end_time": 46.683,
+    "text": "to get really good at something.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 22,
+    "start_time": 46.707,
+    "end_time": 48.762,
+    "text": "I really didn't have a lot of time to waste.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 23,
+    "start_time": 48.786,
+    "end_time": 51.208,
+    "text": "This talk isn't for those looking to quit their job",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 24,
+    "start_time": 51.232,
+    "end_time": 54.334,
+    "text": "because they don't like their boss or they had a long day at work.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 25,
+    "start_time": 54.358,
+    "end_time": 57.457,
+    "text": "This is for those that are ready to make the completely scary leap",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 26,
+    "start_time": 57.481,
+    "end_time": 58.639,
+    "text": "into a brand-new career.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 27,
+    "start_time": 58.663,
+    "end_time": 60.762,
+    "text": "So as you think about making a career change,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 28,
+    "start_time": 60.786,
+    "end_time": 62.601,
+    "text": "here are a few tips I hope you consider",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 29,
+    "start_time": 62.625,
+    "end_time": 64.778,
+    "text": "and a few things I've picked up along the way.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 30,
+    "start_time": 64.802,
+    "end_time": 68.283,
+    "text": "First, there's three things to think about before you're ready to move on.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 31,
+    "start_time": 68.307,
+    "end_time": 70.598,
+    "text": "Number one: professional life is about learning.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 32,
+    "start_time": 70.622,
+    "end_time": 72.956,
+    "text": "If you're not even interested in learning anymore,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 33,
+    "start_time": 72.98,
+    "end_time": 74.131,
+    "text": "that's a huge red flag",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 34,
+    "start_time": 74.155,
+    "end_time": 76.884,
+    "text": "that there might not be a future for you in that industry.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 35,
+    "start_time": 76.908,
+    "end_time": 79.159,
+    "text": "Number two: career changes are often gut-driven.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 36,
+    "start_time": 79.183,
+    "end_time": 81.052,
+    "text": "If you constantly have sleepless nights",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 37,
+    "start_time": 81.076,
+    "end_time": 83.702,
+    "text": "where you're wide awake staring at the ceiling thinking,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 38,
+    "start_time": 83.726,
+    "end_time": 86.976,
+    "text": "\"Oh, man. I can't live with myself if I never try to make this change",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 39,
+    "start_time": 87.0,
+    "end_time": 89.06,
+    "text": "or if I don't even actually investigate it,\"",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 40,
+    "start_time": 89.084,
+    "end_time": 90.235,
+    "text": "then trust your gut.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 41,
+    "start_time": 90.259,
+    "end_time": 92.171,
+    "text": "It might be time for that career change.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 42,
+    "start_time": 92.195,
+    "end_time": 93.346,
+    "text": "On the flip side,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 43,
+    "start_time": 93.37,
+    "end_time": 95.476,
+    "text": "one reason to not move on is short-term pain.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 44,
+    "start_time": 95.5,
+    "end_time": 96.788,
+    "text": "If you don't like your boss",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 45,
+    "start_time": 96.812,
+    "end_time": 98.816,
+    "text": "or people at the office are grating on you,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 46,
+    "start_time": 98.84,
+    "end_time": 101.986,
+    "text": "that's actually not a good reason to absolutely change your career,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 47,
+    "start_time": 102.01,
+    "end_time": 103.728,
+    "text": "because when you do change a career,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 48,
+    "start_time": 103.752,
+    "end_time": 105.805,
+    "text": "you generally have to start from the bottom,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 49,
+    "start_time": 105.829,
+    "end_time": 108.179,
+    "text": "and you'll probably feel a lot of short-term pain,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 50,
+    "start_time": 108.203,
+    "end_time": 110.873,
+    "text": "whether it's through a lack of salary or lack of a title.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 51,
+    "start_time": 110.897,
+    "end_time": 112.555,
+    "text": "Pain at any job is inevitable.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 52,
+    "start_time": 112.579,
+    "end_time": 115.494,
+    "text": "So now you're convinced that it's time to change your career.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 53,
+    "start_time": 115.518,
+    "end_time": 117.654,
+    "text": "Then there's three things to do immediately.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 54,
+    "start_time": 117.678,
+    "end_time": 120.348,
+    "text": "First: network, network, network.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 55,
+    "start_time": 120.372,
+    "end_time": 123.105,
+    "text": "No one ever builds a career without a good mentor",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 56,
+    "start_time": 123.129,
+    "end_time": 124.382,
+    "text": "or a good support network.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 57,
+    "start_time": 124.406,
+    "end_time": 127.228,
+    "text": "What I mean by networking is getting all the great advice",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 58,
+    "start_time": 127.252,
+    "end_time": 128.608,
+    "text": "that you can possibly get.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 59,
+    "start_time": 128.632,
+    "end_time": 131.437,
+    "text": "Technology has made it so simple to reach out to new people",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 60,
+    "start_time": 131.461,
+    "end_time": 134.107,
+    "text": "to say, \"Hey, I'm thinking about making a career change.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 61,
+    "start_time": 134.131,
+    "end_time": 136.33,
+    "text": "Do you have just five minutes to chat with me?\"",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 62,
+    "start_time": 136.354,
+    "end_time": 139.348,
+    "text": "That passion and that hunger and that ability to be a sponge",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 63,
+    "start_time": 139.372,
+    "end_time": 140.868,
+    "text": "really attracts awesome mentors",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 64,
+    "start_time": 140.892,
+    "end_time": 142.851,
+    "text": "and people willing to give you their time",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 65,
+    "start_time": 142.875,
+    "end_time": 144.272,
+    "text": "to give you some good advice.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 66,
+    "start_time": 144.296,
+    "end_time": 146.018,
+    "text": "So go out there and meet new people.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 67,
+    "start_time": 146.042,
+    "end_time": 148.059,
+    "text": "The second thing you need to do immediately",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 68,
+    "start_time": 148.083,
+    "end_time": 149.568,
+    "text": "is shore up your finances.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 69,
+    "start_time": 149.592,
+    "end_time": 151.647,
+    "text": "The reality is, when you change your career,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 70,
+    "start_time": 151.671,
+    "end_time": 153.976,
+    "text": "you'll either start with a job with a lower title",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 71,
+    "start_time": 154.0,
+    "end_time": 156.208,
+    "text": "or lower pay or maybe even no pay,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 72,
+    "start_time": 156.232,
+    "end_time": 158.485,
+    "text": "especially if you're starting your own business.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 73,
+    "start_time": 158.509,
+    "end_time": 161.376,
+    "text": "So going out there and making sure your finances are in order",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 74,
+    "start_time": 161.4,
+    "end_time": 163.075,
+    "text": "to make the transition less painful",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 75,
+    "start_time": 163.099,
+    "end_time": 164.44,
+    "text": "is really, really important.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 76,
+    "start_time": 164.464,
+    "end_time": 167.578,
+    "text": "For me personally, as I made the transition from being an attorney",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 77,
+    "start_time": 167.602,
+    "end_time": 169.148,
+    "text": "over to a video game creator,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 78,
+    "start_time": 169.172,
+    "end_time": 172.69,
+    "text": "I wanted to have at least six to 12 months of personal runway in the bank.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 79,
+    "start_time": 172.714,
+    "end_time": 175.511,
+    "text": "Six to 12 months might not be the right number for you,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 80,
+    "start_time": 175.535,
+    "end_time": 178.263,
+    "text": "but be honest with yourself on what that number should be.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 81,
+    "start_time": 178.287,
+    "end_time": 182.707,
+    "text": "Number three, if you're not ready to make the full jump right at this moment,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 82,
+    "start_time": 182.731,
+    "end_time": 184.115,
+    "text": "then get your side hustle on.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 83,
+    "start_time": 184.139,
+    "end_time": 187.488,
+    "text": "Side hustles could be anything from volunteering with an organization",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 84,
+    "start_time": 187.512,
+    "end_time": 189.709,
+    "text": "that's in the new industry you want to go into,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 85,
+    "start_time": 189.733,
+    "end_time": 192.462,
+    "text": "could be starting your business part-time on the weekends.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 86,
+    "start_time": 192.486,
+    "end_time": 195.698,
+    "text": "It's a free way to get a taste to see if you really love something.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 87,
+    "start_time": 195.722,
+    "end_time": 197.254,
+    "text": "So you're ready to make the move",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 88,
+    "start_time": 197.278,
+    "end_time": 198.951,
+    "text": "or maybe you already made the move.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 89,
+    "start_time": 198.975,
+    "end_time": 201.883,
+    "text": "Here are three things you should think about doing, right now.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 90,
+    "start_time": 201.907,
+    "end_time": 205.238,
+    "text": "One: do not -- I repeat -- do not burn bridges.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 91,
+    "start_time": 205.262,
+    "end_time": 207.12,
+    "text": "You spent years building those bridges,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 92,
+    "start_time": 207.144,
+    "end_time": 208.294,
+    "text": "why burn them now?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 93,
+    "start_time": 208.318,
+    "end_time": 209.958,
+    "text": "The world is such a small place,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 94,
+    "start_time": 209.982,
+    "end_time": 211.982,
+    "text": "especially with all these online platforms,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 95,
+    "start_time": 212.006,
+    "end_time": 214.538,
+    "text": "that, believe me, you will see these people again",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 96,
+    "start_time": 214.562,
+    "end_time": 216.918,
+    "text": "and probably in the most inopportune times.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 97,
+    "start_time": 216.942,
+    "end_time": 219.258,
+    "text": "Number two: take stock of what you've learned",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 98,
+    "start_time": 219.282,
+    "end_time": 221.098,
+    "text": "in your previous career or careers.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 99,
+    "start_time": 221.122,
+    "end_time": 223.742,
+    "text": "Most likely, a lot of those things are really applicable",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 100,
+    "start_time": 223.766,
+    "end_time": 225.481,
+    "text": "to your new job and your new career,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 101,
+    "start_time": 225.505,
+    "end_time": 228.658,
+    "text": "whether it's interacting with people, playing on a team",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 102,
+    "start_time": 228.682,
+    "end_time": 230.858,
+    "text": "or dealing with jerks and assholes.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 103,
+    "start_time": 230.882,
+    "end_time": 233.27,
+    "text": "All those things are really universally applicable.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 104,
+    "start_time": 233.294,
+    "end_time": 235.73,
+    "text": "You'll find jerks no matter what industry you're in;",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 105,
+    "start_time": 235.754,
+    "end_time": 238.337,
+    "text": "no one's immune to it, everyone's got to figure it out,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 106,
+    "start_time": 238.361,
+    "end_time": 240.367,
+    "text": "and you probably know how to do it already.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 107,
+    "start_time": 240.391,
+    "end_time": 243.41,
+    "text": "Lastly, when you start your new job, you're going to be nervous.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 108,
+    "start_time": 243.434,
+    "end_time": 245.432,
+    "text": "But don't worry, take a deep breath,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 109,
+    "start_time": 245.456,
+    "end_time": 247.37,
+    "text": "because this is what I want to tell you:",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 110,
+    "start_time": 247.394,
+    "end_time": 248.834,
+    "text": "you're part of a new team now,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 111,
+    "start_time": 248.858,
+    "end_time": 251.798,
+    "text": "and everyone around you is rooting for your success,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 112,
+    "start_time": 251.822,
+    "end_time": 254.079,
+    "text": "because your success is their success.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 113,
+    "start_time": 254.103,
+    "end_time": 255.633,
+    "text": "So welcome to your new career.",
+    "translation": null,
+    "ipa": null
+  }
+]
