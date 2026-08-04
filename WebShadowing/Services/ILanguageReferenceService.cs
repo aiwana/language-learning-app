@@ -11,5 +11,6 @@ public interface ILanguageReferenceService
 
     Task<IReadOnlyList<WordIpaDto>> GetIpaBatchAsync(
         IReadOnlyList<string> words,
+        string accent,
         CancellationToken cancellationToken = default);
 }

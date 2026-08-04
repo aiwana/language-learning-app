@@ -75,6 +75,7 @@ public sealed class OpenAiLanguageReferenceService : ILanguageReferenceService
 
     public async Task<IReadOnlyList<WordIpaDto>> GetIpaBatchAsync(
         IReadOnlyList<string> words,
+        string accent,
         CancellationToken cancellationToken = default)
     {
         var normalizedWords = words
@@ -101,7 +102,10 @@ public sealed class OpenAiLanguageReferenceService : ILanguageReferenceService
 
         try
         {
-            var prompt = $"Return only JSON with an items array. For every English word, items must contain {{\"word\":\"...\",\"ipa\":\"/.../\"}} using US IPA. Preserve the supplied order. Words: {string.Join(", ", missing)}";
+            var accentLabel = string.Equals(accent, Accents.EnGb, StringComparison.OrdinalIgnoreCase)
+                ? "British English (en-GB)"
+                : "American English (en-US)";
+            var prompt = $"Return only JSON with an items array. For every English word, items must contain {{\"word\":\"...\",\"ipa\":\"/.../\"}} using {accentLabel} IPA. Preserve the supplied order. Words: {string.Join(", ", missing)}";
             var content = await AskTextModelAsync(apiKey, prompt, cancellationToken);
             using var document = JsonDocument.Parse(StripCodeFence(content));
             if (!document.RootElement.TryGetProperty("items", out var itemsNode) || itemsNode.ValueKind != JsonValueKind.Array)

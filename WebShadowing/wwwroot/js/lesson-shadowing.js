@@ -40,6 +40,9 @@ const state = {
     attemptIdempotencyKey: null,
     answerIdempotencyKey: null,
     answerController: null,
+    ipaQuestionController: null,
+    ipaQuestion: null,
+    selectedIpaOptionId: null,
 };
 
 const dom = {};
@@ -90,6 +93,7 @@ function initDom() {
     dom.answerSubmitBtn = document.getElementById("submit-practice-answer");
     dom.answerNextBtn = document.getElementById("next-practice-answer");
     dom.answerStatus = document.getElementById("practice-answer-status");
+    dom.answerOptions = document.getElementById("answer-options");
 }
 
 // =====================================================================
@@ -136,11 +140,17 @@ function switchTab(tabName) {
     state.answerController?.abort();
     state.answerController = null;
     state.answerIdempotencyKey = null;
+    state.ipaQuestionController?.abort();
+    state.ipaQuestionController = null;
+    state.ipaQuestion = null;
+    state.selectedIpaOptionId = null;
 
     if (!isShadowing) {
         resetRecordingState({ resetScore: false });
         renderAnswerPrompt();
-        dom.answerInput?.focus();
+        if (tabName === "dictation") {
+            dom.answerInput?.focus();
+        }
     }
 }
 
@@ -173,26 +183,130 @@ function renderAnswerPrompt() {
             ? "Nhập nội dung bạn nghe được..."
             : "/phiên âm IPA/";
     }
+    dom.answerInput?.classList.toggle("d-none", !isDictation);
+    dom.answerOptions?.classList.toggle("d-none", isDictation);
     dom.answerPlayBtn?.classList.toggle("d-none", !isDictation);
-    if (dom.answerSubmitBtn) {
-        dom.answerSubmitBtn.disabled = !isDictation && !sentence.ipa;
-    }
+    dom.answerOptions?.replaceChildren();
     dom.answerNextBtn?.classList.add("d-none");
     if (dom.answerStatus) {
         dom.answerStatus.className = "lesson-answer-status";
-        dom.answerStatus.textContent = !isDictation && !sentence.ipa
-            ? "Câu này chưa có dữ liệu IPA để chấm."
-            : "";
+        dom.answerStatus.textContent = isDictation ? "" : "Đang tạo câu hỏi IPA...";
     }
     state.answerIdempotencyKey = null;
+
+    if (isDictation) {
+        if (dom.answerSubmitBtn) {
+            dom.answerSubmitBtn.disabled = false;
+            dom.answerSubmitBtn.innerHTML = '<i data-lucide="check-circle-2"></i><span>Kiểm tra</span>';
+        }
+        return;
+    }
+
+    if (dom.answerSubmitBtn) {
+        dom.answerSubmitBtn.disabled = true;
+        dom.answerSubmitBtn.innerHTML = '<i data-lucide="check-circle-2"></i><span>Chọn đáp án</span>';
+    }
+    loadIpaMatchQuestion();
+}
+
+async function loadIpaMatchQuestion() {
+    const sentence = state.sentences[state.currentIndex];
+    if (!sentence) return;
+
+    state.ipaQuestionController?.abort();
+    state.ipaQuestionController = new AbortController();
+    state.selectedIpaOptionId = null;
+    state.ipaQuestion = null;
+
+    if (dom.answerStatus) {
+        dom.answerStatus.className = "lesson-answer-status";
+        dom.answerStatus.textContent = "Đang tạo câu hỏi IPA...";
+    }
+
+    try {
+        const url = new URL("/api/practice/ipa-question", window.location.origin);
+        url.searchParams.set("lessonId", String(state.lessonData.lessonId));
+        url.searchParams.set("sentenceId", String(sentence.sentenceId));
+
+        const response = await fetch(url, {
+            method: "GET",
+            signal: state.ipaQuestionController.signal
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload.message || `Không thể tạo câu hỏi IPA (${response.status}).`);
+        }
+
+        state.ipaQuestion = payload;
+        renderIpaMatchOptions(payload);
+        if (dom.answerStatus) {
+            dom.answerStatus.className = "lesson-answer-status";
+            dom.answerStatus.textContent = "Chọn đáp án phù hợp nhất rồi kiểm tra.";
+        }
+    } catch (error) {
+        if (error.name === "AbortError") return;
+        state.ipaQuestion = null;
+        if (dom.answerStatus) {
+            dom.answerStatus.className = "lesson-answer-status is-error";
+            dom.answerStatus.textContent = error.message || "Không tạo được câu hỏi IPA.";
+        }
+        if (dom.answerSubmitBtn) {
+            dom.answerSubmitBtn.disabled = true;
+        }
+    }
+}
+
+function renderIpaMatchOptions(question) {
+    if (!dom.answerOptions) return;
+
+    const fragment = document.createDocumentFragment();
+    const questionLabel = document.createElement("div");
+    questionLabel.className = "lesson-answer-question";
+    questionLabel.textContent = `Chọn phiên âm cho từ: ${question.promptWord}`;
+    fragment.appendChild(questionLabel);
+
+    const optionsWrap = document.createElement("div");
+    optionsWrap.className = "lesson-answer-option-grid";
+
+    (question.options ?? []).forEach(option => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "lesson-answer-option";
+        button.dataset.optionId = option.optionId;
+        button.textContent = option.ipa;
+        button.onclick = () => selectIpaOption(option.optionId);
+        optionsWrap.appendChild(button);
+    });
+
+    fragment.appendChild(optionsWrap);
+    dom.answerOptions.replaceChildren(fragment);
+}
+
+function selectIpaOption(optionId) {
+    state.selectedIpaOptionId = optionId;
+    dom.answerOptions?.querySelectorAll(".lesson-answer-option").forEach(button => {
+        button.classList.toggle("is-selected", button.dataset.optionId === optionId);
+    });
+    if (dom.answerSubmitBtn) {
+        dom.answerSubmitBtn.disabled = false;
+        dom.answerSubmitBtn.innerHTML = '<i data-lucide="check-circle-2"></i><span>Kiểm tra</span>';
+    }
 }
 
 async function submitPracticeAnswer() {
     const sentence = state.sentences[state.currentIndex];
-    const answer = dom.answerInput?.value.trim() ?? "";
+    const isDictation = state.activeTab === "dictation";
+    const answer = isDictation
+        ? (dom.answerInput?.value.trim() ?? "")
+        : (state.selectedIpaOptionId ?? "");
     if (!sentence || !["dictation", "ipa-match"].includes(state.activeTab)) return;
     if (!answer) {
-        if (dom.answerStatus) dom.answerStatus.textContent = "Vui lòng nhập câu trả lời.";
+        if (dom.answerStatus) {
+            dom.answerStatus.className = "lesson-answer-status is-error";
+            dom.answerStatus.textContent = isDictation
+                ? "Vui lòng nhập câu trả lời."
+                : "Vui lòng chọn một đáp án.";
+        }
         return;
     }
 
@@ -206,18 +320,26 @@ async function submitPracticeAnswer() {
     }
 
     try {
-        const response = await fetch("/api/practice/evaluate-answer", {
+        const url = isDictation ? "/api/practice/evaluate-answer" : "/api/practice/ipa-submit";
+        const body = isDictation
+            ? {
+                lessonId: state.lessonData.lessonId,
+                sentenceId: sentence.sentenceId,
+                practiceTab: state.activeTab,
+                answer
+            }
+            : {
+                questionToken: state.ipaQuestion?.questionToken ?? "",
+                optionId: answer
+            };
+
+        const response = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Idempotency-Key": state.answerIdempotencyKey
             },
-            body: JSON.stringify({
-                lessonId: state.lessonData.lessonId,
-                sentenceId: sentence.sentenceId,
-                practiceTab: state.activeTab,
-                answer
-            }),
+            body: JSON.stringify(body),
             signal: state.answerController.signal
         });
         const payload = await response.json().catch(() => ({}));
@@ -246,7 +368,9 @@ async function submitPracticeAnswer() {
         }
     } finally {
         if (dom.answerSubmitBtn) {
-            dom.answerSubmitBtn.disabled = state.activeTab === "ipa-match" && !sentence.ipa;
+            dom.answerSubmitBtn.disabled = state.activeTab === "ipa-match"
+                ? !state.selectedIpaOptionId
+                : false;
         }
     }
 }

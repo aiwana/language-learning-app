@@ -29,6 +29,7 @@ builder.Services.AddScoped<AzurePronunciationAssessmentService>();
 builder.Services.AddScoped<OpenAiPronunciationAssessmentService>();
 builder.Services.AddScoped<IPronunciationAssessmentService, HybridPronunciationAssessmentService>();
 builder.Services.AddScoped<IPracticeEvaluationService, PracticeEvaluationService>();
+builder.Services.AddScoped<IIpaMatchService, IpaMatchService>();
 builder.Services.AddSingleton<ILanguageReferenceService, OpenAiLanguageReferenceService>();
 builder.Services.AddRateLimiter(options =>
 {

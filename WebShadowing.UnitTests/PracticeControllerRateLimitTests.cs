@@ -96,6 +96,8 @@ public sealed class PracticeControllerRateLimitTests : IClassFixture<PracticeCon
             {
                 services.RemoveAll<IPracticeEvaluationService>();
                 services.AddScoped<IPracticeEvaluationService, FakePracticeEvaluationService>();
+                services.RemoveAll<IIpaMatchService>();
+                services.AddScoped<IIpaMatchService, FakeIpaMatchService>();
 
                 services.AddAuthentication(TestAuthHandler.SchemeName)
                     .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
@@ -116,6 +118,45 @@ public sealed class PracticeControllerRateLimitTests : IClassFixture<PracticeCon
                 Passed = true,
                 PronunciationTarget = 70,
                 Transcript = "hello",
+                Feedback = "ok"
+            });
+        }
+
+        public Task<PracticeAnswerEvaluationDto> EvaluateAnswerAsync(EvaluatePracticeAnswerCommand command, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new PracticeAnswerEvaluationDto
+            {
+                Score = 100,
+                Passed = true,
+                Feedback = "ok"
+            });
+        }
+    }
+
+    private sealed class FakeIpaMatchService : IIpaMatchService
+    {
+        public Task<IpaMatchQuestionDto> GetQuestionAsync(GetIpaMatchQuestionCommand command, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new IpaMatchQuestionDto
+            {
+                QuestionToken = "token",
+                Accent = Accents.EnUs,
+                PromptWord = "hello",
+                ExpiresAtUtc = DateTime.UtcNow.AddMinutes(5),
+                Options =
+                [
+                    new IpaMatchOptionDto { OptionId = "a", Ipa = "/həˈloʊ/" },
+                    new IpaMatchOptionDto { OptionId = "b", Ipa = "/ˈhɛloʊ/" }
+                ]
+            });
+        }
+
+        public Task<PracticeAnswerEvaluationDto> SubmitAnswerAsync(SubmitIpaMatchAnswerCommand command, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new PracticeAnswerEvaluationDto
+            {
+                Score = 100,
+                Passed = true,
                 Feedback = "ok"
             });
         }

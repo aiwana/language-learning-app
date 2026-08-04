@@ -15,10 +15,14 @@ public sealed class LanguageReferenceController : ControllerBase
     private const int MaxWordLength = 80;
     private const int MaxContextLength = 500;
     private readonly ILanguageReferenceService _languageReferenceService;
+    private readonly IUserContextService _userContextService;
 
-    public LanguageReferenceController(ILanguageReferenceService languageReferenceService)
+    public LanguageReferenceController(
+        ILanguageReferenceService languageReferenceService,
+        IUserContextService userContextService)
     {
         _languageReferenceService = languageReferenceService;
+        _userContextService = userContextService;
     }
 
     [HttpPost("word-meaning")]
@@ -54,6 +58,7 @@ public sealed class LanguageReferenceController : ControllerBase
             return BadRequest(new { message = "Danh sách phải có từ 1 đến 40 từ hợp lệ, mỗi từ tối đa 80 ký tự." });
         }
 
-        return Ok(await _languageReferenceService.GetIpaBatchAsync(request.Words, cancellationToken));
+        var accent = await _userContextService.GetAccentAsync(cancellationToken);
+        return Ok(await _languageReferenceService.GetIpaBatchAsync(request.Words, accent, cancellationToken));
     }
 }
