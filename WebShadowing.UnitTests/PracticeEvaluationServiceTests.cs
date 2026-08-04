@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+// Kịch bản test: audio validation, idempotency, progress và từ sai trong practice.
+// Phụ trách test: Hải Anh. Minh xác nhận expected business rule.
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using WebShadowing.Data;
@@ -188,6 +190,7 @@ public sealed class PracticeEvaluationServiceTests
             new FakeCourseService(),
             new FakeUserContextService(),
             assessmentService,
+            new FakeGamificationService(db),
             profileService,
             effectiveOptions);
     }
@@ -311,5 +314,98 @@ public sealed class PracticeEvaluationServiceTests
 
             return Task.FromResult(_results.Dequeue());
         }
+    }
+
+    private sealed class FakeGamificationService : IGamificationService
+    {
+        private readonly AppDbContext _db;
+
+        public FakeGamificationService(AppDbContext db)
+        {
+            _db = db;
+        }
+
+        public async Task<GamificationTransactionDto> ProcessVerifiedAttemptAsync(
+            VerifiedPracticeAttempt attempt,
+            CancellationToken cancellationToken = default)
+        {
+            var sentence = await _db.LessonSentences.FindAsync(
+                [attempt.SentenceId],
+                cancellationToken);
+            sentence ??= new LessonSentence
+            {
+                SentenceId = attempt.SentenceId,
+                LessonId = attempt.LessonId,
+                SentenceOrder = 1,
+                Text = "hello"
+            };
+
+            _db.PracticeAttempts.Add(new PracticeAttempt
+            {
+                UserId = attempt.UserId,
+                SentenceId = attempt.SentenceId,
+                Sentence = sentence,
+                PracticeTab = attempt.PracticeTab,
+                ExerciseType = attempt.ExerciseType,
+                TargetScore = attempt.TargetScore,
+                Score = attempt.Score,
+                Result = attempt.Passed ? AttemptResults.Passed : AttemptResults.Failed,
+                IdempotencyKey = attempt.IdempotencyKey,
+                AssessmentProvider = attempt.AssessmentProvider,
+                ProviderReferenceId = attempt.ProviderReferenceId,
+                TranscriptText = attempt.TranscriptText,
+                FeedbackText = attempt.FeedbackText
+            });
+
+            foreach (var word in attempt.Words)
+            {
+                var normalized = word.Word.Trim().ToLowerInvariant();
+                var statistic = await _db.WordErrorStatistics.SingleOrDefaultAsync(
+                    item => item.UserId == attempt.UserId && item.NormalizedWord == normalized,
+                    cancellationToken);
+                if (statistic is null)
+                {
+                    statistic = new WordErrorStatistic
+                    {
+                        UserId = attempt.UserId,
+                        NormalizedWord = normalized,
+                        DisplayWord = word.Word
+                    };
+                    _db.WordErrorStatistics.Add(statistic);
+                }
+
+                if (word.AccuracyCode is "incorrect" or "warning")
+                {
+                    statistic.ConsecutiveErrorCount++;
+                    statistic.TotalErrorCount++;
+                }
+                else
+                {
+                    statistic.ConsecutiveErrorCount = 0;
+                }
+            }
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return Success();
+        }
+
+        public Task<GamificationTransactionDto> ExchangeHeartAsync(
+            long userId,
+            string idempotencyKey,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(Success());
+
+        public Task<GamificationBalanceDto?> GetBalanceAsync(
+            long userId,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<GamificationBalanceDto?>(new GamificationBalanceDto());
+
+        private static GamificationTransactionDto Success() => new()
+        {
+            Succeeded = true,
+            Applied = true,
+            TransactionType = "attempt",
+            Balance = new GamificationBalanceDto()
+        };
     }
 }

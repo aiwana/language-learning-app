@@ -119,6 +119,18 @@ public sealed class PracticeControllerRateLimitTests : IClassFixture<PracticeCon
                 Feedback = "ok"
             });
         }
+
+        public Task<PracticeAnswerEvaluationDto> EvaluateAnswerAsync(
+            EvaluatePracticeAnswerCommand command,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new PracticeAnswerEvaluationDto
+            {
+                Score = 100,
+                Passed = true,
+                Feedback = "ok"
+            });
+        }
     }
 
     private sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
