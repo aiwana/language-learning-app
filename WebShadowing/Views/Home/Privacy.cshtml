@@ -1,6 +1,11 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+@{
+    ViewData["Title"] = "Quyền riêng tư & Điều khoản";
 }
-<h1>@ViewData["Title"]</h1>
-
-<p>Use this page to detail your site's privacy policy.</p>
+<main class="surface-card p-4 p-md-5 mx-auto" style="max-width: 52rem;">
+    <p class="section-label section-label-indigo">Thông tin sử dụng</p>
+    <h1>Quyền riêng tư &amp; Điều khoản</h1>
+    <section class="mt-4" aria-labelledby="privacy-title"><h2 id="privacy-title" class="h5">Dữ liệu được xử lý</h2><p>ShadowSpeak lưu hồ sơ học tập, tiến trình, từ vựng, câu yêu thích và lịch sử giao dịch cần thiết để cung cấp dịch vụ. Bản thu được gửi tới dịch vụ AI khi bạn chủ động yêu cầu chấm phát âm hoặc đối thoại.</p></section>
+    <section class="mt-4" aria-labelledby="security-title"><h2 id="security-title" class="h5">Bảo mật</h2><p>API key và merchant credentials phải được lưu bằng biến môi trường hoặc secret manager, không đưa vào mã nguồn. Người dùng nên dùng mật khẩu riêng và đăng xuất trên thiết bị dùng chung.</p></section>
+    <section id="terms" class="mt-4" aria-labelledby="terms-title"><h2 id="terms-title" class="h5">Điều khoản sử dụng</h2><p>Nội dung AI có thể chưa hoàn toàn chính xác và cần được xem như tài liệu hỗ trợ học tập. Thanh toán chỉ được ghi nhận khi webhook hợp lệ từ nhà cung cấp xác nhận giao dịch thành công.</p></section>
+    <a class="btn btn-outline-primary mt-3" asp-controller="Home" asp-action="Index">Quay lại thư viện</a>
+</main>
