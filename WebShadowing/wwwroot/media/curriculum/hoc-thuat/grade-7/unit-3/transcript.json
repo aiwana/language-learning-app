@@ -1,0 +1,38 @@
+[
+  {
+    "sentence_order": 1,
+    "text": "Hi, Tom. Are you busy this Sunday?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 2,
+    "text": "No. What's up?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 3,
+    "text": "We are going to pick up rubbish in the central park. Do you want to join us?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 4,
+    "text": "That sounds great! I love doing volunteer work. What time should we meet?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 5,
+    "text": "At 8 a.m. at the park gate.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 6,
+    "text": "Ok, see you there.",
+    "translation": null,
+    "ipa": null
+  }
+]
