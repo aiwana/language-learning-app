@@ -73,5 +73,3 @@ Database integration tests có thể cần connection string riêng và chỉ n�
 - Generated media, Data Protection keys và cache vẫn dùng tài nguyên local của một instance.
 - Payment production, admin/content moderation, CI/CD, object storage, distributed cache và observability đầy đủ chưa nằm trong snapshot hiện tại.
 - Nội dung transcript phải được ingest thành `LessonSentences` trước khi publish nếu cần thực hiện và lưu bài luyện; runtime read-path không tự ghi database.
-
-Xem [báo cáo hiện trạng kỹ thuật](BAO_CAO_HIEN_TRANG_KY_THUAT_WEBSHADOWING.md) để biết phân tích chi tiết và backlog.
