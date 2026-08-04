@@ -1,5 +1,6 @@
 using System.Data;
-using System.Text.RegularExpressions;
+// Chức năng: transaction/idempotency cho EXP, tim, streak, completion và exchange.
+// Phụ trách rule/persistence: Minh. Hải Anh phụ trách trang hiển thị và kịch bản test.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using WebShadowing.Data;
@@ -9,10 +10,6 @@ namespace WebShadowing.Services;
 
 public sealed class GamificationService : IGamificationService
 {
-    private static readonly Regex WordNormalizeRegex = new(
-        "[^\\p{L}\\p{Nd}']+",
-        RegexOptions.Compiled);
-
     private readonly AppDbContext _db;
     private readonly GamificationOptions _options;
     private readonly TimeProvider _timeProvider;
@@ -48,7 +45,6 @@ public sealed class GamificationService : IGamificationService
         var statistic = await LockOrCreateStatisticAsync(user, cancellationToken);
         var existingAttempt = await _db.PracticeAttempts
             .AsNoTracking()
-            .Include(attempt => attempt.Sentence)
             .SingleOrDefaultAsync(
                 attempt => attempt.UserId == command.UserId
                     && attempt.IdempotencyKey == command.IdempotencyKey,
@@ -58,7 +54,6 @@ public sealed class GamificationService : IGamificationService
         {
             var balance = ToBalance(statistic, user.IsVip);
             var sameSource = existingAttempt.SentenceId == command.SentenceId
-                && existingAttempt.Sentence?.LessonId == command.LessonId
                 && existingAttempt.PracticeTab == command.PracticeTab
                 && existingAttempt.ExerciseType == command.ExerciseType;
 
@@ -112,12 +107,6 @@ public sealed class GamificationService : IGamificationService
             AttemptedAt = nowUtc
         };
         _db.PracticeAttempts.Add(practiceAttempt);
-        await UpdateWordErrorStatisticsAsync(
-            command.UserId,
-            command.SentenceId,
-            command.Words,
-            nowUtc,
-            cancellationToken);
 
         var ledgerEntries = new List<GamificationLedgerEntry>();
         var expDelta = 0;
@@ -352,84 +341,6 @@ public sealed class GamificationService : IGamificationService
                 && entry.SourceId == sourceId,
             cancellationToken);
 
-    private async Task UpdateWordErrorStatisticsAsync(
-        long userId,
-        long sentenceId,
-        IReadOnlyList<VerifiedPracticeWord> words,
-        DateTime attemptedAt,
-        CancellationToken cancellationToken)
-    {
-        if (words.Count == 0)
-        {
-            return;
-        }
-
-        var grouped = words
-            .Select(item => new
-            {
-                item.Word,
-                item.AccuracyCode,
-                Normalized = NormalizeWord(item.Word)
-            })
-            .Where(item => !string.IsNullOrWhiteSpace(item.Normalized))
-            .GroupBy(item => item.Normalized!, StringComparer.Ordinal)
-            .Select(group => new
-            {
-                Normalized = group.Key,
-                Display = group.Select(item => item.Word)
-                    .FirstOrDefault(item => !string.IsNullOrWhiteSpace(item)) ?? group.Key,
-                HasError = group.Any(item =>
-                    item.AccuracyCode is "incorrect" or "warning")
-            })
-            .ToList();
-
-        if (grouped.Count == 0)
-        {
-            return;
-        }
-
-        var normalizedWords = grouped.Select(item => item.Normalized).ToList();
-        var currentStats = await _db.WordErrorStatistics
-            .Where(item =>
-                item.UserId == userId
-                && normalizedWords.Contains(item.NormalizedWord))
-            .ToDictionaryAsync(
-                item => item.NormalizedWord,
-                StringComparer.Ordinal,
-                cancellationToken);
-
-        foreach (var item in grouped)
-        {
-            if (!currentStats.TryGetValue(item.Normalized, out var statistic))
-            {
-                statistic = new WordErrorStatistic
-                {
-                    UserId = userId,
-                    NormalizedWord = item.Normalized,
-                    DisplayWord = item.Display
-                };
-                _db.WordErrorStatistics.Add(statistic);
-                currentStats[item.Normalized] = statistic;
-            }
-
-            statistic.DisplayWord = item.Display;
-            statistic.LastAttemptedAt = attemptedAt;
-            statistic.LastSentenceId = sentenceId;
-            statistic.UpdatedAt = attemptedAt;
-
-            if (item.HasError)
-            {
-                statistic.ConsecutiveErrorCount++;
-                statistic.TotalErrorCount++;
-                statistic.LastErrorAt = attemptedAt;
-            }
-            else
-            {
-                statistic.ConsecutiveErrorCount = 0;
-            }
-        }
-    }
-
     private async Task UpdateProgressAsync(
         VerifiedPracticeAttempt command,
         DateTime nowUtc,
@@ -525,19 +436,6 @@ public sealed class GamificationService : IGamificationService
     {
         var utc = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
         return DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(utc, _businessTimeZone));
-    }
-
-    private static string? NormalizeWord(string word)
-    {
-        if (string.IsNullOrWhiteSpace(word))
-        {
-            return null;
-        }
-
-        var normalized = WordNormalizeRegex.Replace(
-            word.Trim().ToLowerInvariant(),
-            string.Empty);
-        return string.IsNullOrWhiteSpace(normalized) ? null : normalized;
     }
 
     private static bool ConsumesHeart(string practiceTab, string exerciseType) =>

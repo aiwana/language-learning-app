@@ -1,4 +1,6 @@
 @using Microsoft.Extensions.Options
+@* Chức năng: trang Tiến trình & Thẻ nhớ — KPI, đổi tim, flashcard từ vựng và câu yêu thích.
+   Phụ trách chính: Hải Anh. Minh phối hợp gamification và logic tạo vocabulary từ lỗi sai. *@
 @using WebShadowing.Models
 @using WebShadowing.Services
 @inject IUserStatsService UserStatsService
@@ -10,36 +12,92 @@
     var exchangeAmount = GamificationOptions.Value.HeartExchangeAmount;
 }
 
-<div class="animate-slide-up py-2">
-    <div class="surface-card py-4 px-5 py-md-5 px-md-6">
-        <p class="section-label section-label-indigo mb-1">Tiến trình</p>
-        <h1 class="h3 fw-extrabold mb-2">Tiến trình &amp; Thẻ nhớ</h1>
-        <p class="text-body-muted small mb-4">Số dư được đồng bộ từ kết quả luyện tập trên server.</p>
-
-        @if (stats is not null)
-        {
-            <div class="d-flex flex-wrap gap-3 align-items-center" data-progress-gamification>
-                <div class="stat-box streak-box" aria-label="Chuỗi học hiện tại">
-                    <span class="stat-value" data-gamification-stat="streak">@stats.Streak</span>
-                    <span class="stat-unit">ngày</span>
-                </div>
-                <div class="stat-box heart-box" aria-label="Số tim hiện tại">
-                    <span class="stat-value" data-gamification-stat="hearts">@(stats.IsVip ? "∞" : stats.Hearts)</span>
-                    <span class="stat-unit">tim</span>
-                </div>
-                <div class="stat-box exp-box" aria-label="Số EXP hiện tại">
-                    <span class="stat-value" data-gamification-stat="exp">@stats.Exp</span>
-                    <span class="stat-unit">EXP</span>
-                </div>
+<div class="animate-slide-up progress-page progress-dashboard">
+    @if (stats is not null)
+    {
+        <section class="progress-kpi-grid" aria-label="Tổng quan tiến trình" data-progress-gamification>
+            <article class="progress-kpi progress-kpi--streak">
+                <span class="progress-kpi-icon"><i data-lucide="flame"></i></span>
+                <small>Streak liên tiếp</small>
+                <strong><span data-gamification-stat="streak">@stats.Streak</span> ngày</strong>
+                <p>Duy trì đều đặn để giữ nhịp học.</p>
+            </article>
+            <article class="progress-kpi progress-kpi--complete">
+                <span class="progress-kpi-icon"><i data-lucide="trophy"></i></span>
+                <small>Số câu hoàn thành</small>
+                <strong>@stats.CompletedSentences câu</strong>
+                <p>Tổng câu đã vượt mục tiêu phát âm.</p>
+            </article>
+            <article class="progress-kpi progress-kpi--heart">
+                <span class="progress-kpi-icon"><i data-lucide="heart"></i></span>
+                <small>Sức khỏe (Hearts)</small>
+                <strong><span data-gamification-stat="hearts">@(stats.IsVip ? "∞" : stats.Hearts)</span> tim</strong>
+                <p>@(stats.IsVip ? "VIP không giới hạn tim khi luyện tập." : "Tim được dùng cho các lượt luyện tập.")</p>
+            </article>
+            <article class="progress-kpi progress-kpi--exp">
+                <span class="progress-kpi-icon"><i data-lucide="sparkles"></i></span>
+                <small>Kinh nghiệm EXP</small>
+                <strong><span data-gamification-stat="exp">@stats.Exp</span> EXP</strong>
+                <p>Tích lũy từ hoạt động học hằng ngày.</p>
+            </article>
+            <div class="progress-exchange">
                 <button type="button"
-                        class="btn btn-outline-primary rounded-pill fw-bold"
+                        class="btn btn-sm btn-outline-primary"
                         data-exchange-heart
+                        data-exchange-cost="@exchangeCost"
                         data-max-hearts="@GamificationOptions.Value.MaxHearts"
                         @(stats.IsVip || stats.Hearts >= GamificationOptions.Value.MaxHearts ? "disabled" : null)>
                     Đổi @exchangeCost EXP lấy @exchangeAmount tim
                 </button>
                 <span class="small text-body-muted" role="status" aria-live="polite" data-exchange-status></span>
             </div>
-        }
+        </section>
+    }
+
+    <div class="progress-learning-grid">
+        <section class="progress-workspace" aria-labelledby="vocabulary-title">
+            <header class="progress-workspace-heading">
+                <div>
+                    <h1 id="vocabulary-title"><i data-lucide="brain"></i> Sổ tay từ vựng thông minh (Anki)</h1>
+                    <p>Lặp lại ngắt quãng giúp bạn ghi nhớ từ vựng hiệu quả hơn.</p>
+                </div>
+                <select id="vocabulary-filter" class="form-select form-select-sm" aria-label="Lọc trạng thái từ vựng">
+                    <option value="active">Đang học</option>
+                    <option value="mastered">Đã nhớ</option>
+                    <option value="">Tất cả</option>
+                </select>
+            </header>
+            <div id="vocabulary-loading" class="feature-skeleton progress-content-card"><span></span><span></span><span></span></div>
+            <div id="vocabulary-empty" class="feature-empty progress-content-card d-none"><i data-lucide="notebook-tabs"></i><h3>Chưa có từ cần ôn</h3><p>Từ phát âm sai liên tiếp sẽ tự xuất hiện ở đây.</p></div>
+            <div id="vocabulary-flashcard" class="vocabulary-flashcard progress-content-card d-none" tabindex="0" aria-live="polite">
+                <div class="flashcard-topline"><span id="vocabulary-counter">1 / 1</span><button type="button" id="vocabulary-delete" class="btn btn-sm btn-link text-danger">Xóa</button></div>
+                <strong id="vocabulary-word"></strong>
+                <span id="vocabulary-ipa" class="font-mono"></span>
+                <p id="vocabulary-meaning"></p>
+                <blockquote id="vocabulary-example"></blockquote>
+                <div class="flashcard-actions">
+                    <button type="button" id="vocabulary-prev" class="btn btn-sm btn-outline-secondary" aria-label="Từ trước"><i data-lucide="arrow-left"></i></button>
+                    <button type="button" id="vocabulary-speak" class="btn btn-sm btn-outline-primary"><i data-lucide="volume-2"></i> Đọc lại</button>
+                    <button type="button" id="vocabulary-mastered" class="btn btn-sm btn-success">Đã nhớ</button>
+                    <button type="button" id="vocabulary-next" class="btn btn-sm btn-outline-secondary" aria-label="Từ tiếp"><i data-lucide="arrow-right"></i></button>
+                </div>
+                <p id="vocabulary-status" class="small text-body-muted mb-0" role="status"></p>
+            </div>
+        </section>
+
+        <section class="progress-workspace" aria-labelledby="favorites-title">
+            <header class="progress-workspace-heading">
+                <div>
+                    <h2 id="favorites-title"><i data-lucide="bookmark"></i> Sổ tay câu thoại yêu thích</h2>
+                    <p>Lưu lại những câu thoại hay từ bài luyện tập.</p>
+                </div>
+                <span id="favorites-count" class="count-badge">0</span>
+            </header>
+            <div id="favorites-list" class="favorites-list progress-content-card"><div class="feature-skeleton"><span></span><span></span><span></span></div></div>
+        </section>
     </div>
 </div>
+
+@section Scripts {
+    <script defer src="~/js/vocabulary-flashcard.js" asp-append-version="true"></script>
+}
