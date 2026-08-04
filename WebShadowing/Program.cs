@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using WebShadowing.Data;
+using WebShadowing.Middleware;
 using WebShadowing.Models;
 using WebShadowing.Services;
 
@@ -37,6 +38,18 @@ builder.Services.AddScoped<IPracticeEvaluationService, PracticeEvaluationService
 builder.Services.AddScoped<IIpaMatchService, IpaMatchService>();
 builder.Services.AddScoped<IVocabularyNotebookService, VocabularyNotebookService>();
 builder.Services.AddScoped<IFavoriteSentenceService, FavoriteSentenceService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+builder.Services.AddScoped<IAiDialogueService, AiDialogueService>();
+builder.Services.AddScoped<IAiLessonGenerationService, AiLessonGenerationService>();
+builder.Services.AddScoped<IModeChangeService, ModeChangeService>();
+builder.Services.AddScoped<IOpenAiApiClient, OpenAiApiClient>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<ITtsAudioService, TtsAudioService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddScoped<IVocabularyService, VocabularyService>();
+builder.Services.AddScoped<IWordErrorTracker, WordErrorTracker>();
+builder.Services.AddHostedService<SubscriptionExpiryService>();
 builder.Services.AddSingleton<ILanguageReferenceService, OpenAiLanguageReferenceService>();
 builder.Services.AddRateLimiter(options =>
 {
@@ -112,6 +125,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRouting();
 app.UseAuthentication();
+app.UseMiddleware<OnboardingGuardMiddleware>();
 app.UseRateLimiter();
 app.UseAuthorization();
 

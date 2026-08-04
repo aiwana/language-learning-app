@@ -71,8 +71,7 @@ public sealed class HybridPronunciationAssessmentServiceTests
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["OpenAI:ApiKey"] = "test-openai-key",
-                ["OpenAI:AudioModel"] = "gpt-audio"
+                ["OpenAI:ApiKey"] = "test-openai-key"
             })
             .Build();
 
@@ -81,18 +80,22 @@ public sealed class HybridPronunciationAssessmentServiceTests
           "choices": [
             {
               "message": {
-                "content": "{\"score\":78,\"accuracyScore\":76,\"fluencyScore\":80,\"completenessScore\":79,\"prosodyScore\":77,\"transcript\":\"hello world\",\"feedback\":\"ok\",\"words\":[{\"word\":\"hello\",\"accuracyCode\":\"correct\",\"correction\":null,\"phonemes\":[]}]}"
+                "content": "```json\n{\"score\":78.5,\"accuracyScore\":76.4,\"fluencyScore\":80,\"completenessScore\":79,\"prosodyScore\":77,\"transcript\":\"hello world\",\"feedback\":\"ok\",\"words\":[{\"word\":\"hello\",\"accuracyCode\":\"correct\",\"correction\":null,\"phonemes\":[]}]}\n```"
               }
             }
           ]
         }
         """;
 
-        var httpFactory = new StaticHttpClientFactory(new HttpClient(new FixedResponseHandler(_ =>
-            new HttpResponseMessage(HttpStatusCode.OK)
+        string? requestJson = null;
+        var httpFactory = new StaticHttpClientFactory(new HttpClient(new FixedResponseHandler(request =>
+        {
+            requestJson = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+            return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(payload, Encoding.UTF8, "application/json")
-            })));
+            };
+        })));
 
         var primary = new AzurePronunciationAssessmentService(
             httpFactory,
@@ -121,8 +124,17 @@ public sealed class HybridPronunciationAssessmentServiceTests
             70));
 
         Assert.Equal("openai-fallback", result.Provider);
-        Assert.Equal(78, result.OverallScore);
+        Assert.Equal(79, result.OverallScore);
+        Assert.Equal(76, result.AccuracyScore);
         Assert.Single(result.Words);
+        Assert.NotNull(requestJson);
+        using var requestDocument = System.Text.Json.JsonDocument.Parse(requestJson);
+        Assert.Equal("gpt-audio-1.5", requestDocument.RootElement.GetProperty("model").GetString());
+        var userContent = requestDocument.RootElement
+            .GetProperty("messages")[1]
+            .GetProperty("content");
+        Assert.Equal("input_audio", userContent[1].GetProperty("type").GetString());
+        Assert.Equal("wav", userContent[1].GetProperty("input_audio").GetProperty("format").GetString());
     }
 
     private static byte[] BuildWavBytes(int durationSeconds)

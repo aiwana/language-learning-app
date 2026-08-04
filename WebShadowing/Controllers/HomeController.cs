@@ -1,4 +1,7 @@
 using System.Diagnostics;
+// Chức năng: điều hướng các trang Khóa học, Chi tiết bài, Bài AI, Tiến trình, Tài khoản và Auth.
+// Phụ trách theo trang: Minh Anh (Khóa học/Bài học/AI); Hải Anh (Tiến trình/Tài khoản); Minh (Auth/onboarding).
+// Đây là controller dùng chung; thay đổi route hoặc ViewBag/ViewModel phải được các phần liên quan review chéo.
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +18,7 @@ public class HomeController : Controller
     private readonly IHostEnvironment _env;
     private readonly IConfiguration _configuration;
     private readonly ILogger<HomeController> _logger;
+    private readonly IAiLessonGenerationService _aiLessons;
 
     public HomeController(
         ICourseService courseService,
@@ -22,6 +26,7 @@ public class HomeController : Controller
         IAuthService authService,
         IHostEnvironment env,
         IConfiguration configuration,
+        IAiLessonGenerationService aiLessons,
         ILogger<HomeController> logger)
     {
         _courseService = courseService;
@@ -29,7 +34,58 @@ public class HomeController : Controller
         _authService = authService;
         _env = env;
         _configuration = configuration;
+        _aiLessons = aiLessons;
         _logger = logger;
+    }
+
+    [Authorize, HttpGet("/ai-lessons/preview/{id:guid}")]
+    public async Task<IActionResult> AiLessonPreview(Guid id, CancellationToken cancellationToken)
+    {
+        if (_userContext.GetCurrentUserId() is not long userId) return Unauthorized();
+        var preview = await _aiLessons.GetPreviewAsync(userId, id, cancellationToken);
+        if (preview is null) return NotFound();
+        return await RenderAiLessonAsync(preview.Title, preview.LearningMode, preview.Accent, preview.Segments,
+            preview.PreviewId, preview.SavedLessonId, preview.Saved, cancellationToken);
+    }
+
+    [Authorize, HttpGet("/ai-lessons/{id:long}")]
+    public async Task<IActionResult> AiLessonDetail(long id, CancellationToken cancellationToken)
+    {
+        if (_userContext.GetCurrentUserId() is not long userId) return Unauthorized();
+        var lesson = await _aiLessons.GetSavedAsync(userId, id, cancellationToken);
+        if (lesson is null) return NotFound();
+        var accent = await _userContext.GetAccentAsync(cancellationToken);
+        return await RenderAiLessonAsync(lesson.Title, lesson.LearningMode, accent, lesson.Segments,
+            null, lesson.SavedLessonId, true, cancellationToken);
+    }
+
+    private async Task<IActionResult> RenderAiLessonAsync(string title, string mode, string accent,
+        IReadOnlyList<AiLessonSegmentDto> segments, Guid? previewId, long? savedLessonId, bool saved,
+        CancellationToken cancellationToken)
+    {
+        var target = await _userContext.GetPronunciationTargetAsync(cancellationToken);
+        var lesson = new LessonDetailDto
+        {
+            LessonId = 0, Title = title, Source = "ai-generated", PronunciationTarget = target,
+            AiPreviewId = previewId, SavedAiLessonId = savedLessonId, IsSavedAiLesson = saved,
+            Course = new LessonCourseDto { Title = "Bài học AI", CourseType = "ai", LearningMode = mode, Level = accent },
+            Media = new LessonMediaDto(),
+            Sentences = segments.Select((item, index) => new LessonSentenceDto
+            {
+                SentenceId = saved ? -(index + 1) : 0, Order = item.Order, Text = item.Text,
+                Translation = item.Translation, Ipa = item.Ipa, AudioUrl = item.AudioUrl, SavedSegmentId = item.SavedSegmentId
+            }).ToList()
+        };
+        ViewBag.LessonId = 0L; ViewBag.LearningMode = mode; ViewBag.LessonTitle = title;
+        ViewBag.HasVideo = false; ViewBag.SupportsDictation = segments.Any(item => !string.IsNullOrWhiteSpace(item.AudioUrl));
+        ViewBag.IsAiLesson = true; ViewBag.IsSavedAiLesson = saved; ViewBag.AiPreviewId = previewId;
+        ViewBag.SavedAiLessonId = savedLessonId;
+        ViewBag.PronunciationAiConfigured = !string.IsNullOrWhiteSpace(_configuration["OPENAI_API_KEY"] ?? _configuration["OpenAI:ApiKey"]);
+        var userId = _userContext.GetCurrentUserId();
+        var currentUser = userId is null ? null : await _authService.GetUserAsync(userId.Value, cancellationToken);
+        ViewBag.IsVip = currentUser?.IsVip == true;
+        ViewBag.InitialLessonJson = JsonSerializer.Serialize(lesson, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        return View("LessonDetail");
     }
 
     [Authorize]
@@ -52,6 +108,12 @@ public class HomeController : Controller
 
             viewModel.CurriculumCourses = libraryData.Curriculum.Courses;
             viewModel.VideoBankCourses = libraryData.VideoBank.Courses;
+
+            if (_userContext.GetCurrentUserId() is long userId)
+            {
+                var savedLessons = await _aiLessons.ListAsync(userId, cancellationToken);
+                viewModel.SavedAiLessons = savedLessons.Where(l => l.LearningMode == normalizedMode).ToList();
+            }
         }
         catch (Exception ex)
         {
@@ -101,8 +163,12 @@ public class HomeController : Controller
         ViewBag.LessonId = id;
         ViewBag.LearningMode = normalizedMode;
         ViewBag.LessonTitle = lessonResult.Lesson.Title;
+        ViewBag.HasVideo = !string.IsNullOrWhiteSpace(lessonResult.Lesson.Media.YoutubeId);
         ViewBag.PronunciationAiConfigured = !string.IsNullOrWhiteSpace(
             _configuration["OPENAI_API_KEY"] ?? _configuration["OpenAI:ApiKey"]);
+        var userId = _userContext.GetCurrentUserId();
+        var currentUser = userId is null ? null : await _authService.GetUserAsync(userId.Value, cancellationToken);
+        ViewBag.IsVip = currentUser?.IsVip == true;
         ViewBag.InitialLessonJson = JsonSerializer.Serialize(
             lessonResult.Lesson,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
@@ -168,6 +234,13 @@ public class HomeController : Controller
     public IActionResult Privacy()
     {
         return View();
+    }
+
+    [AllowAnonymous]
+    public IActionResult NotFoundPage()
+    {
+        Response.StatusCode = StatusCodes.Status404NotFound;
+        return View("NotFound");
     }
 
     [AllowAnonymous]

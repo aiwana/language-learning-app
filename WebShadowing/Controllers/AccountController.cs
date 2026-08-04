@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
+// Chức năng: POST đăng nhập, đăng ký, hoàn tất onboarding và đăng xuất.
+// Phụ trách chính: Minh. View liên quan: Views/Home/Authen.cshtml.
 using Microsoft.AspNetCore.Mvc;
 using WebShadowing.Models;
 using WebShadowing.Services;

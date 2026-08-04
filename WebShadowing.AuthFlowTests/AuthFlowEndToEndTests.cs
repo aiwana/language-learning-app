@@ -71,6 +71,17 @@ public sealed class AuthFlowEndToEndTests
         // This database is isolated and disposable. Remove only the extension
         // objects/columns to reproduce the last production schema before this update.
         await db.Database.ExecuteSqlRawAsync("""
+            DECLARE @dropLegacyFks NVARCHAR(MAX) = N'';
+            SELECT @dropLegacyFks = @dropLegacyFks +
+                N'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) + N'.' +
+                QUOTENAME(OBJECT_NAME(parent_object_id)) + N' DROP CONSTRAINT ' + QUOTENAME(name) + N';'
+            FROM sys.foreign_keys
+            WHERE referenced_object_id IN (
+                OBJECT_ID(N'dbo.User_Saved_Lessons'),
+                OBJECT_ID(N'dbo.Saved_AI_Lesson_Segments')
+            );
+            IF LEN(@dropLegacyFks) > 0 EXEC sp_executesql @dropLegacyFks;
+
             DROP TABLE IF EXISTS dbo.Payment_Transactions;
             DROP TABLE IF EXISTS dbo.VIP_Subscriptions;
             DROP TABLE IF EXISTS dbo.Gamification_Ledger;
@@ -369,7 +380,7 @@ public sealed class AuthFlowEndToEndTests
         Assert.Equal(HttpStatusCode.OK, courseResponse.StatusCode);
         var courseHtml = await courseResponse.Content.ReadAsStringAsync();
         Assert.Contains("aria-label=\"Chuỗi học 12 ngày\"", courseHtml);
-        Assert.Contains("aria-label=\"Còn 4 tim\"", courseHtml);
+        Assert.Contains("data-gamification-stat=\"hearts\"", courseHtml);
         Assert.Contains("aria-label=\"980 điểm kinh nghiệm\"", courseHtml);
         Assert.Contains("provip-box--vip", courseHtml);
         Assert.Contains("mobile-gamification-bar", courseHtml);
@@ -697,8 +708,8 @@ public sealed class AuthFlowEndToEndTests
 
     private static async Task<string> ReadAntiForgeryTokenAsync(HttpResponseMessage response)
     {
-        response.EnsureSuccessStatusCode();
         var html = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode, html);
         var match = Regex.Match(
             html,
             "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"",

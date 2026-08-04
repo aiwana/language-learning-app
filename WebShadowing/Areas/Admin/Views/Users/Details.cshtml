@@ -1,0 +1,159 @@
+@model AdminUserDetailDto
+@{
+    ViewData["Title"] = $"User · {Model.FullName}";
+}
+
+<section class="admin-page">
+    <header class="admin-page-header">
+        <div>
+            <a class="admin-back-inline" asp-area="Admin" asp-controller="Users" asp-action="Index">← Danh sách</a>
+            <h1>@Model.FullName</h1>
+            <p class="admin-page-sub">@Model.Email · @@@Model.Username · #@Model.UserId</p>
+        </div>
+        <div class="admin-header-actions">
+            @if (Model.IsActive)
+            {
+                <form method="post" asp-area="Admin" asp-controller="Users" asp-action="Disable" asp-route-id="@Model.UserId" class="admin-inline-form">
+                    @Html.AntiForgeryToken()
+                    <input type="text" name="reason" class="form-control form-control-sm" placeholder="Lý do ẩn (tuỳ chọn)" maxlength="500" />
+                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Ẩn tài khoản này? Người dùng sẽ không đăng nhập được.');">Ẩn đăng nhập</button>
+                </form>
+            }
+            else
+            {
+                <form method="post" asp-area="Admin" asp-controller="Users" asp-action="Enable" asp-route-id="@Model.UserId">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success btn-sm">Kích hoạt lại</button>
+                </form>
+            }
+        </div>
+    </header>
+
+    <div class="admin-grid">
+        <article class="admin-card">
+            <h2>Hồ sơ</h2>
+            <dl class="admin-dl">
+                <div><dt>Vai trò</dt><dd>@Model.Role</dd></div>
+                <div><dt>Trạng thái</dt><dd>@(Model.IsActive ? "Active" : "Disabled")</dd></div>
+                <div><dt>Learning mode</dt><dd>@Model.LearningMode</dd></div>
+                <div><dt>Accent</dt><dd>@Model.Accent</dd></div>
+                <div><dt>Pronunciation target</dt><dd>@Model.PronunciationTarget</dd></div>
+                <div><dt>Onboarding</dt><dd>@(Model.OnboardingCompleted ? "Đã xong" : "Chưa")</dd></div>
+                <div><dt>Tạo lúc</dt><dd>@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd></div>
+                <div><dt>Cập nhật</dt><dd>@Model.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd></div>
+                @if (!Model.IsActive)
+                {
+                    <div><dt>Ẩn lúc</dt><dd>@(Model.DisabledAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "—")</dd></div>
+                    <div><dt>Lý do</dt><dd>@(Model.DisabledReason ?? "—")</dd></div>
+                }
+            </dl>
+        </article>
+
+        <article class="admin-card">
+            <h2>VIP / Subscription</h2>
+            <dl class="admin-dl">
+                <div><dt>Entitlement</dt><dd>@(Model.IsVip ? "VIP" : "Free")</dd></div>
+                @if (Model.CurrentSubscription is { } sub)
+                {
+                    <div><dt>Plan</dt><dd>@sub.PlanCode</dd></div>
+                    <div><dt>Status</dt><dd>@sub.Status</dd></div>
+                    <div><dt>Provider</dt><dd>@sub.Provider</dd></div>
+                    <div><dt>Period</dt><dd>@sub.BillingPeriod</dd></div>
+                    <div><dt>Bắt đầu</dt><dd>@sub.StartsAt.ToLocalTime().ToString("dd/MM/yyyy")</dd></div>
+                    <div><dt>Hết hạn</dt><dd>@(sub.EndsAt?.ToLocalTime().ToString("dd/MM/yyyy") ?? "Không hết hạn")</dd></div>
+                }
+                else
+                {
+                    <div><dt>Subscription</dt><dd>Chưa có</dd></div>
+                }
+            </dl>
+
+            <form method="post" asp-area="Admin" asp-controller="Users" asp-action="GrantVip" asp-route-id="@Model.UserId" class="admin-vip-form">
+                @Html.AntiForgeryToken()
+                <label class="form-label">Cấp VIP</label>
+                <div class="admin-vip-row">
+                    <select name="billingPeriod" class="form-select form-select-sm">
+                        <option value="@BillingPeriods.Monthly">1 tháng</option>
+                        <option value="@BillingPeriods.Yearly">1 năm</option>
+                        <option value="@BillingPeriods.Lifetime">Lifetime</option>
+                    </select>
+                    <input type="number" name="customDays" class="form-control form-control-sm" min="1" max="3650" placeholder="Hoặc N ngày" />
+                    <button type="submit" class="btn btn-primary btn-sm">Grant</button>
+                </div>
+            </form>
+
+            @if (Model.IsVip)
+            {
+                <form method="post" asp-area="Admin" asp-controller="Users" asp-action="RevokeVip" asp-route-id="@Model.UserId" class="mt-2">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Thu hồi VIP của tài khoản này?');">Revoke VIP</button>
+                </form>
+            }
+        </article>
+
+        <article class="admin-card admin-card-wide">
+            <h2>Feature usage (30 ngày)</h2>
+            <div class="admin-stats-row">
+                <div><span class="admin-stat-label">Streak</span><strong>@Model.Usage.StreakDays</strong></div>
+                <div><span class="admin-stat-label">EXP</span><strong>@Model.Usage.Exp</strong></div>
+                <div><span class="admin-stat-label">Hearts</span><strong>@Model.Usage.Hearts</strong></div>
+                <div><span class="admin-stat-label">Sessions</span><strong>@Model.Usage.TotalSessions</strong></div>
+                <div><span class="admin-stat-label">Avg score</span><strong>@Model.Usage.AverageScore.ToString("0.#")</strong></div>
+                <div><span class="admin-stat-label">Last practice</span><strong>@(Model.Usage.LastPracticeAt?.ToLocalTime().ToString("dd/MM HH:mm") ?? "—")</strong></div>
+            </div>
+            <table class="admin-table compact">
+                <thead>
+                    <tr>
+                        <th>Practice tab</th>
+                        <th>Attempts</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var pair in Model.Usage.PracticeTabCounts30d)
+                {
+                    <tr>
+                        <td>@pair.Key</td>
+                        <td>@pair.Value</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+            <p class="admin-muted mt-2 mb-0">
+                AI dialogue sessions: @Model.Usage.AiDialogueSessions30d ·
+                Saved AI lessons: @Model.Usage.SavedAiLessons30d
+            </p>
+        </article>
+
+        <article class="admin-card admin-card-wide">
+            <h2>Audit gần đây</h2>
+            @if (Model.RecentAudits.Count == 0)
+            {
+                <p class="admin-muted mb-0">Chưa có thao tác admin trên tài khoản này.</p>
+            }
+            else
+            {
+                <table class="admin-table compact">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Action</th>
+                            <th>Actor</th>
+                            <th>Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var audit in Model.RecentAudits)
+                    {
+                        <tr>
+                            <td>@audit.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@audit.Action</td>
+                            <td>@audit.ActorEmail</td>
+                            <td>@(audit.Detail ?? "—")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </article>
+    </div>
+</section>

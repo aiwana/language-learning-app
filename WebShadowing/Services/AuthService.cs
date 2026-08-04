@@ -33,24 +33,24 @@ public class AuthService : IAuthService
     {
         if (!ModelValidation.IsValidEmail(model.Email))
         {
-            return AuthResult.Failure("Email không hợp lệ.");
+            return AuthResult.Failure("Email khÃ´ng há»£p lá»‡.");
         }
 
         if (model.Password.Length < 8)
         {
-            return AuthResult.Failure("Mật khẩu phải có ít nhất 8 ký tự.");
+            return AuthResult.Failure("Máº­t kháº©u pháº£i cÃ³ Ã­t nháº¥t 8 kÃ½ tá»±.");
         }
 
         if (string.IsNullOrWhiteSpace(model.FullName))
         {
-            return AuthResult.Failure("Vui lòng nhập họ tên.");
+            return AuthResult.Failure("Vui lÃ²ng nháº­p há» tÃªn.");
         }
 
         var normalizedEmail = model.Email.Trim().ToLowerInvariant();
         var existingUser = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail, cancellationToken);
         if (existingUser is not null)
         {
-            return AuthResult.Failure("Email này đã được đăng ký.");
+            return AuthResult.Failure("Email nÃ y Ä‘Ã£ Ä‘Æ°á»£c Ä‘Äƒng kÃ½.");
         }
 
         var usernameBase = BuildUsername(model.FullName, normalizedEmail);
@@ -91,7 +91,7 @@ public class AuthService : IAuthService
         catch (DbUpdateException)
         {
             await transaction.RollbackAsync(cancellationToken);
-            return AuthResult.Failure("Không thể tạo tài khoản. Email hoặc tên người dùng có thể đã tồn tại.");
+            return AuthResult.Failure("KhÃ´ng thá»ƒ táº¡o tÃ i khoáº£n. Email hoáº·c tÃªn ngÆ°á»i dÃ¹ng cÃ³ thá»ƒ Ä‘Ã£ tá»“n táº¡i.");
         }
 
         await SignInAsync(user, cancellationToken);
@@ -102,20 +102,25 @@ public class AuthService : IAuthService
     {
         if (!ModelValidation.IsValidEmail(model.Email))
         {
-            return AuthResult.Failure("Email hoặc mật khẩu không đúng.");
+            return AuthResult.Failure("Email hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng.");
         }
 
         var normalizedEmail = model.Email.Trim().ToLowerInvariant();
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail, cancellationToken);
         if (user is null)
         {
-            return AuthResult.Failure("Email hoặc mật khẩu không đúng.");
+            return AuthResult.Failure("Email hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng.");
         }
 
         var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.Password);
         if (verificationResult == PasswordVerificationResult.Failed)
         {
-            return AuthResult.Failure("Email hoặc mật khẩu không đúng.");
+            return AuthResult.Failure("Email hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng.");
+        }
+
+        if (!user.IsActive)
+        {
+            return AuthResult.Failure("Tài khoản không khả dụng.");
         }
 
         await SignInAsync(user, cancellationToken);
@@ -137,33 +142,33 @@ public class AuthService : IAuthService
     {
         if (model.LearningMode is not (LearningModes.Casual or LearningModes.Academic or LearningModes.Professional))
         {
-            return AuthResult.Failure("Hình thức học không hợp lệ. Vui lòng chọn: giao tiếp, học thuật hoặc công việc.");
+            return AuthResult.Failure("HÃ¬nh thá»©c há»c khÃ´ng há»£p lá»‡. Vui lÃ²ng chá»n: giao tiáº¿p, há»c thuáº­t hoáº·c cÃ´ng viá»‡c.");
         }
 
         if (model.Accent is not (Accents.EnUs or Accents.EnGb))
         {
-            return AuthResult.Failure("Chuẩn phát âm không hợp lệ. Vui lòng chọn Anh-Mỹ hoặc Anh-Anh.");
+            return AuthResult.Failure("Chuáº©n phÃ¡t Ã¢m khÃ´ng há»£p lá»‡. Vui lÃ²ng chá»n Anh-Má»¹ hoáº·c Anh-Anh.");
         }
 
         if (model.PronunciationTarget is not (PronunciationTargets.Fluency50 or PronunciationTargets.Comprehension70 or PronunciationTargets.Accent90))
         {
-            return AuthResult.Failure("Mục tiêu phát âm không hợp lệ. Vui lòng chọn 50, 70 hoặc 90.");
+            return AuthResult.Failure("Má»¥c tiÃªu phÃ¡t Ã¢m khÃ´ng há»£p lá»‡. Vui lÃ²ng chá»n 50, 70 hoáº·c 90.");
         }
 
         if (model.Plan is not ("free" or "vip"))
         {
-            return AuthResult.Failure("Gói tài khoản không hợp lệ.");
+            return AuthResult.Failure("GÃ³i tÃ i khoáº£n khÃ´ng há»£p lá»‡.");
         }
 
         if (model.Plan == "vip" && !_vipStubOptions.Enabled)
         {
-            return AuthResult.Failure("Kích hoạt VIP thử nghiệm hiện không khả dụng. Vui lòng chọn gói Miễn Phí.");
+            return AuthResult.Failure("KÃ­ch hoáº¡t VIP thá»­ nghiá»‡m hiá»‡n khÃ´ng kháº£ dá»¥ng. Vui lÃ²ng chá»n gÃ³i Miá»…n PhÃ­.");
         }
 
         var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == userId, cancellationToken);
         if (user is null)
         {
-            return AuthResult.Failure("Không tìm thấy tài khoản.");
+            return AuthResult.Failure("KhÃ´ng tÃ¬m tháº¥y tÃ i khoáº£n.");
         }
 
         user.LearningMode        = model.LearningMode;
