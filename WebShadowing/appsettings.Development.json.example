@@ -21,6 +21,21 @@
   "VipStub": {
     "Enabled": true
   },
+  "Payment": {
+    "Momo": {
+      "PartnerCode": "set-via-user-secrets",
+      "AccessKey": "set-via-user-secrets",
+      "SecretKey": "set-via-user-secrets",
+      "RedirectUrl": "https://localhost:7274/settings?payment=return",
+      "IpnUrl": "https://your-public-tunnel.example/api/payment/webhooks/momo"
+    },
+    "ZaloPay": {
+      "AppId": "set-via-user-secrets",
+      "Key1": "set-via-user-secrets",
+      "Key2": "set-via-user-secrets",
+      "CallbackUrl": "https://your-public-tunnel.example/api/payment/webhooks/zalopay"
+    }
+  },
   "Gamification": {
     "SentenceCompletionExp": 20,
     "FailedAttemptHeartCost": 1,

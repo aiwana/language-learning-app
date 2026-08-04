@@ -84,6 +84,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IUserStatsService, UserStatsService>();
 builder.Services.AddScoped<IGamificationService, GamificationService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddHostedService<SubscriptionExpiryService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddOptions<GamificationOptions>()
     .Bind(builder.Configuration.GetSection(GamificationOptions.SectionName))
@@ -98,6 +101,10 @@ builder.Services.Configure<VipStubOptions>(options =>
         $"{VipStubOptions.SectionName}:Enabled")
         ?? builder.Environment.IsDevelopment();
 });
+builder.Services.AddOptions<PaymentOptions>()
+    .Bind(builder.Configuration.GetSection(PaymentOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 var app = builder.Build();
 
