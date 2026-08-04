@@ -59,3 +59,17 @@ coverage/
 *.pubxml
 *.pfx
 *.publishproj
+
+# 8. Python & Tools virtual environments and cache
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# 9. Workspace Temporary Folders & AI Agent Artifacts
+artifacts/
+tmp/

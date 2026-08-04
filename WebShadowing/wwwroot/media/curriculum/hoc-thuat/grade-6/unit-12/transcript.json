@@ -1,0 +1,44 @@
+[
+  {
+    "sentence_order": 1,
+    "text": "Look at this robot, Nick!",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 2,
+    "text": "Wow! It's so big. What can it do?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 3,
+    "text": "It can lift heavy things and build houses. It's a worker robot.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 4,
+    "text": "Can it talk?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 5,
+    "text": "No, it can't. But look at that one over there. It's a teaching robot.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 6,
+    "text": "Can it teach English?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 7,
+    "text": "Yes, it can. It can also help students with their homework.",
+    "translation": null,
+    "ipa": null
+  }
+]

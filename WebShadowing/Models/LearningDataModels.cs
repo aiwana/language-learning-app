@@ -220,6 +220,15 @@ public sealed class VocabularyItem
     [Column("source_sentence_id")]
     public long? SourceSentenceId { get; set; }
 
+    [Required, MaxLength(20), Column("review_status")]
+    public string ReviewStatus { get; set; } = VocabularyReviewStatuses.Active;
+
+    [Column("last_reviewed_at")]
+    public DateTime? LastReviewedAt { get; set; }
+
+    [Column("review_count")]
+    public int ReviewCount { get; set; }
+
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -390,6 +399,12 @@ public sealed class SavedAiLessonSegment
 
     [Column("end_ms")]
     public int? EndMilliseconds { get; set; }
+
+    [MaxLength(100), Column("ipa")]
+    public string? Ipa { get; set; }
+
+    [Column("audio_url")]
+    public string? AudioUrl { get; set; }
 
     public SavedAiLesson SavedLesson { get; set; } = null!;
 }

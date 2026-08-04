@@ -1,0 +1,44 @@
+[
+  {
+    "sentence_order": 1,
+    "text": "Hello, Mai. What seems to be the problem?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 2,
+    "text": "Hi, doctor. I've been feeling very tired and stressed lately.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 3,
+    "text": "I see. Are you sleeping well?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 4,
+    "text": "Not really. I often stay up late studying for exams.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 5,
+    "text": "That's not good for your health. You need to get enough sleep, at least eight hours a night.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 6,
+    "text": "I know, but I have so much homework.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 7,
+    "text": "You should try to manage your time better. Also, make sure you eat healthy food and get some exercise.",
+    "translation": null,
+    "ipa": null
+  }
+]

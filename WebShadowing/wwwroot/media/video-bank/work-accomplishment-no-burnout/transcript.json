@@ -1,0 +1,490 @@
+[
+  {
+    "sentence_order": 1,
+    "start_time": 0.04,
+    "end_time": 7.0,
+    "text": "﻿We're increasingly facing burnout. How is it possible to do work that you're proud of and",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 2,
+    "start_time": 7.0,
+    "end_time": 11.96,
+    "text": "not feel like your job is encroaching on all parts of your life? Because it's no longer you",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 3,
+    "start_time": 11.96,
+    "end_time": 17.72,
+    "text": "just see me in my office looking vaguely busy. You can actually see every email I'm sending and",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 4,
+    "start_time": 17.72,
+    "end_time": 22.76,
+    "text": "how active I am in a Slack chat. I could do this on the way to work, on the way home from work,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 5,
+    "start_time": 22.76,
+    "end_time": 30.12,
+    "text": "at home, on the weekends. Enough is enough. We're increasingly exhausted. We have a",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 6,
+    "start_time": 30.12,
+    "end_time": 34.64,
+    "text": "faulty definition of productivity that we've been following, and what we need to",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 7,
+    "start_time": 34.64,
+    "end_time": 41.6,
+    "text": "do instead is shift our focus onto outcomes. I'm Cal Newport. I'm a computer scientist and",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 8,
+    "start_time": 41.6,
+    "end_time": 54.72,
+    "text": "writer. My most recent book is \"Slow Productivity: The Lost Art of Accomplishment Without Burnout.\"",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 9,
+    "start_time": 54.72,
+    "end_time": 60.0,
+    "text": "So the knowledge sector emerges in the mid-twentieth century. When it emerges,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 10,
+    "start_time": 60.0,
+    "end_time": 65.12,
+    "text": "our best understanding of productivity came from manufacturing. Manufacturing,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 11,
+    "start_time": 65.12,
+    "end_time": 71.04,
+    "text": "this is something that we could measure very precisely. For example, how many Model Ts are",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 12,
+    "start_time": 71.04,
+    "end_time": 77.32,
+    "text": "we producing per labor hour going in as input? And we had a number we could look at. Knowledge",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 13,
+    "start_time": 77.32,
+    "end_time": 81.68,
+    "text": "work emerges. These type of metrics don't work anymore. Because in knowledge work, we're not",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 14,
+    "start_time": 81.68,
+    "end_time": 86.96,
+    "text": "producing one thing. I might be working on seven or eight different things at the same time. This",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 15,
+    "start_time": 86.96,
+    "end_time": 91.24,
+    "text": "could be different than the seven or eight things that the person right next to me is working on.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 16,
+    "start_time": 91.24,
+    "end_time": 97.28,
+    "text": "Our solution to this was to introduce a rough heuristic that I call pseudo-productivity that",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 17,
+    "start_time": 97.28,
+    "end_time": 104.84,
+    "text": "said we can use visible activity as a crude proxy for useful effort. So if I see you doing things,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 18,
+    "start_time": 104.84,
+    "end_time": 109.16,
+    "text": "that's better than you not doing things. Come to an office and we watch you work. If we need to be",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 19,
+    "start_time": 109.16,
+    "end_time": 114.8,
+    "text": "more productive, come earlier, stay later. We'll just use activity as our best marker that you're",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 20,
+    "start_time": 114.8,
+    "end_time": 122.0,
+    "text": "probably doing something useful. More and more of our time is focused on performing this busyness,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 21,
+    "start_time": 122.0,
+    "end_time": 128.04,
+    "text": "which means less of our time is spent actually doing things that matter.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 22,
+    "start_time": 128.04,
+    "end_time": 133.48,
+    "text": "So what's the solution? Slow productivity is a way of measuring useful effort that is now",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 23,
+    "start_time": 133.48,
+    "end_time": 139.12,
+    "text": "much more focused on the quality things you produce over time as opposed to your",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 24,
+    "start_time": 139.12,
+    "end_time": 145.44,
+    "text": "visible activity in the moment, and I define it to be built on three main principles. The",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 25,
+    "start_time": 145.44,
+    "end_time": 150.96,
+    "text": "first is to do fewer things. Now this idea scares a lot of people when they first hear",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 26,
+    "start_time": 150.96,
+    "end_time": 157.88,
+    "text": "it because they interpret do fewer things to mean accomplish fewer things. What I really",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 27,
+    "start_time": 157.88,
+    "end_time": 164.84,
+    "text": "mean is do fewer things at once. We know this from neuroscience and organizational",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 28,
+    "start_time": 164.84,
+    "end_time": 170.12,
+    "text": "psychology that when you turn the target of your attention from one point to another,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 29,
+    "start_time": 170.12,
+    "end_time": 175.88,
+    "text": "it takes a while for your brain to reorient. The things you're thinking about over here",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 30,
+    "start_time": 175.88,
+    "end_time": 182.72,
+    "text": "leaves what's known as attention residue. This is a self-imposed reduction of cognitive capacity,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 31,
+    "start_time": 182.72,
+    "end_time": 188.92,
+    "text": "so you're producing worse work. Even worse, it's a psychological state that is exhausting",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 32,
+    "start_time": 188.92,
+    "end_time": 194.96,
+    "text": "and frustrating, so the experience of work itself just becomes subjectively very negative. So what",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 33,
+    "start_time": 194.96,
+    "end_time": 200.16,
+    "text": "happens if I'm working on fewer things at once? More of my day can actually be spent trying to",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 34,
+    "start_time": 200.16,
+    "end_time": 205.6,
+    "text": "complete commitments, which means I'm going to complete them faster. And probably the quality",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 35,
+    "start_time": 205.6,
+    "end_time": 213.36,
+    "text": "level is going to be higher as well because I can give them uninterrupted concentration.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 36,
+    "start_time": 213.36,
+    "end_time": 219.72,
+    "text": "The second principle is to work at a natural pace. One of the defining features of human economic",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 37,
+    "start_time": 219.72,
+    "end_time": 225.32,
+    "text": "activity for the last several hundred thousand years is that the seasons really matter. There was",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 38,
+    "start_time": 225.32,
+    "end_time": 230.24,
+    "text": "migration seasons when we were hunting. There was planting seasons. We were planting, and harvest",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 39,
+    "start_time": 230.24,
+    "end_time": 235.0,
+    "text": "seasons when we're harvesting, and seasons where neither of those activities were going on. We had",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 40,
+    "start_time": 235.0,
+    "end_time": 241.12,
+    "text": "a lot of variety throughout the year in terms of how hard we were working. I think in knowledge",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 41,
+    "start_time": 241.12,
+    "end_time": 246.6,
+    "text": "work, if certain times of year are more intense than others, this will lead to overall better",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 42,
+    "start_time": 246.6,
+    "end_time": 252.64,
+    "text": "and more sustainable outcomes. So the principle of working at a natural pace says it's okay to",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 43,
+    "start_time": 252.64,
+    "end_time": 258.52,
+    "text": "not redline it fifty weeks a year, five days a week. We can have busy days and less busy days.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 44,
+    "start_time": 258.52,
+    "end_time": 266.16,
+    "text": "We can have busy seasons and less busy seasons. The third principle of slow productivity is to",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 45,
+    "start_time": 266.16,
+    "end_time": 272.04,
+    "text": "obsess over quality. And what this means is you should identify the things you do in your",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 46,
+    "start_time": 272.04,
+    "end_time": 279.12,
+    "text": "work that produce the most value and really care about getting better at that. Any quest",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 47,
+    "start_time": 279.12,
+    "end_time": 285.04,
+    "text": "towards obsessing over quality has to start with a perhaps pretty thorough investigation of your",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 48,
+    "start_time": 285.04,
+    "end_time": 289.8,
+    "text": "own job. And then once you figure that out, start giving that activity as much attention",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 49,
+    "start_time": 289.8,
+    "end_time": 295.68,
+    "text": "as you can. For example, invest in better tools so that you can signal to yourself",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 50,
+    "start_time": 295.68,
+    "end_time": 302.28,
+    "text": "that you're invested in doing this thing well. I did this myself as a postdoc. I was at MIT,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 51,
+    "start_time": 302.28,
+    "end_time": 308.04,
+    "text": "didn't have a ton of money at that time, but I bought a fifty-dollar lab notebook. And my idea",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 52,
+    "start_time": 308.04,
+    "end_time": 313.56,
+    "text": "was this is going to make me take the work I'm doing in this notebook more seriously, and it",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 53,
+    "start_time": 313.56,
+    "end_time": 321.32,
+    "text": "did. So something about having this more quality tool pushed me towards more quality thinking.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 54,
+    "start_time": 321.32,
+    "end_time": 325.28,
+    "text": "So this idea that you want to slow down, that you want to do fewer things, that you want to have a",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 55,
+    "start_time": 325.28,
+    "end_time": 331.04,
+    "text": "more natural pace, this becomes very natural when you're really focused on doing what you",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 56,
+    "start_time": 331.04,
+    "end_time": 336.44,
+    "text": "do well. You begin to see all of those meetings and the email and the overstuffed task list not",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 57,
+    "start_time": 336.44,
+    "end_time": 342.16,
+    "text": "as a mark of productivity, but obstacles to what you're really trying to do. If you are embracing",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 58,
+    "start_time": 342.16,
+    "end_time": 346.32,
+    "text": "these principles, a few things are going to happen. The pace at which important things",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 59,
+    "start_time": 346.32,
+    "end_time": 352.28,
+    "text": "are finished is going to go up. The quality of what you're producing is going to go up,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 60,
+    "start_time": 352.28,
+    "end_time": 357.96,
+    "text": "and the happiness is also going to go up. This is going to become a much more sustainable work",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 61,
+    "start_time": 357.96,
+    "end_time": 362.2,
+    "text": "environment, and you're going to be doing the work that's going to make you better.",
+    "translation": null,
+    "ipa": null
+  }
+]

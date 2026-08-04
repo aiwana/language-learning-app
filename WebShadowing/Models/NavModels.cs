@@ -9,5 +9,6 @@ public class UserNavStatsViewModel
     public int Streak  { get; set; }
     public int Hearts  { get; set; }
     public int Exp     { get; set; }
+    public int CompletedSentences { get; set; }
     public bool IsVip  { get; set; }
 }

@@ -82,6 +82,9 @@ public sealed class LessonDetailDto
     public LessonMediaDto Media { get; set; } = new();
     public IReadOnlyList<LessonSentenceDto> Sentences { get; set; } = [];
     public byte PronunciationTarget { get; set; } = PronunciationTargets.Comprehension70;
+    public Guid? AiPreviewId { get; set; }
+    public long? SavedAiLessonId { get; set; }
+    public bool IsSavedAiLesson { get; set; }
 }
 
 public sealed class LessonCourseDto
@@ -118,4 +121,6 @@ public sealed class LessonSentenceDto
     public double? StartTime { get; set; }
     /// <summary>Giây kết thúc trong file audio/video (nullable nếu không có timestamp).</summary>
     public double? EndTime { get; set; }
+    public string? AudioUrl { get; set; }
+    public long? SavedSegmentId { get; set; }
 }

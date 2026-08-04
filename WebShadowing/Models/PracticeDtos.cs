@@ -53,6 +53,9 @@ public sealed class PracticeAnswerRequestDto
 
     [Required, StringLength(4000)]
     public string Answer { get; set; } = string.Empty;
+
+    [Range(0, 39)]
+    public int? TargetIndex { get; set; }
 }
 
 public sealed class PracticeAnswerEvaluationDto
@@ -87,3 +90,11 @@ public sealed class WordIpaDto
     public string Word { get; set; } = string.Empty;
     public string Ipa { get; set; } = string.Empty;
 }
+
+public sealed class SentenceIpaRequestDto
+{
+    [Range(1, long.MaxValue)]
+    public long SentenceId { get; set; }
+}
+
+public sealed record SentenceIpaDto(long SentenceId, string Ipa);
