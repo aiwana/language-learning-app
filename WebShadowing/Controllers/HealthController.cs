@@ -9,10 +9,12 @@ namespace WebShadowing.Controllers;
 public class HealthController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly TimeProvider _timeProvider;
 
-    public HealthController(AppDbContext db)
+    public HealthController(AppDbContext db, TimeProvider timeProvider)
     {
         _db = db;
+        _timeProvider = timeProvider;
     }
 
     [HttpGet]
@@ -29,25 +31,19 @@ public class HealthController : ControllerBase
                 });
             }
 
-            var userCount = await _db.Users.AsNoTracking().CountAsync(cancellationToken);
-            var courseCount = await _db.Courses.AsNoTracking().CountAsync(cancellationToken);
-
             return Ok(new
             {
                 status = "healthy",
                 database = "connected",
-                users = userCount,
-                courses = courseCount,
-                timestamp = DateTime.UtcNow
+                timestamp = _timeProvider.GetUtcNow()
             });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new
             {
                 status = "unhealthy",
-                database = "error",
-                message = ex.Message
+                database = "error"
             });
         }
     }
