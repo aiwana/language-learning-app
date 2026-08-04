@@ -43,6 +43,10 @@ const state = {
     ipaQuestionController: null,
     ipaQuestion: null,
     selectedIpaOptionId: null,
+    favoriteSentenceId: null,
+    favoriteSaved: false,
+    favoriteBusy: false,
+    favoriteRequestVersion: 0,
 };
 
 const dom = {};
@@ -94,6 +98,9 @@ function initDom() {
     dom.answerNextBtn = document.getElementById("next-practice-answer");
     dom.answerStatus = document.getElementById("practice-answer-status");
     dom.answerOptions = document.getElementById("answer-options");
+    dom.favoriteSentenceBtn = document.getElementById("favorite-sentence-btn");
+    dom.favoriteSentenceLabel = document.getElementById("favorite-sentence-label");
+    dom.favoriteSentenceStatus = document.getElementById("favorite-sentence-status");
 }
 
 // =====================================================================
@@ -102,6 +109,7 @@ function initDom() {
 document.addEventListener("DOMContentLoaded", () => {
     initDom();
     initTabBar();
+    initFavoriteControls();
     if (window.__initialLesson) {
         state.lessonData = window.__initialLesson;
         initLesson(window.__initialLesson);
@@ -710,9 +718,136 @@ function selectSentence(idx) {
 
     state.currentIndex = idx;
     renderCurrentSentence(state.sentences[idx]);
+    void refreshFavoriteState();
     updateSubtitleListUI();
     if (state.activeTab !== "shadowing") {
         renderAnswerPrompt();
+    }
+}
+
+function initFavoriteControls() {
+    dom.favoriteSentenceBtn?.addEventListener("click", () => {
+        void toggleFavoriteSentence();
+    });
+    renderFavoriteState();
+}
+
+function renderFavoriteState(message = "", tone = "") {
+    if (dom.favoriteSentenceBtn) {
+        dom.favoriteSentenceBtn.disabled = state.favoriteBusy || state.sentences.length === 0;
+        dom.favoriteSentenceBtn.classList.toggle("is-active", state.favoriteSaved);
+        dom.favoriteSentenceBtn.setAttribute("aria-pressed", String(state.favoriteSaved));
+        dom.favoriteSentenceBtn.setAttribute(
+            "aria-label",
+            state.favoriteSaved ? "Bỏ lưu câu yêu thích" : "Lưu câu yêu thích");
+    }
+
+    if (dom.favoriteSentenceLabel) {
+        dom.favoriteSentenceLabel.textContent = state.favoriteBusy
+            ? (state.favoriteSaved ? "Đang bỏ lưu..." : "Đang lưu...")
+            : state.favoriteSaved ? "Bỏ lưu" : "Lưu câu";
+    }
+
+    if (dom.favoriteSentenceStatus) {
+        dom.favoriteSentenceStatus.className = tone ? `lesson-inline-status ${tone}` : "lesson-inline-status";
+        dom.favoriteSentenceStatus.textContent = message;
+    }
+}
+
+async function refreshFavoriteState() {
+    const sentence = state.sentences[state.currentIndex];
+    if (!sentence) {
+        state.favoriteSentenceId = null;
+        state.favoriteSaved = false;
+        renderFavoriteState();
+        return;
+    }
+
+    const requestVersion = ++state.favoriteRequestVersion;
+    state.favoriteBusy = true;
+    renderFavoriteState("Đang kiểm tra trạng thái lưu...");
+
+    try {
+        const url = new URL("/api/favorite-sentences/status", window.location.origin);
+        url.searchParams.set("sentenceId", String(sentence.sentenceId));
+
+        const response = await fetch(url, { cache: "no-store" });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload.message || `Không kiểm tra được trạng thái lưu (${response.status}).`);
+        }
+        if (requestVersion !== state.favoriteRequestVersion) {
+            return;
+        }
+
+        state.favoriteSentenceId = payload.favoriteSentenceId ?? null;
+        state.favoriteSaved = Boolean(payload.isFavorite);
+        state.favoriteBusy = false;
+        renderFavoriteState(state.favoriteSaved ? "Câu này đã có trong mục yêu thích." : "");
+    } catch (error) {
+        if (requestVersion !== state.favoriteRequestVersion) {
+            return;
+        }
+
+        state.favoriteBusy = false;
+        state.favoriteSentenceId = null;
+        state.favoriteSaved = false;
+        renderFavoriteState(error.message || "Không kiểm tra được trạng thái lưu.", "is-error");
+    }
+}
+
+async function toggleFavoriteSentence() {
+    const sentence = state.sentences[state.currentIndex];
+    if (!sentence || state.favoriteBusy) {
+        return;
+    }
+
+    state.favoriteBusy = true;
+    renderFavoriteState(state.favoriteSaved ? "Đang bỏ lưu câu..." : "Đang lưu câu...");
+
+    try {
+        if (state.favoriteSaved && state.favoriteSentenceId) {
+            const response = await fetch(`/api/favorite-sentences/${state.favoriteSentenceId}`, {
+                method: "DELETE"
+            });
+            if (!response.ok) {
+                throw new Error(`Không thể bỏ lưu câu (${response.status}).`);
+            }
+
+            state.favoriteSentenceId = null;
+            state.favoriteSaved = false;
+            state.favoriteBusy = false;
+            renderFavoriteState("Đã bỏ lưu câu hiện tại.", "is-success");
+            showToast("Đã bỏ lưu câu yêu thích.");
+            return;
+        }
+
+        const response = await fetch("/api/favorite-sentences", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                sentenceId: sentence.sentenceId,
+                text: sentence.text,
+                translation: sentence.translation ?? null,
+                learningMode: window.__learningMode || null,
+                lessonTitle: state.lessonData?.title || null
+            })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload.message || `Không thể lưu câu (${response.status}).`);
+        }
+
+        state.favoriteSentenceId = payload.item?.favoriteSentenceId ?? null;
+        state.favoriteSaved = true;
+        state.favoriteBusy = false;
+        renderFavoriteState(
+            payload.alreadySaved ? "Câu này đã có trong mục yêu thích." : "Đã lưu câu hiện tại.",
+            "is-success");
+        showToast(payload.alreadySaved ? "Câu này đã được lưu trước đó." : "Đã lưu câu yêu thích.");
+    } catch (error) {
+        state.favoriteBusy = false;
+        renderFavoriteState(error.message || "Không thể cập nhật mục yêu thích.", "is-error");
     }
 }
 

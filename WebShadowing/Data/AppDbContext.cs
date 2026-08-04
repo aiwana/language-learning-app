@@ -337,6 +337,7 @@ public class AppDbContext : DbContext
             entity.Property(v => v.ReviewCount).HasDefaultValue(0);
             entity.ToTable("Vocabulary_Items", table =>
             {
+                table.HasCheckConstraint("CK_VocabularyItems_SourceType", "source_type IN ('lesson_sentence','ai_snapshot')");
                 table.HasCheckConstraint("CK_VocabularyItems_ReviewStatus", "review_status IN ('active','mastered')");
                 table.HasCheckConstraint("CK_VocabularyItems_ReviewCount", "review_count >= 0");
             });
@@ -348,10 +349,17 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<FavoriteSentence>(entity =>
         {
-            entity.HasIndex(f => new { f.UserId, f.SentenceId }).IsUnique();
+            entity.HasIndex(f => new { f.UserId, f.SourceType, f.SourceKey }).IsUnique();
+            entity.ToTable("Favorite_Sentences", table =>
+            {
+                table.HasCheckConstraint("CK_FavoriteSentences_SourceType", "source_type IN ('lesson_sentence','ai_snapshot')");
+                table.HasCheckConstraint("CK_FavoriteSentences_Source", "(CASE WHEN sentence_id IS NULL THEN 0 ELSE 1 END + CASE WHEN saved_segment_id IS NULL THEN 0 ELSE 1 END) <= 1");
+            });
             entity.HasOne(f => f.User).WithMany().HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(f => f.Sentence).WithMany().HasForeignKey(f => f.SentenceId)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(f => f.SavedSegment).WithMany().HasForeignKey(f => f.SavedSegmentId)
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
