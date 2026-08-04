@@ -11,8 +11,9 @@ public class CourseLibraryViewModel
 
     public IReadOnlyList<CourseLibraryDto> CurriculumCourses { get; set; } = [];
     public IReadOnlyList<CourseLibraryDto> VideoBankCourses { get; set; } = [];
+    public IReadOnlyList<SavedAiLessonDto> SavedAiLessons { get; set; } = [];
 
     public bool HasCurriculum => CurriculumCourses.Count > 0;
     public bool HasVideoBank => VideoBankCourses.Count > 0;
-    public bool HasAnyContent => HasCurriculum || HasVideoBank;
+    public bool HasAnyContent => HasCurriculum || HasVideoBank || SavedAiLessons.Count > 0;
 }

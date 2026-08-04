@@ -1,0 +1,50 @@
+[
+  {
+    "sentence_order": 1,
+    "text": "Have you heard about the new facial recognition technology at our school?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 2,
+    "text": "Yes, I have. We won't need student ID cards anymore. The cameras will scan our faces.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 3,
+    "text": "Do you think it's a good idea?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 4,
+    "text": "Definitely. It's faster and more secure.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 5,
+    "text": "But what about privacy? I'm worried about who will have access to our data.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 6,
+    "text": "The school says the data is encrypted and safe.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 7,
+    "text": "Technology is changing everything. I read that scientists are developing biometric sensors to monitor our health.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 8,
+    "text": "Yes, those sensors can warn us before we get sick. Science and technology are really improving our lives.",
+    "translation": null,
+    "ipa": null
+  }
+]

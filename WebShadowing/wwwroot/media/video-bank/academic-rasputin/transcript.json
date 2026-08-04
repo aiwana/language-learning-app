@@ -1,0 +1,626 @@
+[
+  {
+    "sentence_order": 1,
+    "start_time": 7.107,
+    "end_time": 10.247,
+    "text": "On a cold winter night in 1916,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 2,
+    "start_time": 10.247,
+    "end_time": 15.016,
+    "text": "Felix Yusupov anxiously prepared to pick up his dinner guest.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 3,
+    "start_time": 15.016,
+    "end_time": 19.046,
+    "text": "If all went as planned, his guest would be dead by morning,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 4,
+    "start_time": 19.046,
+    "end_time": 24.306,
+    "text": "though four others had already tried and failed to finish him off.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 5,
+    "start_time": 24.306,
+    "end_time": 27.476,
+    "text": "The Russian monarchy was on the brink of collapse,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 6,
+    "start_time": 27.476,
+    "end_time": 30.335,
+    "text": "and to Yusupov and his fellow aristocrats,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 7,
+    "start_time": 30.335,
+    "end_time": 35.118,
+    "text": "the holy man they’d invited to dinner was the single cause of it all.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 8,
+    "start_time": 35.118,
+    "end_time": 36.438,
+    "text": "But who was he,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 9,
+    "start_time": 36.438,
+    "end_time": 41.945,
+    "text": "and how could a single monk be to blame for the fate of an empire?",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 10,
+    "start_time": 41.945,
+    "end_time": 46.37,
+    "text": "Grigori Yefimovich Rasputin began his life in Siberia,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 11,
+    "start_time": 46.37,
+    "end_time": 49.73,
+    "text": "born in 1869 to a peasant family.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 12,
+    "start_time": 49.73,
+    "end_time": 53.445,
+    "text": "He might have lived a life of obscurity in his small village,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 13,
+    "start_time": 53.445,
+    "end_time": 56.877,
+    "text": "if not for his conversion to the Russian Orthodox Church",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 14,
+    "start_time": 56.877,
+    "end_time": 58.687,
+    "text": "in the 1890s.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 15,
+    "start_time": 58.687,
+    "end_time": 61.797,
+    "text": "Inspired by the humbled monks that wandered endlessly",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 16,
+    "start_time": 61.797,
+    "end_time": 63.988,
+    "text": "from holy site to holy site,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 17,
+    "start_time": 63.988,
+    "end_time": 68.076,
+    "text": "he spent years on pilgrimages across Russia.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 18,
+    "start_time": 68.076,
+    "end_time": 73.466,
+    "text": "On his travels, strangers were captivated by Rasputin’s magnetic presence.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 19,
+    "start_time": 73.466,
+    "end_time": 78.658,
+    "text": "Some even believed he had mystical gifts of prediction and healing.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 20,
+    "start_time": 78.658,
+    "end_time": 83.208,
+    "text": "Despite Rasputin’s heavy drinking, petty theft, and promiscuity,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 21,
+    "start_time": 83.208,
+    "end_time": 87.409,
+    "text": "his reputation as a monk quickly spread beyond Siberia",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 22,
+    "start_time": 87.409,
+    "end_time": 92.305,
+    "text": "and attracted both laypeople and powerful Orthodox clergymen.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 23,
+    "start_time": 92.305,
+    "end_time": 95.285,
+    "text": "When he finally reached the capital, St. Petersburg,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 24,
+    "start_time": 95.285,
+    "end_time": 98.229,
+    "text": "Rasputin used his charisma and connections",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 25,
+    "start_time": 98.229,
+    "end_time": 102.997,
+    "text": "to win favor with the imperial family’s spiritual advisor.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 26,
+    "start_time": 102.997,
+    "end_time": 104.957,
+    "text": "In November 1905,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 27,
+    "start_time": 104.957,
+    "end_time": 110.017,
+    "text": "Rasputin was finally introduced to Russian Tsar Nicholas II.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 28,
+    "start_time": 110.017,
+    "end_time": 114.794,
+    "text": "Nicholas and his wife Alexandra devoutly believed in the Orthodox Church,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 29,
+    "start_time": 114.794,
+    "end_time": 118.244,
+    "text": "as well as in mysticism and supernatural powers,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 30,
+    "start_time": 118.244,
+    "end_time": 122.143,
+    "text": "and this Siberian holy man had them transfixed.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 31,
+    "start_time": 122.143,
+    "end_time": 126.844,
+    "text": "It was a particularly tumultuous period for Russia and their family.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 32,
+    "start_time": 126.844,
+    "end_time": 129.912,
+    "text": "The monarchy was barely clinging to control",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 33,
+    "start_time": 129.912,
+    "end_time": 132.592,
+    "text": "after the Revolution of 1905.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 34,
+    "start_time": 132.592,
+    "end_time": 136.902,
+    "text": "Their political struggles were only intensified by personal turmoil:",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 35,
+    "start_time": 136.902,
+    "end_time": 139.188,
+    "text": "Alexei, the heir to the throne,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 36,
+    "start_time": 139.188,
+    "end_time": 142.984,
+    "text": "had a life-threatening blood disease called hemophilia.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 37,
+    "start_time": 142.984,
+    "end_time": 147.114,
+    "text": "When Alexei suffered a severe medical crisis in 1912,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 38,
+    "start_time": 147.114,
+    "end_time": 151.62,
+    "text": "Rasputin advised his parents to reject treatment from doctors.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 39,
+    "start_time": 151.62,
+    "end_time": 156.13,
+    "text": "Alexei’s health improved, cementing the royal family’s belief",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 40,
+    "start_time": 156.13,
+    "end_time": 159.243,
+    "text": "that Rasputin had magical healing powers,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 41,
+    "start_time": 159.243,
+    "end_time": 163.694,
+    "text": "and guaranteeing his privileged place on the royal court.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 42,
+    "start_time": 163.694,
+    "end_time": 167.17,
+    "text": "Today, we know that the doctors had prescribed aspirin,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 43,
+    "start_time": 167.17,
+    "end_time": 169.684,
+    "text": "a drug that worsens hemophilia.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 44,
+    "start_time": 169.684,
+    "end_time": 173.149,
+    "text": "After this incident, Rasputin made a prophecy:",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 45,
+    "start_time": 173.149,
+    "end_time": 176.834,
+    "text": "if he died, or the royal family deserted him,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 46,
+    "start_time": 176.834,
+    "end_time": 181.382,
+    "text": "both their son and their crown would soon be gone.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 47,
+    "start_time": 181.382,
+    "end_time": 185.853,
+    "text": "Outside the royal family, people had mixed views on Rasputin.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 48,
+    "start_time": 185.853,
+    "end_time": 189.183,
+    "text": "On one hand, peasants regarded him as one of their own,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 49,
+    "start_time": 189.183,
+    "end_time": 193.196,
+    "text": "amplifying their often-unheard voice to the monarchy.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 50,
+    "start_time": 193.196,
+    "end_time": 197.286,
+    "text": "But nobles and clergymen came to despise his presence.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 51,
+    "start_time": 197.286,
+    "end_time": 200.308,
+    "text": "Rasputin never ceased his scandalous behavior,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 52,
+    "start_time": 200.308,
+    "end_time": 203.376,
+    "text": "and they were skeptical of his so-called powers",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 53,
+    "start_time": 203.376,
+    "end_time": 206.362,
+    "text": "and thought he was corrupting the royal family.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 54,
+    "start_time": 206.362,
+    "end_time": 208.146,
+    "text": "By the end of World War I,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 55,
+    "start_time": 208.146,
+    "end_time": 211.476,
+    "text": "they were convinced the only way to maintain order",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 56,
+    "start_time": 211.476,
+    "end_time": 215.296,
+    "text": "was to eliminate this sham of a holy man.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 57,
+    "start_time": 215.296,
+    "end_time": 216.755,
+    "text": "With this conviction,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 58,
+    "start_time": 216.755,
+    "end_time": 220.495,
+    "text": "Yusupov began to plot Rasputin’s assassination.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 59,
+    "start_time": 220.495,
+    "end_time": 223.405,
+    "text": "Though the exact details remain mysterious,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 60,
+    "start_time": 223.405,
+    "end_time": 228.435,
+    "text": "our best guess at how it all unfolded comes from Yusupov’s memoirs.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 61,
+    "start_time": 228.435,
+    "end_time": 233.897,
+    "text": "He served Rasputin a number of pastries, believing they contained cyanide.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 62,
+    "start_time": 233.897,
+    "end_time": 236.277,
+    "text": "But unbeknownst to Yusupov,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 63,
+    "start_time": 236.277,
+    "end_time": 238.928,
+    "text": "one of his co-conspirators had a change of heart,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 64,
+    "start_time": 238.928,
+    "end_time": 242.468,
+    "text": "and substituted the poison with a harmless substance.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 65,
+    "start_time": 242.468,
+    "end_time": 247.348,
+    "text": "To Yusupov’s shock, Rasputin ate them without ill effect.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 66,
+    "start_time": 247.348,
+    "end_time": 251.548,
+    "text": "In desperation, he shot Rasputin at point-blank range.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 67,
+    "start_time": 251.548,
+    "end_time": 255.796,
+    "text": "But Rasputin recovered, punched his attacker, and fled.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 68,
+    "start_time": 255.796,
+    "end_time": 258.586,
+    "text": "Yusupov and his accomplices pursued him,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 69,
+    "start_time": 258.586,
+    "end_time": 261.956,
+    "text": "finally killing Rasputin with a bullet to the forehead",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 70,
+    "start_time": 261.956,
+    "end_time": 265.706,
+    "text": "and dumping his body in the Malaya Nevka river.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 71,
+    "start_time": 265.706,
+    "end_time": 268.87,
+    "text": "But far from stabilizing the monarchy’s authority,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 72,
+    "start_time": 268.87,
+    "end_time": 272.126,
+    "text": "Rasputin’s death enraged the peasantry.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 73,
+    "start_time": 272.126,
+    "end_time": 273.876,
+    "text": "Just as Rasputin prophesied,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 74,
+    "start_time": 273.876,
+    "end_time": 277.826,
+    "text": "his murder was swiftly followed by that of the royal family.",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 75,
+    "start_time": 277.826,
+    "end_time": 280.156,
+    "text": "Whether the downfall of the Russian monarchy",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 76,
+    "start_time": 280.156,
+    "end_time": 282.416,
+    "text": "was a product of the monk’s curse,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 77,
+    "start_time": 282.416,
+    "end_time": 286.086,
+    "text": "or the result of political tensions decades in the making,",
+    "translation": null,
+    "ipa": null
+  },
+  {
+    "sentence_order": 78,
+    "start_time": 286.086,
+    "end_time": 288.306,
+    "text": "well, we may never know.",
+    "translation": null,
+    "ipa": null
+  }
+]
