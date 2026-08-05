@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * Chức năng: tab Shadowing Studio — đồng bộ media/timeline, chọn câu, ghi âm bằng
+ * MediaRecorder, nghe lại, upload chấm phát âm và tra nghĩa.
+ * Phụ trách chính: Minh Anh. Minh phối hợp API scoring/persistence/từ sai liên tiếp.
+ */
 // Playback and session progress stay in the browser. Scoring, speech recognition,
 // dictionary meaning, and IPA enrichment are provided by replaceable backend adapters.
 
@@ -17,7 +22,6 @@ const state = {
     currentIndex: 0,
     unlockedIndex: 0,
     completedIndexes: new Set(),
-    activeTab: "shadowing",
     aiAvailable: window.__pronunciationAiConfigured !== false,
     isRecording: false,
     mediaRecorder: null,
@@ -38,8 +42,6 @@ const state = {
     subtitleButtons: [],
     dictController: null,
     attemptIdempotencyKey: null,
-    answerIdempotencyKey: null,
-    answerController: null,
 };
 
 const dom = {};
@@ -59,6 +61,7 @@ function initDom() {
     dom.targetTranslation = document.getElementById("target-translation");
     dom.sentenceTimeInfo = document.getElementById("sentence-time-info");
     dom.playSampleBtn = document.getElementById("play-sample-btn");
+    dom.playSampleBtnLabel = document.querySelector("#play-sample-btn span");
     dom.recordBtn = document.getElementById("record-btn");
     dom.recordBtnLabel = document.getElementById("record-btn-label");
     dom.playbackBtn = document.getElementById("playback-btn");
@@ -79,17 +82,6 @@ function initDom() {
     dom.dictWord = document.getElementById("dict-word");
     dom.dictIpa = document.getElementById("dict-ipa");
     dom.dictMeaning = document.getElementById("dict-meaning");
-    dom.shadowingPanel = document.getElementById("shadowing-tab-panel");
-    dom.answerPanel = document.getElementById("answer-tab-panel");
-    dom.answerModeKicker = document.getElementById("answer-mode-kicker");
-    dom.answerModeTitle = document.getElementById("answer-mode-title");
-    dom.answerModeInstruction = document.getElementById("answer-mode-instruction");
-    dom.answerTarget = document.getElementById("answer-target");
-    dom.answerPlayBtn = document.getElementById("answer-play-btn");
-    dom.answerInput = document.getElementById("practice-answer-input");
-    dom.answerSubmitBtn = document.getElementById("submit-practice-answer");
-    dom.answerNextBtn = document.getElementById("next-practice-answer");
-    dom.answerStatus = document.getElementById("practice-answer-status");
 }
 
 // =====================================================================
@@ -114,150 +106,10 @@ function initTabBar() {
 }
 
 function switchTab(tabName) {
-    if (tabName === "ai-dialogue") {
-        showToast("Tính năng VIP sẽ được mở ở phiên bản sau.");
-        return;
-    }
-    if (!["shadowing", "dictation", "ipa-match"].includes(tabName)) return;
-
-    state.activeTab = tabName;
-    document.querySelectorAll(".lesson-mode-tab").forEach(tab => {
-        const active = tab.dataset.tab === tabName;
-        tab.classList.toggle("is-active", active);
-        tab.setAttribute("aria-selected", String(active));
-        tab.setAttribute("tabindex", active ? "0" : "-1");
-    });
-
-    const isShadowing = tabName === "shadowing";
-    document.querySelectorAll("[data-shadowing-content]").forEach(element => {
-        element.classList.toggle("d-none", !isShadowing);
-    });
-    dom.answerPanel?.classList.toggle("d-none", isShadowing);
-    state.answerController?.abort();
-    state.answerController = null;
-    state.answerIdempotencyKey = null;
-
-    if (!isShadowing) {
-        resetRecordingState({ resetScore: false });
-        renderAnswerPrompt();
-        dom.answerInput?.focus();
-    }
-}
-
-function renderAnswerPrompt() {
-    const sentence = state.sentences[state.currentIndex];
-    if (!sentence || state.activeTab === "shadowing") return;
-
-    const isDictation = state.activeTab === "dictation";
-    if (dom.answerModeKicker) {
-        dom.answerModeKicker.textContent = isDictation ? "Nghe chép" : "Ghép IPA";
-    }
-    if (dom.answerModeTitle) {
-        dom.answerModeTitle.textContent = isDictation
-            ? "Nhập câu bạn nghe được"
-            : "Nhập phiên âm IPA của câu";
-    }
-    if (dom.answerModeInstruction) {
-        dom.answerModeInstruction.textContent = isDictation
-            ? "Nghe câu mẫu rồi nhập chính xác nội dung. Dấu câu và chữ hoa không ảnh hưởng kết quả."
-            : "Nhập phiên âm IPA tương ứng với câu bên dưới. Dấu / hoặc [ ] là tùy chọn.";
-    }
-    if (dom.answerTarget) {
-        dom.answerTarget.textContent = isDictation
-            ? `Câu ${state.currentIndex + 1} / ${state.sentences.length}`
-            : sentence.text;
-    }
-    if (dom.answerInput) {
-        dom.answerInput.value = "";
-        dom.answerInput.placeholder = isDictation
-            ? "Nhập nội dung bạn nghe được..."
-            : "/phiên âm IPA/";
-    }
-    dom.answerPlayBtn?.classList.toggle("d-none", !isDictation);
-    if (dom.answerSubmitBtn) {
-        dom.answerSubmitBtn.disabled = !isDictation && !sentence.ipa;
-    }
-    dom.answerNextBtn?.classList.add("d-none");
-    if (dom.answerStatus) {
-        dom.answerStatus.className = "lesson-answer-status";
-        dom.answerStatus.textContent = !isDictation && !sentence.ipa
-            ? "Câu này chưa có dữ liệu IPA để chấm."
-            : "";
-    }
-    state.answerIdempotencyKey = null;
-}
-
-async function submitPracticeAnswer() {
-    const sentence = state.sentences[state.currentIndex];
-    const answer = dom.answerInput?.value.trim() ?? "";
-    if (!sentence || !["dictation", "ipa-match"].includes(state.activeTab)) return;
-    if (!answer) {
-        if (dom.answerStatus) dom.answerStatus.textContent = "Vui lòng nhập câu trả lời.";
-        return;
-    }
-
-    state.answerController?.abort();
-    state.answerController = new AbortController();
-    state.answerIdempotencyKey ??= createIdempotencyKey(`${state.activeTab}-attempt`);
-    if (dom.answerSubmitBtn) dom.answerSubmitBtn.disabled = true;
-    if (dom.answerStatus) {
-        dom.answerStatus.className = "lesson-answer-status";
-        dom.answerStatus.textContent = "Đang kiểm tra...";
-    }
-
-    try {
-        const response = await fetch("/api/practice/evaluate-answer", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Idempotency-Key": state.answerIdempotencyKey
-            },
-            body: JSON.stringify({
-                lessonId: state.lessonData.lessonId,
-                sentenceId: sentence.sentenceId,
-                practiceTab: state.activeTab,
-                answer
-            }),
-            signal: state.answerController.signal
-        });
-        const payload = await response.json().catch(() => ({}));
-        state.answerIdempotencyKey = null;
-        if (!response.ok) {
-            throw new Error(payload.message || `Không thể kiểm tra câu trả lời (${response.status}).`);
-        }
-
-        window.applyGamificationTransaction?.(payload.gamification);
-        if (dom.answerStatus) {
-            dom.answerStatus.className = `lesson-answer-status ${payload.passed ? "is-success" : "is-error"}`;
-            dom.answerStatus.textContent = payload.feedback
-                || (payload.passed ? "Chính xác!" : "Chưa chính xác, hãy thử lại.");
-        }
-        dom.answerNextBtn?.classList.toggle("d-none", !payload.passed);
-        if (payload.passed) {
-            state.unlockedIndex = Math.max(
-                state.unlockedIndex,
-                Math.min(state.currentIndex + 1, state.sentences.length - 1));
-        }
-    } catch (error) {
-        if (error.name === "AbortError") return;
-        if (dom.answerStatus) {
-            dom.answerStatus.className = "lesson-answer-status is-error";
-            dom.answerStatus.textContent = error.message || "Mất kết nối. Hãy thử lại.";
-        }
-    } finally {
-        if (dom.answerSubmitBtn) {
-            dom.answerSubmitBtn.disabled = state.activeTab === "ipa-match" && !sentence.ipa;
-        }
-    }
-}
-
-function advanceAnswerSentence() {
-    if (state.currentIndex >= state.sentences.length - 1) {
-        showToast("Bạn đã hoàn thành tất cả câu trong chế độ này!");
-        return;
-    }
-    state.unlockedIndex = Math.max(state.unlockedIndex, state.currentIndex + 1);
-    selectSentence(state.currentIndex + 1);
+    if (tabName === "shadowing") return;
+    showToast(tabName === "ai-dialogue"
+        ? "Tính năng VIP sẽ được mở ở phiên bản sau."
+        : "Tính năng này sắp ra mắt.");
 }
 
 function initLesson(lesson) {
@@ -300,7 +152,8 @@ function initMediaPlayer(lesson) {
     const audioWrap = dom.audioPlayerWrap;
     const audioEl = dom.audio;
 
-    const isAudioOnly = Boolean(lesson.media?.audioUrl) && !lesson.media?.youtubeId;
+    const hasSentenceAudio = Boolean(lesson.sentences?.some(sentence => sentence.audioUrl));
+    const isAudioOnly = (Boolean(lesson.media?.audioUrl) || hasSentenceAudio) && !lesson.media?.youtubeId;
     const isVideoEnabled = Boolean(lesson.media?.youtubeId);
 
     topGrid?.classList.toggle("is-audio-only", isAudioOnly);
@@ -315,6 +168,7 @@ function initMediaPlayer(lesson) {
         audioEl.src = lesson.media.audioUrl;
         audioWrap?.classList.remove("d-none");
     }
+    if (audioEl && hasSentenceAudio) audioWrap?.classList.remove("d-none");
 }
 
 function initYoutubePlayback(lesson) {
@@ -355,17 +209,30 @@ function playCurrentSentenceAudio() {
     const sentence = state.sentences[state.currentIndex];
     if (!sentence) return;
 
-    // Guard: warn user if no timestamp available (P1 fix - audio/video no-timestamp case)
-    if (!hasTimestamp(sentence)) {
+    if (sentence.audioUrl && dom.audio) {
+        dom.audio.src = sentence.audioUrl;
+        dom.audio.currentTime = 0;
+        dom.audio.play().catch(() => showToast("Không phát được audio của câu này."));
+        return;
+    }
+
+    if (state.lessonData.media?.audioUrl && !state.lessonData.media?.youtubeId) {
+        playAudioSegment(sentence);
+        return;
+    }
+
+    if (state.lessonData.media?.youtubeId && !hasTimestamp(sentence)) {
         showToast("Câu này chưa có timestamp. Phát từ vị trí hiện tại.");
     }
 
     if (state.lessonData.media?.youtubeId) {
         playYoutubeSegment(sentence);
-    } else if (state.lessonData.media?.audioUrl) {
-        playAudioSegment(sentence);
     } else {
-        showToast("Bài này chưa có audio mẫu.");
+        const utterance = new SpeechSynthesisUtterance(sentence.text);
+        utterance.lang = window.__initialLesson?.course?.learningMode === "academic" ? "en-GB" : "en-US";
+        utterance.rate = 0.88;
+        window.speechSynthesis?.cancel();
+        window.speechSynthesis?.speak(utterance);
     }
 }
 
@@ -431,6 +298,8 @@ function playAudioSegment(sentence) {
     const timed = hasTimestamp(sentence);
     if (timed) {
         audio.currentTime = Math.max(0, sentence.startTime);
+    } else if (audio.ended) {
+        audio.currentTime = 0;
     }
 
     audio.play().catch(err => {
@@ -587,9 +456,6 @@ function selectSentence(idx) {
     state.currentIndex = idx;
     renderCurrentSentence(state.sentences[idx]);
     updateSubtitleListUI();
-    if (state.activeTab !== "shadowing") {
-        renderAnswerPrompt();
-    }
 }
 
 function renderCurrentSentence(sentence) {
@@ -631,7 +497,17 @@ function renderCurrentSentence(sentence) {
         }
     }
 
+    if (dom.playSampleBtnLabel) {
+        dom.playSampleBtnLabel.textContent = isUntimedAudioLesson() ? "Phát audio" : "Nghe mẫu";
+    }
+
     if (dom.playSampleBtn) dom.playSampleBtn.disabled = false;
+}
+
+function isUntimedAudioLesson() {
+    return Boolean(state.lessonData?.media?.audioUrl)
+        && !state.lessonData?.media?.youtubeId
+        && !state.sentences.some(hasTimestamp);
 }
 
 async function hydrateWordIpa(words, requestVersion) {
@@ -867,7 +743,11 @@ async function evaluateCurrentRecording() {
     formData.append("lessonId", String(state.lessonData.lessonId));
     formData.append("sentenceId", String(sentence.sentenceId));
     formData.append("sentenceIndex", String(state.currentIndex));
+    if (sentence.savedSegmentId) formData.append("savedSegmentId", String(sentence.savedSegmentId));
+    if (state.lessonData.aiPreviewId) formData.append("previewId", state.lessonData.aiPreviewId);
+    formData.append("learningMode", window.__learningMode ?? "casual");
     state.attemptIdempotencyKey ??= createIdempotencyKey("attempt");
+    formData.append("idempotencyKey", state.attemptIdempotencyKey);
     if (state.audioBlob) {
         const isWav = state.audioBlob.type === "audio/wav";
         formData.append("audio", state.audioBlob, isWav ? "recording.wav" : "recording.webm");
@@ -876,7 +756,9 @@ async function evaluateCurrentRecording() {
     try {
         const response = await fetch("/api/practice/evaluate-shadowing", {
             method: "POST",
-            headers: { "Idempotency-Key": state.attemptIdempotencyKey },
+            headers: {
+                "Idempotency-Key": state.attemptIdempotencyKey
+            },
             body: formData,
             signal: state.evaluationController.signal
         });
@@ -1043,7 +925,6 @@ function resetRecordingState({ resetScore }) {
     state.audioBlob = null;
     state.audioUrl = null;
     state.audioPlayback = null;
-    state.attemptIdempotencyKey = null;
 
     setRecordBtnState("idle");
     if (dom.playbackBtn) dom.playbackBtn.classList.add("d-none");
@@ -1214,3 +1095,22 @@ function showPageError(message) {
     if (el) el.classList.remove("d-none");
     if (dom.lessonStudio) dom.lessonStudio.classList.add("d-none");
 }
+
+window.lessonPlayer = {
+    getCurrentIndex: () => state.currentIndex,
+    getCurrentSentence: () => state.sentences[state.currentIndex] ?? null,
+    playSentence(index) {
+        if (index < 0 || index >= state.sentences.length) return;
+        const previous = state.currentIndex;
+        state.currentIndex = index;
+        playCurrentSentenceAudio();
+        state.currentIndex = previous;
+    },
+    stop() {
+        stopYoutubeSegment({ pauseOnly: true });
+        if (dom.audio) {
+            dom.audio.pause();
+            clearTimeout(state.audioStopTimer);
+        }
+    }
+};

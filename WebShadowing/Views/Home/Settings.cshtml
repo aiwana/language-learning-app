@@ -1,20 +1,62 @@
+@using Microsoft.Extensions.Options
+@* Chức năng: trang Tài khoản — hồ sơ, learning settings, auto-save AI, theme, VIP và logout.
+   Phụ trách chính: Hải Anh. Minh phối hợp auth/policy/payment; payment production chưa hoàn thiện. *@
+@using WebShadowing.Models
+@inject IOptions<PaymentOptions> PaymentOptions
 @{
     ViewData["Title"] = "Tài khoản";
 }
 
-<div class="animate-slide-up py-2">
-    <div class="surface-card py-4 px-5 py-md-5 px-md-6">
-        <p class="section-label section-label-violet mb-1">Tài khoản</p>
-        <h1 class="h3 fw-extrabold mb-2">Cài đặt &amp; hồ sơ</h1>
-        <p class="text-body-muted small mb-0">Coming soon — nội dung đầy đủ sẽ có ở milestone M2.</p>
+<div class="animate-slide-up settings-page account-dashboard" data-open-checkout="@(Context.Request.Query["checkout"] == "vip" ? "true" : "false")">
+    <section class="account-main-panel surface-card" aria-labelledby="account-settings-title">
+        <header class="account-panel-heading">
+            <div>
+                <p class="section-label section-label-violet mb-1">Tài khoản</p>
+                <h1 id="account-settings-title">Cài đặt hồ sơ &amp; mục tiêu học</h1>
+            </div>
+            <p id="settings-global-status" class="settings-status" role="status" aria-live="polite"></p>
+        </header>
 
-        <hr class="my-4 border-secondary opacity-25" />
+        <form id="profile-form" class="account-form account-profile-form">
+            <div class="account-field"><label for="profile-full-name">Tên thành viên</label><input id="profile-full-name" class="form-control" required minlength="2" maxlength="255" autocomplete="name" /></div>
+            <div class="account-field"><label for="profile-phone">Số điện thoại liên hệ</label><input id="profile-phone" class="form-control" maxlength="20" autocomplete="tel" placeholder="090 123 4567" /></div>
+            <div class="account-field account-field--wide"><label for="profile-email">Địa chỉ email</label><input id="profile-email" class="form-control" readonly aria-readonly="true" /><small>Để bảo mật, địa chỉ email đăng nhập không thể thay đổi.</small></div>
 
-        <div class="d-flex flex-wrap gap-3 align-items-center settings-mobile-tools">
-            <button class="btn btn-outline-secondary btn-sm btn-theme-toggle d-md-none" type="button" aria-label="Chuyển dark/light mode">
-                <span class="theme-toggle-label-light">🌙 Giao diện tối</span>
-                <span class="theme-toggle-label-dark d-none">☀️ Giao diện sáng</span>
-            </button>
-        </div>
-    </div>
+            <div class="account-field"><label for="learning-mode-setting">Khóa học / chế độ mong muốn</label><select id="learning-mode-setting" class="form-select"><option value="casual">Giao tiếp</option><option value="academic">Học thuật</option><option value="professional">Công việc</option></select></div>
+            <div class="account-field"><label for="pronunciation-target">Mục tiêu điểm số phát âm</label><select id="pronunciation-target" class="form-select"><option value="50">50% · Giao tiếp trôi chảy</option><option value="70">70% · Dễ hiểu, rõ ràng</option><option value="90">90% · Gần chuẩn bản ngữ</option></select></div>
+            <div class="account-field account-field--wide"><span class="account-field-label">Giọng phát âm mục tiêu</span><div class="account-accent-options"><label><input type="radio" name="accent-setting" value="en-us" /><span>US Giọng Mỹ <small>General American</small></span></label><label><input type="radio" name="accent-setting" value="en-gb" /><span>GB Giọng Anh <small>RP / British</small></span></label></div></div>
+            <div class="account-learning-footer">
+                <label class="settings-switch"><input id="auto-save-ai" type="checkbox" role="switch" /><span><strong>Tự động lưu bài AI</strong><small>Lưu ngay sau khi tạo thành công.</small></span></label>
+                <p id="mode-policy-copy" class="settings-help"></p>
+                <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Lưu</button>
+            </div>
+            <select id="theme-setting" class="d-none" aria-hidden="true" tabindex="-1"><option value="system">Theo hệ thống</option><option value="light">Sáng</option><option value="dark">Tối</option></select>
+        </form>
+    </section>
+
+    <aside class="account-sidebar" aria-label="Trạng thái tài khoản">
+        <section id="vip-settings" class="surface-card account-side-card account-vip-card" aria-labelledby="vip-title">
+            <header><i data-lucide="badge-check"></i><h2 id="vip-title">Thành viên Pro VIP</h2></header>
+            <div class="account-vip-status"><i data-lucide="circle-check"></i><span><strong id="subscription-summary">Đang kiểm tra trạng thái gói...</strong><small>Phương thức thanh toán đang ở chế độ mô phỏng.</small></span></div>
+            <div class="vip-plan-selector" role="radiogroup" aria-label="Chu kỳ VIP"><label><input type="radio" name="vip-period" value="monthly" checked /><span><strong>Hàng tháng</strong><b>@PaymentOptions.Value.VipMonthlyPrice.ToString("N0") ₫</b></span></label><label><input type="radio" name="vip-period" value="yearly" /><span><strong>Hàng năm</strong><b>@PaymentOptions.Value.VipYearlyPrice.ToString("N0") ₫</b></span></label></div>
+            <div class="payment-actions"><button type="button" class="btn btn-primary" data-checkout-provider="momo">Kích hoạt MoMo</button><button type="button" class="btn btn-outline-primary" data-checkout-provider="zalopay">Kích hoạt ZaloPay</button><button type="button" id="cancel-subscription" class="btn btn-outline-secondary d-none">Hủy kích hoạt gói VIP</button></div>
+            <p id="payment-status" class="settings-help" role="status"></p>
+        </section>
+
+        <section class="surface-card account-side-card account-theme-card" aria-labelledby="theme-title">
+            <header><i data-lucide="moon-star"></i><h2 id="theme-title">Giao diện ứng dụng</h2></header>
+            <p>Chuyển đổi giao diện sáng hoặc tối để bảo vệ mắt khi học.</p>
+            <button type="button" id="theme-quick-toggle" class="btn btn-outline-primary"><i data-lucide="moon"></i> Chuyển giao diện</button>
+        </section>
+
+        <section class="surface-card account-side-card account-logout-card" aria-labelledby="logout-title">
+            <header><i data-lucide="log-out"></i><h2 id="logout-title">Đăng xuất tài khoản</h2></header>
+            <p>Đăng xuất khỏi thiết bị này để bảo mật dữ liệu học tập cá nhân.</p>
+            <form asp-controller="Account" asp-action="Logout" method="post">@Html.AntiForgeryToken()<button class="btn btn-outline-danger" type="submit"><i data-lucide="log-out"></i> Đăng xuất ngay</button></form>
+        </section>
+    </aside>
 </div>
+
+@section Scripts {
+    <script defer src="~/js/settings.js" asp-append-version="true"></script>
+}

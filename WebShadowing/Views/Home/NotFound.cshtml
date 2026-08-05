@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Không tìm thấy trang";
+}
+<main class="not-found-page">
+    <section class="not-found-card" aria-labelledby="not-found-title">
+        <div class="not-found-copy">
+            <span class="not-found-code">Lỗi 404</span>
+            <h1 id="not-found-title">Trang này không tồn tại</h1>
+            <p>Liên kết có thể đã thay đổi hoặc nội dung đã được chuyển sang một khu vực khác.</p>
+            <a class="not-found-action" asp-controller="Home" asp-action="Index">
+                <i data-lucide="library-big" aria-hidden="true"></i>
+                <span>Về thư viện bài học</span>
+                <i data-lucide="arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <div class="not-found-visual" aria-hidden="true">
+            <span class="not-found-orbit not-found-orbit-outer"></span>
+            <span class="not-found-orbit not-found-orbit-inner"></span>
+            <span class="not-found-dot"></span>
+            <span class="not-found-icon"><i data-lucide="map-off"></i></span>
+            <strong>404</strong>
+        </div>
+    </section>
+</main>

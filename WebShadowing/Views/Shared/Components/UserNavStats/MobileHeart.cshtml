@@ -1,7 +1,7 @@
 @model WebShadowing.Models.UserNavStatsViewModel
 
-<div class="stat-box heart-box" title="Số tim còn lại">
-    <span class="stat-value">@Model.Hearts</span>
+<div class="stat-box heart-box" title="@(Model.IsVip ? "Tim vô hạn" : "Số tim còn lại")" aria-label="@(Model.IsVip ? "Tim vô hạn" : $"Còn {Model.Hearts} tim")">
+    <span class="stat-value" data-gamification-stat="hearts">@(Model.IsVip ? "∞" : Model.Hearts)</span>
     <svg width="20" height="20" viewBox="12 10 14 13" fill="none" xmlns="http://www.w3.org/2000/svg" class="stat-icon" aria-hidden="true">
         <path d="M23.7544 18.1698C24.7474 17.1968 25.7537 16.0305 25.7537 14.5043C25.7537 13.5322 25.3675 12.5999 24.6801 11.9125C23.9927 11.225 23.0604 10.8389 22.0883 10.8389C20.9153 10.8389 20.0889 11.1721 19.0893 12.1718C18.0896 11.1721 17.2632 10.8389 16.0903 10.8389C15.1181 10.8389 14.1858 11.225 13.4984 11.9125C12.811 12.5999 12.4248 13.5322 12.4248 14.5043C12.4248 16.0371 13.4245 17.2034 14.4241 18.1698L19.0893 22.8349L23.7544 18.1698Z" fill="currentColor" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>

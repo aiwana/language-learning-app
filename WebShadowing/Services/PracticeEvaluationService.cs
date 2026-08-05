@@ -1,4 +1,7 @@
 using System.Text;
+// Chức năng: kiểm tra audio/đáp án, gọi provider chấm, lưu attempt/progress và kích hoạt gamification.
+// Phụ trách chính: Minh. Hải Anh viết kịch bản hồi quy; Minh Anh giữ tương thích contract Shadowing UI.
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using WebShadowing.Data;
@@ -111,6 +114,45 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
         var learningMode = await _userContext.GetLearningModeAsync(cancellationToken);
         var accent = await _userContext.GetAccentAsync(cancellationToken);
         var pronunciationTarget = await _userContext.GetPronunciationTargetAsync(cancellationToken);
+        if (command.SavedSegmentId.HasValue || command.PreviewId.HasValue)
+        {
+            string? referenceText = null;
+            string? referenceIpa = null;
+            if (command.SavedSegmentId is long savedSegmentId)
+            {
+                var saved = await _db.SavedAiLessonSegments.AsNoTracking()
+                    .Where(item => item.SavedSegmentId == savedSegmentId && item.SavedLesson.UserId == userId.Value)
+                    .Select(item => new { item.Text, item.Ipa, item.SavedLesson.LearningMode })
+                    .SingleOrDefaultAsync(cancellationToken);
+                if (saved is not null && saved.LearningMode == learningMode)
+                {
+                    referenceText = saved.Text;
+                    referenceIpa = saved.Ipa;
+                }
+            }
+            else if (command.PreviewId is Guid previewId)
+            {
+                var preview = await _db.AiLessonPreviews.AsNoTracking()
+                    .SingleOrDefaultAsync(item => item.PreviewId == previewId && item.UserId == userId.Value
+                        && item.ExpiresAt >= DateTime.UtcNow, cancellationToken);
+                var segments = preview is null ? null : JsonSerializer.Deserialize<List<AiLessonSegmentDto>>(preview.ContentJson);
+                var segment = segments?.ElementAtOrDefault(command.SentenceIndex);
+                if (preview?.LearningMode == learningMode && segment is not null)
+                {
+                    referenceText = segment.Text;
+                    referenceIpa = segment.Ipa;
+                }
+            }
+            if (string.IsNullOrWhiteSpace(referenceText))
+                throw new PronunciationAssessmentUnavailableException("Không tìm thấy câu AI hợp lệ.", StatusCodes.Status404NotFound, "ai_sentence_not_found");
+
+            var aiResult = await _assessmentService.AssessAsync(new PronunciationAssessmentRequest(
+                command.Audio, command.AudioFormat, accent, learningMode, referenceText, referenceIpa, pronunciationTarget), cancellationToken);
+            var aiScore = _scoreProfileService.ComputeOverallScore(learningMode, aiResult);
+            var balance = await _gamificationService.GetBalanceAsync(userId.Value, cancellationToken) ?? new GamificationBalanceDto();
+            return MapToDto(aiResult, aiScore, aiScore >= pronunciationTarget, pronunciationTarget, accent, learningMode,
+                new GamificationTransactionDto { Succeeded = true, Applied = false, TransactionType = "ai-preview-attempt", Balance = balance });
+        }
         var lessonResult = await _courseService.GetLessonAsync(
             command.LessonId,
             learningMode,
@@ -257,9 +299,23 @@ public sealed class PracticeEvaluationService : IPracticeEvaluationService
                 "invalid_sentence");
         }
 
-        var expectedAnswer = command.PracticeTab == PracticeTabs.Dictation
-            ? sentence.Text
-            : sentence.Ipa;
+        var expectedAnswer = sentence.Text;
+        if (command.PracticeTab == PracticeTabs.IpaMatch)
+        {
+            var ipaTokens = (sentence.Ipa ?? string.Empty)
+                .Trim().Trim('/', '[', ']')
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (command.TargetIndex is not int targetIndex
+                || targetIndex < 0
+                || targetIndex >= ipaTokens.Length)
+            {
+                throw new PronunciationAssessmentUnavailableException(
+                    "Từ cần ghép IPA không hợp lệ.",
+                    StatusCodes.Status400BadRequest,
+                    "invalid_ipa_target");
+            }
+            expectedAnswer = ipaTokens[targetIndex];
+        }
         if (string.IsNullOrWhiteSpace(expectedAnswer))
         {
             throw new PronunciationAssessmentUnavailableException(

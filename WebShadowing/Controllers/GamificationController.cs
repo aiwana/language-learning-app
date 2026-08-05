@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
+// Chức năng: đọc balance và đổi EXP lấy tim cho navbar/trang Tiến trình.
+// Phụ trách hiển thị và test: Hải Anh. Phụ trách rule/persistence: Minh.
 using Microsoft.AspNetCore.Mvc;
 using WebShadowing.Models;
 using WebShadowing.Services;

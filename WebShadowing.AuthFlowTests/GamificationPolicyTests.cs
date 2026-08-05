@@ -1,4 +1,6 @@
 using WebShadowing.Services;
+// Kịch bản test: reward, heart penalty, VIP và streak.
+// Phụ trách test: Hải Anh. Minh xác nhận gamification policy.
 using Xunit;
 
 namespace WebShadowing.AuthFlowTests;

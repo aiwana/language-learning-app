@@ -41,7 +41,7 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
 
         try
         {
-            var model = _configuration["OpenAI:AudioModel"] ?? "gpt-audio";
+            var model = _configuration["OpenAI:AudioModel"] ?? "gpt-audio-1.5";
             var payload = new
             {
                 model,
@@ -141,7 +141,7 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
         var json = StripCodeFence(content);
         using var document = JsonDocument.Parse(json);
         var root = document.RootElement;
-        var score = Math.Clamp(root.GetProperty("score").GetInt32(), 0, 100);
+        var score = TryGetOptionalInt(root, "score") ?? 0;
         var accuracyScore = TryGetOptionalInt(root, "accuracyScore");
         var fluencyScore = TryGetOptionalInt(root, "fluencyScore");
         var completenessScore = TryGetOptionalInt(root, "completenessScore");
@@ -215,6 +215,11 @@ public sealed class OpenAiPronunciationAssessmentService : IPronunciationAssessm
         return property.ValueKind switch
         {
             JsonValueKind.Number => Math.Clamp((int)Math.Round(property.GetDouble(), MidpointRounding.AwayFromZero), 0, 100),
+            JsonValueKind.String when double.TryParse(
+                property.GetString(),
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out var value) => Math.Clamp((int)Math.Round(value, MidpointRounding.AwayFromZero), 0, 100),
             _ => null
         };
     }

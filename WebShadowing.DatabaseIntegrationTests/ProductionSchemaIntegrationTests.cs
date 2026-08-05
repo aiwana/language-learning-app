@@ -1,4 +1,6 @@
 using System.Text.RegularExpressions;
+// Kịch bản test: nâng schema production có dữ liệu cũ, chạy lặp, constraint và concurrency.
+// Phụ trách test/seed: Hải Anh. Minh chịu trách nhiệm sửa schema/migration khi test thất bại.
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WebShadowing.Data;
@@ -215,6 +217,9 @@ public sealed class ProductionSchemaIntegrationTests
         DROP TABLE IF EXISTS dbo.VIP_Subscriptions;
         DROP TABLE IF EXISTS dbo.Practice_Attempts;
         DROP TABLE IF EXISTS dbo.Saved_AI_Lesson_Segments;
+        DROP TABLE IF EXISTS dbo.AI_Dialogue_Turns;
+        DROP TABLE IF EXISTS dbo.AI_Dialogue_Sessions;
+        DROP TABLE IF EXISTS dbo.AI_Lesson_Previews;
         DROP TABLE IF EXISTS dbo.User_Saved_Lessons;
         DROP TABLE IF EXISTS dbo.Mode_Change_History;
         DROP TABLE IF EXISTS dbo.Favorite_Sentences;

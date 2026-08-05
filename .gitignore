@@ -73,3 +73,39 @@ env/
 # 9. Workspace Temporary Folders & AI Agent Artifacts
 artifacts/
 tmp/
+
+# 10. Media do ứng dụng tự sinh lúc chạy (Storage:LocalPath trong appsettings)
+# Đây là audio TTS / bài học AI sinh ra trên từng máy, tái tạo được nên không commit.
+# Vẫn giữ lại thư mục để ứng dụng không lỗi khi ghi file lần đầu.
+WebShadowing/wwwroot/media/generated/*
+!WebShadowing/wwwroot/media/generated/.gitkeep
+
+# 11. File tải dở và file tạm (hay lẫn vào wwwroot/media khi tải tài liệu)
+*.crdownload
+*.part
+*.partial
+*.download
+*.tmp
+*.temp
+*.bak
+*~
+
+# 12. Output build/publish, package và test artifacts còn thiếu
+[Pp]ublish/
+*.nupkg
+*.snupkg
+packages/
+*.binlog
+*.trx
+*.coverage
+*.coveragexml
+[Tt]est[Rr]esult*/
+BenchmarkDotNet.Artifacts/
+
+# 13. IDE khác và file rác hệ điều hành
+.idea/
+*.swp
+*.swo
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/

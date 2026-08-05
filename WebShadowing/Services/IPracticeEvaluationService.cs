@@ -7,14 +7,17 @@ public sealed record EvaluateShadowingCommand(
     byte[] Audio,
     string AudioFormat,
     string ContentType,
-    string IdempotencyKey);
+    string IdempotencyKey,
+    long? SavedSegmentId = null,
+    Guid? PreviewId = null);
 
 public sealed record EvaluatePracticeAnswerCommand(
     long LessonId,
     long SentenceId,
     string PracticeTab,
     string Answer,
-    string IdempotencyKey);
+    string IdempotencyKey,
+    int? TargetIndex = null);
 
 public interface IPracticeEvaluationService
 {

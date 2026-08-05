@@ -1,184 +1,77 @@
-# ShadowSpeak AI - Web App Luyện Nói Tiếng Anh Theo Phương Pháp Shadowing Tích Hợp Trí Tuệ Nhân Tạo
+# WebShadowing
 
-**ShadowSpeak AI** là nền tảng hiện đại ứng dụng Trí tuệ nhân tạo (AI) kết hợp kiến trúc truyền tải dữ liệu thời gian thực giúp người học cải thiện kỹ năng phát âm, ngữ điệu và phản xạ tiếng Anh thông qua kỹ thuật nói đuổi (Shadowing).
+WebShadowing là ứng dụng web học tiếng Anh theo phương pháp shadowing. Ứng dụng hiện là một ASP.NET Core MVC modular monolith: trình duyệt ghi âm thành tệp, gửi request HTTP lên backend, backend gọi dịch vụ đánh giá phát âm và trả kết quả JSON. Repository hiện không dùng WebSocket, SignalR, Gemini Live hoặc microservices.
 
----
+## Công nghệ
 
-## 🌟 I. Tổng Quan Đề Tài & Điểm Đột Phá Công Nghệ
+- .NET 10 / ASP.NET Core MVC
+- Entity Framework Core 10 và SQL Server
+- Razor Views, JavaScript và CSS
+- Cookie authentication
+- Azure Speech Pronunciation Assessment; có thể cấu hình OpenAI làm fallback
+- xUnit cho unit test và integration test
 
-Cốt lõi của phương pháp Shadowing là người học sẽ nghe một đoạn âm thanh mẫu (giọng chuẩn), sau đó lập tức lặp lại (như một cái bóng) để rèn luyện cơ miệng và phản xạ cơ mặt. 
+## Chức năng hiện có
 
-### 🛑 Hạn chế của các hệ thống cũ:
-* Sử dụng giọng đọc nhân tạo (TTS) đều đều, vô cảm, thiếu ngữ điệu tự nhiên.
-* Cơ chế ghi âm ngắt quãng: Thu âm thành file ➡️ Gửi file lên Server ➡️ Chờ phản hồi (gây độ trễ cao, ngắt mạch học tập).
+- Thư viện khóa học, bài học, transcript và audio/video
+- Shadowing, dictation và IPA match
+- Từ vựng, câu yêu thích và theo dõi từ phát âm sai
+- Gamification: EXP, tim, streak và thống kê
+- AI lesson, TTS và AI dialogue
+- Hồ sơ, cài đặt và subscription/payment schema
 
-### ✨ Điểm đột phá của ShadowSpeak AI:
-1. **Âm thanh có ngữ điệu tự nhiên (Prosody/Intonation):** Tích hợp luồng âm thanh thế hệ mới giúp giọng đọc mẫu của AI có đầy đủ cảm xúc, nhấn nhá, lên giọng xuống giọng y hệt người thật bản xứ (Accent: US English).
-2. **Giao tiếp luồng song hướng thời gian thực (Bi-directional Streaming):** Loại bỏ hoàn toàn cơ chế thu âm bằng file thủ công. Hệ thống thiết lập đường truyền WebSockets song hướng chạy liên tục; giọng nói từ Micro của người học được băm nhỏ thành các gói dữ liệu và đẩy liên tục lên AI Server để phân tích ngay lập tức.
+Checkout kích hoạt VIP trực tiếp chỉ là luồng demo. Endpoint này tự động bị vô hiệu hóa ngoài môi trường `Development` và `Testing`; chưa được xem là payment production.
 
----
+## Chạy local
 
-## 📐 II. Sơ Đồ Kiến Trúc Luồng Dữ Liệu Thời Gian Thực (System Architecture)
+Yêu cầu .NET SDK 10 và SQL Server.
 
-Dự án áp dụng mô hình **WebSocket Proxy Gateway** bảo mật. Client giao tiếp với Backend C# thông qua giao thức SignalR/WebSockets nội bộ, Backend đóng vai trò trung chuyển luồng Stream nhị phân lên Google AI Server nhằm bảo mật tuyệt đối API Key.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as Người Học (Browser)
-    participant Client as Frontend (AudioContext/JS)
-    participant Server as Backend (.NET 8 Core MVC Proxy)
-    participant Gemini as Google AI Server (Gemini Live API)
-
-    User->>Client: Bật phòng luyện tập (Microphone On)
-    Client->>Server: Khởi tạo kết nối song hướng (WebSocket Connection)
-    Server->>Gemini: Thiết lập BidiGenerateContent Stream (wss://...)
-    Gemini-->>Server: Trả về luồng âm thanh mẫu (Audio Stream có ngữ điệu)
-    Server-->>Client: Trung chuyển gói âm thanh mẫu
-    Client-->>User: Phát âm thanh mẫu ra Loa/Tai nghe
-    
-    User->>Client: Thực hiện nói đuổi (Shadowing hành động nói)
-    Client->>Client: Băm nhỏ sóng âm từ Mic thành PCM 16-bit / 24kHz
-    Client->>Server: Stream gói dữ liệu âm thanh thô liên tục (Binary Chunks)
-    Server->>Gemini: Đẩy luồng dữ liệu âm thanh của người học lên AI Core
-    Gemini->>Gemini: Phân tích sóng âm & Đối chiếu dữ liệu gốc (IPA)
-    Gemini-->>Server: Trả về kết quả đánh giá chi tiết (Phát âm sai, Fluency, Chấm điểm)
-    Server-->>Client: Đổ dữ liệu JSON kết quả ra màn hình
-    Client-->>User: Hiển thị từ vựng phát âm sai (Màu đỏ) và điểm số thực tế
-
+```powershell
+Copy-Item WebShadowing/appsettings.Development.json.example WebShadowing/appsettings.Development.json
+dotnet restore WebShadowing/WebShadowing.slnx
+dotnet run --project WebShadowing/WebShadowing.csproj
 ```
 
----
+Cấu hình connection string trong `WebShadowing/appsettings.Development.json`, User Secrets hoặc biến môi trường. Không commit API key hay secret.
 
-## 🛠️ III. Kiến Trúc Mã Nguồn & Công Nghệ Sử Dụng
+Ứng dụng mặc định đọc cấu hình:
 
-### 1. Các công nghệ cốt lõi
+- `ConnectionStrings:DefaultConnection`
+- `AzureSpeech:ApiKey` và `AzureSpeech:Region`
+- `PronunciationAssessment:EnableOpenAiFallback`
+- `OpenAI:ApiKey`
+- các section `Gamification`, `Vocabulary`, `AiLesson`, `AiDialogue`, `Storage` và `Payment`
 
-* **Frontend Engine:** HTML5 Media Devices API, Tailwind CSS Engine v3, Razor View Engine, Lucide Icons.
-* **Backend Framework:** **ASP.NET Core MVC (.NET 8.0)** áp dụng nguyên lý Dependency Injection (DI) và lập trình bất đồng bộ (`async/await`).
-* **Database Management:** **Microsoft SQL Server** kết hợp Entity Framework Core (Code-First) quản lý cơ sở dữ liệu quan hệ chặt chẽ.
+## Database
 
-### 2. Cấu Trúc Thư Mục Dự Án Chuẩn Doanh Nghiệp
+Schema hiện được quản lý bằng SQL scripts, chưa dùng EF migrations. Khởi tạo database theo thứ tự phù hợp với môi trường:
 
-```text
-/ (Workspace Root)
-├── Controllers/
-│   ├── AccountController.cs   <- Quản lý luồng Đăng nhập, Đăng ký, và Gói Premium
-│   ├── ApiController.cs       <- Gateway kết nối luồng Live Stream WebSockets với Gemini AI
-│   └── HomeController.cs      <- Điều hướng danh mục Khóa học, Thống kê, và Cài đặt
-├── Models/
-│   └── CourseModels.cs        <- Định nghĩa cấu trúc thực thể dữ liệu (Lesson, Sentence, UserProfile)
-├── Services/
-│   ├── GeminiService.cs       <- Xử lý logic kết nối API và truyền tải dữ liệu luồng âm thanh
-│   └── LessonService.cs       <- Quản lý kho bài học SGK tĩnh và bài học do AI sinh ra
-├── Views/
-│   ├── _ViewImports.cshtml    <- Đăng ký Namespaces toàn cục và Razor Tag Helpers
-│   ├── _ViewStart.cshtml      <- Định nghĩa Layout sườn mặc định của hệ thống View
-│   ├── Account/               <- Giao diện Login, Register, Thiết lập lộ trình học cá nhân
-│   ├── Home/                  <- Giao diện trang chủ Khóa học, Thống kê SRS, Phòng luyện nói Shadowing
-│   └── Shared/
-│       └── _Layout.cshtml     <- Thanh điều hướng đồng bộ (Streak, Hearts, EXP) và Darkmode
-├── wwwroot/
-│   ├── css/site.css           <- Custom CSS & cấu hình tối ưu hóa hiển thị giao diện
-│   └── js/site.js             <- Tiện ích JavaScript hỗ trợ tương tác âm thanh thô
-├── Program.cs                 <- Đăng ký DI, cấu hình Middleware Pipeline, và Routing chính
-└── ShadowSpeakMvc.csproj      <- Quản lý các gói thư viện NuGet phụ thuộc hệ thống
+1. `Designs/Database/DatabaseCreation.sql`
+2. `Designs/Database/Schema_v0p1_extension.sql`
+3. `WebShadowing/Database/production_learning_schema_update.sql`
+4. `WebShadowing/Database/project_completion_schema_update.sql`
 
+Luôn chạy integration test trên database test riêng, không dùng database phát triển hoặc production.
+
+## Kiểm thử
+
+```powershell
+dotnet build WebShadowing/WebShadowing.slnx
+dotnet test WebShadowing.UnitTests/WebShadowing.UnitTests.csproj
+dotnet test WebShadowing.AuthFlowTests/WebShadowing.AuthFlowTests.csproj
+dotnet test WebShadowing.DatabaseIntegrationTests/WebShadowing.DatabaseIntegrationTests.csproj
 ```
 
----
+Database integration tests có thể cần connection string riêng và chỉ nên chạy khi đã chuẩn bị SQL Server test.
 
-## 🎨 IV. Tiêu Chuẩn Thiết Kế UI/UX & Hệ Thống Nhận Diện (Design System)
+## Endpoint vận hành
 
-Giao diện được nghiên cứu cấu trúc kỹ lưỡng nhằm phục vụ tối đa cho ứng dụng EdTech, tối ưu hóa trải nghiệm tương tác âm thanh.
+`GET /health` chỉ trả trạng thái kết nối tối thiểu và timestamp. Endpoint không công khai số lượng user/course hoặc dữ liệu nghiệp vụ.
 
-### 1. Nguyên tắc thiết kế (Design Principles)
+## Giới hạn hiện tại
 
-* **Trực quan hóa dữ liệu (Data Visualization):** Sử dụng các biểu đồ tiến trình học tập, chuỗi ngày học liên tiếp (Streak) bằng đồ họa sống động để kích thích động lực học tập (Gamification).
-* **Thiết kế tập trung (Focus-Oriented UI):** Phòng luyện tập Shadowing được tối giản hóa các thành phần gây xao nhãng, giúp người học tập trung hoàn toàn vào tai nghe và khẩu hình phát âm.
+- Generated media, Data Protection keys và cache vẫn dùng tài nguyên local của một instance.
+- Payment production, admin/content moderation, CI/CD, object storage, distributed cache và observability đầy đủ chưa nằm trong snapshot hiện tại.
+- Nội dung transcript phải được ingest thành `LessonSentences` trước khi publish nếu cần thực hiện và lưu bài luyện; runtime read-path không tự ghi database.
 
-
-### 2. Thông số kỹ thuật Design System (Đã hiện thực hóa qua Tailwind CSS)
-
-* **Bảng màu chủ đạo (Color Palette):**
-* *Primary Color:* Indigo Premium (`#4F46E5` - Đại diện cho công nghệ, trí tuệ nhân tạo).
-* *Neutral Slate:* Slate Gray (`#E2E8F0` cho viền/nhãn dán và `#1D293D` cho màu chữ - Tạo cảm giác lì, tinh tế, hiện đại).
-* *Gamification System:* Orange Amber (`#F59E0B` cho Streak lửa) và Rose Crimson (`#F43F5E` cho điểm số Tim).
-
-
-* **Hệ Thống Phông Chữ (Typography):**
-* *Font hiển thị tiêu đề:* `Space Grotesk` (Mang phong cách hình khối công nghệ, góc cạnh).
-* *Font văn bản hệ thống:* `Inter` (Font chữ quốc dân tối ưu hóa hiển thị sắc nét trên mọi kích thước màn hình).
-* *Font phiên âm quốc tế:* `JetBrains Mono` (Font chữ đơn cách - Monospace, giúp các ký tự phiên âm IPA đứng thẳng hàng, dễ đọc).
-
-
-* **Giao diện đa nền văn minh:** Tích hợp bộ lọc chế độ **Light/Dark Mode** thời gian thực, đồng bộ tự động dựa theo cấu hình hệ điều hành của người dùng (`prefers-color-scheme`).
-
----
-
-## 💻 V. Công Cụ Thiết Kế & Quản Lý Dự Án (Tooling & Environment)
-
-Dự án áp dụng quy trình sản xuất phần mềm chuyên nghiệp thông qua việc sử dụng các công cụ tiêu chuẩn ngành:
-
-* **Công cụ thiết kế UI/UX:** **Figma** (Sử dụng để xây dựng Wireframe, High-Fidelity Design, Prototyping tương tác luồng người dùng và bàn giao thông số Design System cho giai đoạn lập trình Front-end).
-* **Môi trường phát triển tích hợp (IDE):** **Visual Studio** (Hỗ trợ quản lý Solution, biên dịch mã nguồn C#, gỡ lỗi trực tiếp qua Terminal và tối ưu hóa hệ thống thư viện NuGet).
-* **Hệ thống quản lý phiên bản:** **Git & GitHub** (Triển khai quy trình làm việc theo nhánh - Branching Strategy, quản lý lịch sử Commit sạch sẽ và kiểm soát chất lượng mã nguồn nghiêm ngặt thông qua Pull Request).
-
----
-
-## 🚀 VI. Hướng Dẫn Cài Đặt & Khởi Chạy Dự Án (Local Development)
-
-### Yêu cầu hệ thống:
-
-* .NET 8.0 SDK trở lên.
-* Microsoft SQL Server.
-* Một mã cấu hình **Gemini API Key** hợp lệ từ Google AI Studio.
-
-### Các bước triển khai:
-
-1. **Sao chép mã nguồn về máy cá nhân:**
-
-```bash
-   git clone [https://github.com/your-username/ShadowSpeakMvc.git](https://github.com/your-username/ShadowSpeakMvc.git)
-   cd ShadowSpeakMvc
-
-```
-
-2. **Cấu hình môi trường:**
-Mở file `appsettings.json` và điền mã API Key bảo mật của bạn vào:
-
-```json
-   {
-     "Logging": {
-       "LogLevel": {
-         "Default": "Information",
-         "Microsoft.AspNetCore": "Warning"
-       }
-     },
-     "AllowedHosts": "*",
-     "Gemini": {
-         "ApiKey": "MÃ_API_KEY_GEMINI_CỦA_BẠN_TẠI_ĐÂY"
-     }
-   }
-
-```
-
-3. **Khôi phục các thư viện phụ thuộc (NuGet Packages):**
-
-```bash
-   dotnet restore
-
-```
-
-4. **Biên dịch và chạy dự án:**
-
-```bash
-   dotnet watch run
-
-```
-
-Ứng dụng sẽ tự động kích hoạt trình duyệt và lắng nghe tại đường dẫn mặc định: `http://localhost:5000` hoặc `https://localhost:5001`.
-
-```
-
-```
+Xem [báo cáo hiện trạng kỹ thuật](BAO_CAO_HIEN_TRANG_KY_THUAT_WEBSHADOWING.md) để biết phân tích chi tiết và backlog.

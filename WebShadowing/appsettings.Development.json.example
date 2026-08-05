@@ -3,7 +3,7 @@
     "DefaultConnection": "Server=localhost;Database=EnglishShadowingDB;Trusted_Connection=True;TrustServerCertificate=True"
   },
   "OpenAI": {
-    "AudioModel": "gpt-audio",
+    "AudioModel": "gpt-audio-1.5",
     "TextModel": "gpt-4o-mini",
     "ApiKey": ""
   },
@@ -17,9 +17,6 @@
     "ProviderTimeoutSeconds": 20,
     "AzureProviderName": "azure-speech",
     "OpenAiProviderName": "openai-fallback"
-  },
-  "VipStub": {
-    "Enabled": true
   },
   "Gamification": {
     "SentenceCompletionExp": 20,

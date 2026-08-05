@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
+// Chức năng: nhận audio Shadowing và đáp án Dictation/IPA để chấm.
+// Phụ trách chính logic backend: Minh. Phối hợp Minh Anh cho contract thu âm/Shadowing phía trình duyệt.
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using WebShadowing.Models;
@@ -28,6 +30,8 @@ public sealed class PracticeController : ControllerBase
         [FromForm] long lessonId,
         [FromForm] long sentenceId,
         [FromForm] int sentenceIndex,
+        [FromForm] long? savedSegmentId,
+        [FromForm] Guid? previewId,
         [FromForm] IFormFile? audio,
         CancellationToken cancellationToken)
     {
@@ -72,7 +76,9 @@ public sealed class PracticeController : ControllerBase
                     audioBytes,
                     GetAudioFormat(audio),
                     audio.ContentType ?? string.Empty,
-                    idempotencyKey),
+                    idempotencyKey,
+                    savedSegmentId,
+                    previewId),
                 cancellationToken);
 
             return Ok(result);
@@ -110,7 +116,8 @@ public sealed class PracticeController : ControllerBase
                     request.SentenceId,
                     request.PracticeTab,
                     request.Answer,
-                    idempotencyKey),
+                    idempotencyKey,
+                    request.TargetIndex),
                 cancellationToken);
             return Ok(result);
         }
